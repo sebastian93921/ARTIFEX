@@ -149,14 +149,22 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
   return r.json();
 }
 
-// sseUrl builds a URL for Server-Sent Events streams. SSE must NOT go through the
-// Next.js dev `/api` rewrite: that proxy buffers the streamed response, so event
-// frames never reach the browser (the EventSource opens but receives 0 messages).
-// We therefore connect straight to the Go backend, whose CORS is open. Override
-// with NEXT_PUBLIC_SSE_BASE; set it to "" to force same-origin (e.g. behind a
-// production reverse proxy that flushes SSE correctly).
-// Token is appended as ?token= because SSE bypasses the Next.js proxy and the
-// browser does not send cookies cross-port.
+// sseUrl builds a URL for Server-Sent Events streams.
+//
+// Production (static export / Docker): the Go backend serves the web UI *and* the
+// SSE streams on the same port, so we default to a same-origin (relative) URL.
+// This is what makes reverse-proxy deploys work: a page loaded from
+// https://<domain>/ connects to https://<domain>/api/..., which the proxy forwards
+// to the backend — no need to expose :8787 publicly. Hardcoding :8787 here used to
+// break exactly that (https://<domain>:8787/... is unreachable when only 443 is open).
+//
+// Dev (next dev): SSE must NOT go through the Next.js `/api` rewrite — that proxy
+// buffers the streamed response, so event frames never reach the browser (the
+// EventSource opens but receives 0 messages). So in dev only we connect straight
+// to the Go backend on :8787, whose CORS is open.
+//
+// Override either default with NEXT_PUBLIC_SSE_BASE (set it to "" to force same-origin).
+// Token is appended as ?token= because SSE can't carry cookies cross-origin.
 // mockReport returns a canned Markdown report for the demo.
 function mockReport(_task?: string): string {
   return swt("interface.m2414");
@@ -165,7 +173,9 @@ function mockReport(_task?: string): string {
 export function sseUrl(path: string): string {
   const base =
     process.env.NEXT_PUBLIC_SSE_BASE ??
-    (typeof window !== "undefined" ? `${window.location.protocol}//${window.location.hostname}:8787` : "");
+    (process.env.NODE_ENV !== "production" && typeof window !== "undefined"
+      ? `${window.location.protocol}//${window.location.hostname}:8787`
+      : "");
   const token = getToken();
   const sep = path.includes("?") ? "&" : "?";
   return localizedUrl(token ? `${base}${path}${sep}token=${encodeURIComponent(token)}` : `${base}${path}`);
