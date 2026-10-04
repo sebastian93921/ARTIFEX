@@ -13,9 +13,14 @@ import (
 	"github.com/sebastian93921/artifex/db"
 	"github.com/sebastian93921/artifex/guard"
 	"github.com/sebastian93921/artifex/intercept"
+	"github.com/sebastian93921/artifex/llmrec"
 	"github.com/sebastian93921/artifex/locale"
 	"github.com/Autumn-27/norma/llm"
 )
+
+// judgeWorkerLane is the usage-ledger "worker" label for intercept fallback-judge
+// calls, so judge spend can be queried apart from the worker/planner/main lanes.
+const judgeWorkerLane = "judge"
 
 // chatGuard returns a guard wired with the manager's interceptor, used for chat
 // conversations. Called once per applyLLM so a new LLM config always gets a fresh guard.
@@ -41,6 +46,9 @@ func (s *Server) wireInterceptReviewer() {
 		if !ok {
 			return intercept.Decision{ProfileID: profileID}, locale.Errorf("Judge model profile %d is unavailable", profileID)
 		}
+		// Tag this call's usage as the "judge" lane so the config page can report
+		// how much the fallback approval has spent, separate from model profiles.
+		ctx = llmrec.WithWorker(ctx, judgeWorkerLane)
 		text, err := reviewCompletion(ctx, prov, prompt, input)
 		if err != nil {
 			return intercept.Decision{ProfileID: profileID}, err
@@ -439,6 +447,23 @@ func (s *Server) interceptSetJudgeConfig(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	writeJSON(w, 200, map[string]any{"ok": true})
+}
+
+// interceptJudgeUsage returns the fallback judge's cumulative token spend plus a
+// recent daily series, for the config page. ?days bounds the daily series (default 30).
+func (s *Server) interceptJudgeUsage(w http.ResponseWriter, r *http.Request) {
+	pg := s.m.PG()
+	if pg == nil {
+		writeJSON(w, 200, db.JudgeUsage{Daily: []db.JudgeDayUsage{}})
+		return
+	}
+	days := atoiDefault(r.URL.Query().Get("days"), 30)
+	usage, err := pg.JudgeUsageStats(days)
+	if err != nil {
+		writeErr(w, 500, err.Error())
+		return
+	}
+	writeJSON(w, 200, usage)
 }
 
 // --- helpers ---

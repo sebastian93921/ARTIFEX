@@ -57,6 +57,7 @@ import type {
   InterceptPending,
   InterceptRule,
   JudgeConfig,
+  JudgeUsage,
   LLMPoolStatus,
   LLMProfile,
   LLMRecordDetail,
@@ -1251,6 +1252,7 @@ export const api = {
   // Global model fallback approval configuration.
   interceptGetJudgeConfig: () => get<JudgeConfig>("/intercept/judge"),
   interceptSetJudgeConfig: (cfg: JudgeConfig) => put<{ ok: boolean }>("/intercept/judge", cfg),
+  interceptJudgeUsage: (days = 30) => get<JudgeUsage>(`/intercept/judge/usage?days=${days}`),
 
   // ---- commands (tool execution history, any tool) ----
   commands: (params?: { task?: string; q?: string; page?: number; size?: number }) => {

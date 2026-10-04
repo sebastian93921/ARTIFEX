@@ -2466,6 +2466,15 @@ function route(m: string, path: string, seg: string[], q: URLSearchParams, b: Re
       ask_timeout_action: "deny",
     };
   if (path === "/intercept/judge" && m === "PUT") return { ok: true };
+  if (path === "/intercept/judge/usage" && m === "GET")
+    return {
+      calls: 0,
+      input_tokens: 0,
+      output_tokens: 0,
+      cache_read_tokens: 0,
+      cache_write_tokens: 0,
+      daily: [],
+    };
 
   // Side questions (/btw): demo has no side sessions.
   // Handle explicitly: paths ending in s otherwise fall through to [] collection responses, leaving items undefined.
