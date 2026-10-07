@@ -23,13 +23,20 @@ export default function SetupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+  // 查不到初始化状态时不能默认当成"未初始化"——那样会把初始化表单摆给一个
+  // 其实已经设过密码的实例，用户照着填就会覆盖掉原密码。此时关闭入口。
+  const [unavailable, setUnavailable] = useState(false);
 
   useEffect(() => {
-    api.authStatus()
+    api
+      .authStatus()
       .then(({ initialized }) => {
         if (initialized) router.replace("/login");
       })
-      .catch(() => setError(swt("interface.m0001")))
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : swt("interface.m0001"));
+        setUnavailable(true);
+      })
       .finally(() => setChecking(false));
   }, [router]);
 
@@ -82,38 +89,51 @@ export default function SetupPage() {
       <div className="flex w-full items-center justify-center bg-background p-8 lg:w-2/3">
         <div className="w-full max-w-md space-y-10 py-24 lg:py-32">
           <div className="space-y-4 text-center">
-            <h2 className="text-2xl font-medium tracking-tight">{swt("interface.m0044")}</h2>
-            <p className="mx-auto max-w-xl text-muted-foreground">{swt("interface.m0045")}</p>
+            <h2 className="text-2xl font-medium tracking-tight">{unavailable ? "Cannot confirm initialization state" : swt("interface.m0044")}</h2>
+            <p className="mx-auto max-w-xl text-muted-foreground">
+              {unavailable
+                ? "The backend or database is temporarily unavailable. To avoid overwriting an existing admin password, initial setup is disabled until the service recovers."
+                : swt("interface.m0045")}
+            </p>
           </div>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="password">{swt("interface.m0046")}</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={swt("interface.m0047")}
-                autoFocus
-                autoComplete="new-password"
-              />
+          {unavailable ? (
+            <div className="flex flex-col gap-4">
+              {error && <p className="text-center text-sm text-destructive">{error}</p>}
+              <Button type="button" className="w-full" onClick={() => window.location.reload()}>
+                Retry
+              </Button>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="confirm">{swt("interface.m0048")}</Label>
-              <Input
-                id="confirm"
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder={swt("interface.m0049")}
-                autoComplete="new-password"
-              />
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading || !password || !confirm}>
-              {loading ? swt("interface.m0050") : swt("interface.m0051")}
-            </Button>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="password">{swt("interface.m0046")}</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={swt("interface.m0047")}
+                  autoFocus
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm">{swt("interface.m0048")}</Label>
+                <Input
+                  id="confirm"
+                  type="password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  placeholder={swt("interface.m0049")}
+                  autoComplete="new-password"
+                />
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <Button type="submit" className="w-full" disabled={loading || !password || !confirm}>
+                {loading ? swt("interface.m0050") : swt("interface.m0051")}
+              </Button>
+            </form>
+          )}
         </div>
       </div>
     </div>

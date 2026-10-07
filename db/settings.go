@@ -25,6 +25,24 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`, key
 	return err
 }
 
+// InsertSettingIfAbsent 只在 key 尚未存在时写入，已存在则原样保留并返回 inserted=false。
+// 给 auth.password_hash 这类"只允许首次设置"的键用：判定落在数据库的主键约束上，
+// 调用方先 GetSetting 再写的那种检查就只是快速失败路径——读出错或并发撞车时，
+// 已有的值也不会被 ON CONFLICT DO UPDATE 顺手覆盖掉。
+func (d *DB) InsertSettingIfAbsent(key, value string) (inserted bool, err error) {
+	res, err := d.Exec(`
+INSERT INTO settings(key, value) VALUES ($1, $2)
+ON CONFLICT (key) DO NOTHING`, key, value)
+	if err != nil {
+		return false, err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return n > 0, nil
+}
+
 // GetBool returns the boolean setting, or def when unset/unparseable.
 func (d *DB) GetBool(key string, def bool) bool {
 	v, ok, err := d.GetSetting(key)
