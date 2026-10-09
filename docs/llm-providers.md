@@ -4,9 +4,7 @@ ARTEX uses its existing provider formats and custom base URL fields. A template 
 
 ## Z.ai GLM-5.3
 
-![GLM-5.3 new-profile template](../screenshots/en/llm-templates.png)
-
-Template preview with no API key entered; this is not a live provider connection.
+No template preview is included; the template only fills the new-profile form.
 
 Open **LLM → New → Configuration template**. Choose **General API (recommended)** for API billing, or **Coding Plan (reference)** only after obtaining Z.ai authorization for ARTEX.
 

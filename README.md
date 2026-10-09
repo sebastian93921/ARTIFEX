@@ -40,18 +40,14 @@ includes the bundled skill guidance.
 
 ## Screenshots
 
-These captures show ARTEX's English interface with the included fictional demo data.
-They do not represent scans of live targets. See the English captures below
-and [mobile view](screenshots/en/mobile.png).
+Captures from the original upstream ARTEX (Chinese interface); the English build follows the same
+layout. They show the bundled demo data, not scans of live targets.
 
 | Dashboard | Tasks |
 | :---: | :---: |
-| ![English dashboard](screenshots/en/dashboard.png) | ![English task list](screenshots/en/tasks.png) |
-| Findings | Settings |
-| ![English findings](screenshots/en/findings.png) | ![English settings](screenshots/en/settings.png) |
-
-Original Chinese screenshots remain in [the screenshots directory](screenshots), credited to
-[upstream ARTEX](https://github.com/Autumn-27/ARTEX/tree/160fe13c243be361eeac5408c40a96e824fa842c/screenshots).
+| ![Dashboard](screenshots/dashboard.png) | ![Task list](screenshots/tasks.png) |
+| Findings | LLM |
+| ![Findings](screenshots/findings.png) | ![LLM](screenshots/llm.png) |
 
 ---
 
@@ -565,9 +561,8 @@ to English. See [docs/PROVENANCE.md](docs/PROVENANCE.md).
 
 ### Screenshots
 
-The English captures live in `screenshots/en/`. They show the included demo fixtures on desktop
-and mobile. Original ARTEX screenshots elsewhere in `screenshots/` remain unchanged and credited
-to upstream.
+The captures in `screenshots/` are the original upstream ARTEX images (Chinese interface),
+unchanged and credited to upstream.
 
 ---
 
