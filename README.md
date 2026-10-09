@@ -4,7 +4,7 @@
 
 An LLM multi-agent autonomous penetration-testing system (Go backend + Next.js frontend)
 
-English
+[English](README.md) | [简体中文](README_zh.md)
 
 </div>
 
@@ -301,11 +301,15 @@ configuration" page. Optional: `ARTIFEX_LLM_PROVIDER` / `ARTIFEX_LLM_MODEL` / `A
 **Common flags**: `./start.sh -addr :8787 -proxy :8788` (`-addr` is frontend + API, `-proxy` is the
 traffic-capture proxy). The start script passes flags straight through to `artifex`.
 
-### 反向代理部署（HTTPS / 只开放 443）
+### Reverse-proxy deployment (HTTPS / only expose 443)
 
-前端和 API/SSE 都由同一个后端端口（默认 `:8787`）提供，实时活动流默认走**同源**地址，因此**无需配置 `NEXT_PUBLIC_SSE_BASE`**，公网只开放 443、把 8787 留在内网即可。
+The frontend and the API/SSE are both served from the same backend port (default `:8787`), and the
+live activity stream uses a **same-origin** URL by default — so **`NEXT_PUBLIC_SSE_BASE` needs no
+configuration**. Only expose 443 to the public internet and keep 8787 internal.
 
-SSE 是长连接 + 持续推送，反代**必须关闭缓冲**，否则浏览器能连上却收不到事件（表现为活动流一直转圈）。Nginx 示例：
+SSE is a long-lived connection with continuous pushes, so the reverse proxy **must disable
+buffering**; otherwise the browser connects but receives no events (the activity stream spins
+forever). Nginx example:
 
 ```nginx
 server {
@@ -318,7 +322,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        # SSE 关键项：关缓冲、长超时、HTTP/1.1
+        # SSE essentials: no buffering, long timeouts, HTTP/1.1
         proxy_buffering off;
         proxy_cache off;
         proxy_read_timeout 3600s;
@@ -328,7 +332,9 @@ server {
 }
 ```
 
-> 仅当 SSE 需要走与页面不同的来源（如独立子域）时，才在**构建期**设置 `NEXT_PUBLIC_SSE_BASE`（该变量在 `next build` 时固化进静态包，容器运行时再设无效）。
+> Only when the SSE stream must come from a different origin than the page (e.g. a dedicated
+> subdomain), set `NEXT_PUBLIC_SSE_BASE` at **build time** (the value is baked into the static
+> bundle by `next build`; setting it at container runtime has no effect).
 
 ---
 
