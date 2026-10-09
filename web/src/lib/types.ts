@@ -1335,7 +1335,7 @@ export interface JudgeConfig {
   ask_timeout_action: "allow" | "deny"; // Default action after approval timeout.
 }
 
-// JudgeUsage: 模型兜底审批(judge 通道)的累计 token 用量 + 近 N 天每日序列。
+// JudgeUsage: cumulative token usage for the judge channel + a last-N-days daily series.
 export interface JudgeDayUsage {
   date: string; // YYYY-MM-DD (UTC)
   calls: number;

@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/rand"
+	"fmt"
 	"github.com/sebastian93921/artifex/locale"
 	"log"
 	"math/big"

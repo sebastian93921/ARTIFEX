@@ -4,6 +4,20 @@ This is the translated upstream ARTEX history from baseline `160fe13`, preservin
 
 ## [Unreleased]
 
+### Upstream ports
+
+#### Fixed
+
+- Ported three upstream changes from the final ARTEX tree (v0.3.15, via
+  kutukam/autonomous-pentest-agent): the auth init/status fail-open fix
+  (a DB read error no longer lets an unauthenticated request reach
+  /setup and overwrite the admin password; password length is now also
+  validated server-side), the SSE same-origin default for
+  reverse-proxy deployments, and per-call token metering for the
+  intercept judge channel (worker=judge) with a usage card on the
+  intercept settings page. Ported UI strings are English per this
+  tree's English-only interface.
+
 ## [Unreleased]
 
 ### Branding

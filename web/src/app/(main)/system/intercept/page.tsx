@@ -63,14 +63,14 @@ import type {
   Tool,
 } from "@/lib/types";
 
-// fmtTokens 把 token 数压成紧凑写法(1.2k / 3.4M),用于审批用量统计。
+// fmtTokens compresses a token count into a compact form (1.2k / 3.4M) for judge-usage stats.
 function fmtTokens(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
   if (n >= 1000) return (n / 1000).toFixed(1) + "k";
   return String(n);
 }
 
-// JudgeStat 是一块统计数字(标签 + 数值)。
+// JudgeStat renders one stat block (label + value).
 function JudgeStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border bg-muted/20 px-3 py-2">
@@ -80,7 +80,7 @@ function JudgeStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-// JudgeSparkbars 用纯 div 画近 N 天每日消耗(输入+输出)的迷你柱图,免图表库依赖。
+// JudgeSparkbars draws the last-N-days daily spend (input+output) as pure-div mini bars, no chart library.
 function JudgeSparkbars({ daily }: { daily: JudgeDayUsage[] }) {
   const max = Math.max(1, ...daily.map((d) => d.input_tokens + d.output_tokens));
   return (
@@ -91,7 +91,7 @@ function JudgeSparkbars({ daily }: { daily: JudgeDayUsage[] }) {
         return (
           <div
             key={d.date}
-            title={`${d.date} · ${d.calls} 次 · ${fmtTokens(total)} tokens`}
+            title={`${d.date} · ${d.calls} calls · ${fmtTokens(total)} tokens`}
             className="min-w-[2px] flex-1 rounded-sm bg-violet-500/60 hover:bg-violet-500"
             style={{ height: `${h}%` }}
           />
@@ -223,12 +223,12 @@ function JudgeCard() {
   const [saving, setSaving] = React.useState(false);
   const [usage, setUsage] = React.useState<JudgeUsage | null>(null);
 
-  // 审批用量统计:失败不打断配置页,仅在开启时拉取。
+  // Judge usage stats: failures never block the config page; fetched only while enabled.
   const loadUsage = React.useCallback(async () => {
     try {
       setUsage(await api.interceptJudgeUsage(30));
     } catch {
-      // 忽略:统计不可用不应影响配置编辑
+      // ignore: unavailable stats must not affect config editing
     }
   }, []);
 
@@ -249,7 +249,7 @@ function JudgeCard() {
     load();
   }, [load]);
 
-  // 开启后(含初次加载把开关读为 true 时)拉取审批用量统计。
+  // Fetch judge usage stats when enabled (including the initial load reading the switch as true).
   React.useEffect(() => {
     if (cfg.enabled) loadUsage();
   }, [cfg.enabled, loadUsage]);
@@ -308,32 +308,32 @@ function JudgeCard() {
         </div>
       </div>
 
-      {/* 审批 Token 用量统计(全局累计,独立于各模型配置) */}
+      {/* Judge-model token usage (global totals, independent of per-model profiles) */}
       {cfg.enabled && usage && (
         <Card>
           <CardContent className="p-4">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">审批 Token 消耗</p>
+                <p className="text-sm font-medium">Judge-model token spend</p>
                 <p className="text-xs text-muted-foreground">
-                  模型兜底审批累计用量,单独计量(worker=judge),不与各模型配置的统计混在一起
+                  Cumulative judge-model usage, metered separately (worker=judge) and never mixed into per-model profile stats
                 </p>
               </div>
               <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={loadUsage}>
-                刷新
+                Refresh
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-              <JudgeStat label="审批调用" value={usage.calls.toLocaleString()} />
-              <JudgeStat label="输入 Token" value={fmtTokens(usage.input_tokens)} />
-              <JudgeStat label="输出 Token" value={fmtTokens(usage.output_tokens)} />
-              <JudgeStat label="缓存读" value={fmtTokens(usage.cache_read_tokens)} />
-              <JudgeStat label="缓存写" value={fmtTokens(usage.cache_write_tokens)} />
+              <JudgeStat label="Judge calls" value={usage.calls.toLocaleString()} />
+              <JudgeStat label="Input tokens" value={fmtTokens(usage.input_tokens)} />
+              <JudgeStat label="Output tokens" value={fmtTokens(usage.output_tokens)} />
+              <JudgeStat label="Cache read" value={fmtTokens(usage.cache_read_tokens)} />
+              <JudgeStat label="Cache write" value={fmtTokens(usage.cache_write_tokens)} />
             </div>
             {usage.daily.length > 0 && (
               <div className="mt-4">
                 <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                  近 30 天每日消耗(输入 + 输出)
+                  Last 30 days, daily (input + output)
                 </p>
                 <JudgeSparkbars daily={usage.daily} />
               </div>
