@@ -16,7 +16,6 @@ import { AccountSwitcher } from "./sidebar/account-switcher";
 import { LayoutControls } from "./sidebar/layout-controls";
 import { SearchDialog } from "./sidebar/search-dialog";
 import { ThemeSwitcher } from "./sidebar/theme-switcher";
-import { UpdateBadge } from "./update-badge";
 
 // Task details supply their own header, tabs, and padding; do not add the global header or padding.
 function isFullBleed(pathname: string) {
@@ -39,15 +38,6 @@ export function MainContent({ children }: { children: ReactNode }) {
 
   const currentUser = useCurrentUser();
   const pathname = usePathname();
-  const [version, setVersion] = useState("");
-
-  useEffect(() => {
-    api
-      .health()
-      .then((h) => setVersion((h.version ?? "").replace(/^v(?=\d)/, "")))
-      .catch(() => setVersion(""));
-  }, []);
-
   if (isFullBleed(pathname)) {
     return <>{children}</>;
   }
@@ -70,10 +60,6 @@ export function MainContent({ children }: { children: ReactNode }) {
             <SearchDialog />
           </div>
           <div className="flex items-center gap-2">
-            {version && (
-              <span className="font-medium text-muted-foreground text-xs tabular-nums">{swt("interface.m0052")}{version}</span>
-            )}
-            <UpdateBadge />
             <LayoutControls />
             <ThemeSwitcher />
             <AccountSwitcher users={[currentUser]} />

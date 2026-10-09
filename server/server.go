@@ -678,10 +678,6 @@ func (s *Server) Handler() http.Handler {
 
 	// One-click updates use normal JWT authentication. auth.go exempts only /api/auth/* and
 	// /api/health, so endpoints modifying the running application require login.
-	mux.HandleFunc("GET /api/update/check", s.updateCheck)
-	mux.HandleFunc("POST /api/update/apply", s.updateApply)
-	mux.HandleFunc("POST /api/update/rollback", s.updateRollback)
-	mux.HandleFunc("GET /api/update/stream", s.updateStream)
 
 	mux.HandleFunc("GET /api/tasks", s.listTasks)
 	mux.HandleFunc("POST /api/tasks", s.createTask)

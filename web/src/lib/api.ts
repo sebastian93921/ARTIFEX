@@ -103,7 +103,6 @@ import type {
   TrafficEvidenceRole,
   TrafficHost,
   TrafficResp,
-  UpdateCheck,
   UsageStats,
   WorkspaceFile,
   WorkspaceListing,
@@ -1278,14 +1277,4 @@ export const api = {
   tokensByModel: (task: string) =>
     get<{ models: ModelTokenStat[] }>(`/llm/records/by-model?task=${encodeURIComponent(task)}`),
 
-  // One-click updates.
-  // Trust backend connectivity checks because it performs downloads. The browser may reach GitHub
-  // while an internal server or browser-only proxy cannot, in which case updating must fail.
-  // Cache GitHub results for 30 minutes; unauthenticated requests are limited to 60/hour/IP.
-  // Header checks on full-page loads would otherwise exhaust the quota. force=true bypasses cache
-  // for explicit user update checks.
-  checkUpdate: (force = false) => get<UpdateCheck>(`/update/check${force ? "?force=1" : ""}`),
-  // Return 202 immediately; download in the background and stream progress through /api/update/stream.
-  applyUpdate: () => post<{ ok: boolean; target: string }>(`/update/apply`),
-  rollbackUpdate: () => post<{ ok: boolean }>(`/update/rollback`),
 };

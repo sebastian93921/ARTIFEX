@@ -65,17 +65,3 @@ func TestDynamicErrorLocalizesBeforeInterpolation(t *testing.T) {
 		t.Fatal("error identity changed with request language")
 	}
 }
-
-func TestUpdateProgressRendersPerSubscriber(t *testing.T) {
-	p := updateProgress{message: locale.M("Downloading %s (%s)…", "raw-한글.zip", "12 MB"), cause: locale.Errorf("Release package does not contain %s", "raw-한글.exe")}
-	en := p.inLanguage(locale.En)
-	if en.Message != "Downloading raw-한글.zip (12 MB)…" {
-		t.Fatalf("progress locale mismatch: %q", en.Message)
-	}
-	if !strings.Contains(en.Error, "Release package") || !strings.Contains(en.Error, "raw-한글.exe") {
-		t.Fatalf("error locale/raw argument mismatch: %q", en.Error)
-	}
-	if p.Message != "" || p.Error != "" {
-		t.Fatal("subscriber mutated shared event")
-	}
-}

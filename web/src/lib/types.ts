@@ -1548,47 +1548,6 @@ export interface FindingTrafficDetail {
   response: EvidenceBodyPreview;
 }
 
-/* GET /api/update/check compares the current version with GitHub's latest stable release. */
-export interface UpdateCheck {
-  /* Current running version; development builds use dev or suffixed git describe values. */
-  current: string;
-  /* Runtime form. Docker updates affect only the writable layer; recreation restores the image version. */
-  mode: "docker" | "binary";
-  os: string;
-  arch: string;
-  repo: string;
-  /* Whether a previous binary (artex.old) is available for rollback. */
-  has_backup: boolean;
-  /* Self-update bootstrap result, such as failed replacement or rollback; empty if nothing occurred. */
-  boot_notice?: string;
-  rolled_back?: boolean;
-  /* GitHub query failure reason; subsequent fields are absent on failure. */
-  error?: string;
-  latest?: string;
-  notes?: string;
-  html_url?: string;
-  published_at?: string;
-  /* Release-package name for the platform and whether the release actually contains it. */
-  asset?: string;
-  asset_available?: boolean;
-  size?: number;
-  has_update?: boolean;
-  /* Whether versions are comparable; false for development builds, disabling one-click updates. */
-  comparable?: boolean;
-  /* Explanation when comparable is false. */
-  reason?: string;
-}
-
-/* One update-progress event from /api/update/stream. */
-export interface UpdateProgress {
-  phase: "idle" | "downloading" | "verifying" | "extracting" | "staged" | "failed";
-  /* 0–100 only during download; -1 for other stages. */
-  percent: number;
-  message: string;
-  version?: string;
-  error?: string;
-}
-
 // Original execution selected from an approval, never submitted to the reviewer.
 export interface InterceptExecution {
   conversation_id: number | null;
