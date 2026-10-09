@@ -1,4 +1,4 @@
--- ScopeWeaver PostgreSQL schema (single source of truth).
+-- ARTEX PostgreSQL schema (single source of truth).
 -- Idempotent: safe to rerun (IF NOT EXISTS / OR REPLACE / DROP TRIGGER IF EXISTS).
 
 -- =====================================================================

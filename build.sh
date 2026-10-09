@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScopeWeaver cross-platform release builder.
+# ARTEX cross-platform release builder.
 #
 # The default mode builds one target and embeds the already-exported frontend.
 # `./build.sh --release` builds and packages all supported desktop/server targets.
@@ -9,7 +9,7 @@
 #   ARTEX_TARGET_ARCH=amd64           One target arch in single-target mode.
 #   ARTEX_TARGETS=linux/amd64,...     Comma-separated targets for multi-target mode.
 #   ARTEX_BUILD_VERSION=v0.3.3        Version embedded in the binary and archive name.
-#   ARTEX_OUTPUT=/path/to/scopeweaver       Explicit binary path in single-target mode.
+#   ARTEX_OUTPUT=/path/to/artex       Explicit binary path in single-target mode.
 #   ARTEX_OUTPUT_DIR=dist             Directory for default binary paths.
 #   ARTEX_PACKAGE=1                   Create a zip archive for each target.
 #   ARTEX_PACKAGE_DIR=dist            Directory for release archives.
@@ -19,7 +19,7 @@
 #   ARTEX_SKIP_NPM_CI=1               Skip npm ci while rebuilding the frontend.
 #   ARTEX_GOSUMDB=sum.golang.org      Go checksum database.
 set -euo pipefail
-LANG_SEL="${SCOPEWEAVER_LANGUAGE:-${ARTEX_LANGUAGE:-en}}"
+LANG_SEL="${ARTEX_LANGUAGE:-${ARTEX_LANGUAGE:-en}}"
 case "$LANG_SEL" in ko|ko_*|ko-*|KO) LANG_SEL=ko ;; *) LANG_SEL=en ;; esac
 msg(){ if [ "$LANG_SEL" = ko ]; then printf '%s' "$2"; else printf '%s' "$1"; fi; }
 
@@ -176,7 +176,7 @@ package_binary() {
   binary="$1"
   goos="$2"
   goarch="$3"
-  package_name="scopeweaver-${ARTEX_BUILD_VERSION}-${goos}-${goarch}"
+  package_name="artex-${ARTEX_BUILD_VERSION}-${goos}-${goarch}"
   package_root="${ARTEX_PACKAGE_DIR}/${package_name}"
   archive="${ARTEX_PACKAGE_DIR}/${package_name}.zip"
 
@@ -193,7 +193,7 @@ package_binary() {
   fi
   cp -R skills "$package_root/"
   cp config.example.json "$package_root/"
-  cp README.md README.ko.md LICENSE CHANGELOG.md "$package_root/"
+  cp README.md LICENSE CHANGELOG.md "$package_root/"
   if [ -d docs ]; then cp -R docs "$package_root/"; fi
   # Ship the adapter sources without local dependencies, credentials or runtime state.
   mkdir -p "$package_root/adapters/agent"
@@ -219,12 +219,12 @@ build_target() {
     *) die "$(msg "Unsupported OS: $goos (use linux, darwin, windows)" "지원하지 않는 OS: $goos (linux, darwin, windows 지원)")" ;;
   esac
 
-  binary_name="scopeweaver"
-  [ "$goos" = "windows" ] && binary_name="scopeweaver.exe"
+  binary_name="artex"
+  [ "$goos" = "windows" ] && binary_name="artex.exe"
   if [ -n "${ARTEX_OUTPUT:-}" ] && [ "$ARTEX_RELEASE" != "1" ]; then
     output="$ARTEX_OUTPUT"
   else
-    output="${ARTEX_OUTPUT_DIR}/scopeweaver-${goos}-${goarch}/${binary_name}"
+    output="${ARTEX_OUTPUT_DIR}/artex-${goos}-${goarch}/${binary_name}"
   fi
   mkdir -p "$(dirname "$output")"
 

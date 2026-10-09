@@ -6,7 +6,6 @@ allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(npm:*)
 
 # Browser Automation with playwright-cli
 
-[한국어 참고서](../../docs/ko/skills/playwright-cli/README.md)
 
 ## Quick start
 

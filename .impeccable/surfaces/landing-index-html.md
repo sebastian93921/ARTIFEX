@@ -5,14 +5,14 @@ primary_target: "landing/index.html"
 related_targets: ["landing/ko/index.html"]
 ---
 
-# Surface brief: ScopeWeaver public landing page
+# Surface brief: ARTEX public landing page
 
 Scope: `landing/index.html` (English, default) and `landing/ko/index.html`
-(Korean), static GitHub Pages at https://cskwork.github.io/scopeweaver/. Mode:
+static GitHub Pages at https://github.com/Autumn-27/ARTEX/. Mode:
 Persuade. This brief is development-only context and is never shipped in
 `landing/`.
 
-Audience and job: developers and security researchers evaluating ScopeWeaver
+Audience and job: developers and security researchers evaluating ARTEX
 for locally isolated research. They should see the real application, understand
 how a task moves across its actual screens, learn how a coding agent can drive
 it, trust the stated limits, and reach the v0.1.0 release or setup commands.
@@ -23,15 +23,15 @@ install commands), release notes (5 platform archives + GHCR image), VERIFICATIO
 (one inherited failing test, npm audit findings, unverified Docker/Windows
 runtime, adapter tests on local fixtures only), and an observed owner workflow.
 The owner's real conversation was inspected in the signed-in local UI: task
-creation from chat, exploration-graph and worker-trace inspection, and Korean
+creation from chat, exploration-graph and worker-trace inspection, and
 progress updates. The page uses only that privacy-safe summary — no target
 names, raw messages, vulnerability claims, token counts or private screenshots —
 and frames it as orchestration evidence, not independent security validation.
 No testimonials, metrics or benchmarks.
 
 Constraints: plain HTML/CSS/JS, relative asset paths that resolve under
-`/scopeweaver/` and `/scopeweaver/ko/` (OG images are absolute
-`https://cskwork.github.io/scopeweaver/assets/img/og-*.jpg` with `en_US`/`ko_KR`
+`/artex/` and `/artex/ko/` (OG images are absolute
+`https://github.com/Autumn-27/ARTEX/assets/img/og-*.jpg` with `en_US`/`ko_KR`
 locales, since crawlers need absolute URLs), self-hosted OFL fonts, no
 trackers/forms/CDNs/frameworks, a demo caption on every screenshot, and no
 contract/seed/planning text in shipped files.

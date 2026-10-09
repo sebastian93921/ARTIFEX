@@ -12,12 +12,12 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: scopeweaver_test
+          POSTGRES_USER: artex_test
           POSTGRES_PASSWORD: test_only_password
-          POSTGRES_DB: scopeweaver_adapter_e2e
+          POSTGRES_DB: artex_adapter_e2e
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U scopeweaver_test -d scopeweaver_adapter_e2e"
+          --health-cmd "pg_isready -U artex_test -d artex_adapter_e2e"
           --health-interval 5s --health-timeout 3s --health-retries 10
     steps:
       - uses: actions/checkout@v4
@@ -36,8 +36,8 @@ jobs:
         working-directory: adapters/agent
       - name: Test adapter against real backend
         env:
-          SCOPEWEAVER_ADAPTER_E2E: "1"
-          ARTEX_PG_DSN: postgres://scopeweaver_test:test_only_password@localhost:5432/scopeweaver_adapter_e2e?sslmode=disable
+          ARTEX_ADAPTER_E2E: "1"
+          ARTEX_PG_DSN: postgres://artex_test:test_only_password@localhost:5432/artex_adapter_e2e?sslmode=disable
         run: go test ./server -run '^TestAgentAdapterE2E$' -count=1 -v
   frontend:
     runs-on: ubuntu-latest
@@ -60,12 +60,12 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: scopeweaver_test
+          POSTGRES_USER: artex_test
           POSTGRES_PASSWORD: test_only_password
           POSTGRES_DB: postgres
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U scopeweaver_test -d postgres"
+          --health-cmd "pg_isready -U artex_test -d postgres"
           --health-interval 5s --health-timeout 3s --health-retries 10
     steps:
       - uses: actions/checkout@v4
@@ -81,7 +81,7 @@ jobs:
         env:
           PGHOST: localhost
           PGPORT: "5432"
-          PGUSER: scopeweaver_test
+          PGUSER: artex_test
           PGPASSWORD: test_only_password
         run: |
           set -euo pipefail
@@ -107,7 +107,7 @@ jobs:
           status=0
           while IFS= read -r package; do
             index=$((index + 1))
-            database="scopeweaver_test_${index}"
+            database="artex_test_${index}"
             createdb "$database"
             ARTEX_PG_DSN="postgres://${PGUSER}:${PGPASSWORD}@localhost:5432/${database}?sslmode=disable" "$RUNNER_TEMP/init-test-db"
             if ! ARTEX_PG_DSN="postgres://${PGUSER}:${PGPASSWORD}@localhost:5432/${database}?sslmode=disable" go test -p 1 "$package" -count=1; then

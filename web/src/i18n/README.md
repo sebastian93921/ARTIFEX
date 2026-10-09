@@ -1,8 +1,8 @@
 # Interface localization
 
-English is the default. The React locale provider restores an explicit English or Korean preference after hydration, keeping the static English export and first client render consistent. The selection persists in `scopeweaver.locale` localStorage and the `scopeweaver_locale` cookie. API transport reads the stored preference even before hydration finishes.
+English is the only interface language. The React locale provider restores an explicit English preference after hydration, keeping the static English export and first client render consistent. The selection persists in `artex.locale` localStorage and the `artex_locale` cookie. API transport reads the stored preference even before hydration finishes.
 
-Use `useI18n().t` in components and `translate` in non-React helpers. Both catalogs must contain every key; Korean never falls back to English. Keep placeholders identical and pass user values as interpolation parameters. Never translate user-entered text, persisted reports, identifiers, API field names, credentials, or protocol values. Existing Chinese mention wire labels and historical parser aliases remain compatible with the backend; visible labels are localized independently.
+Use `useI18n().t` in components and `translate` in non-React helpers. Keep placeholders identical and pass user values as interpolation parameters. Never translate user-entered text, persisted reports, identifiers, API field names, credentials, or protocol values. Existing Chinese mention wire labels and historical parser aliases remain compatible with the backend; visible labels are localized independently.
 
 The `interface` namespace contains the migrated interface and authored demo messages, with stable IDs. The `english` namespace covers pre-existing English interface labels. New features should use descriptive keys in an appropriate namespace. Static configuration objects expose localized labels through getters. Consumers subscribe to the locale, and memoized derived labels include the locale dependency. Language changes do not remount the application or clear drafts.
 

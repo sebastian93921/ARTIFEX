@@ -16,9 +16,9 @@ func TestNormalize(t *testing.T) {
 		"EN":    {En, true},
 		"en-US": {En, true},
 		"en_GB": {En, true},
-		"ko":    {Ko, true},
-		"ko-KR": {Ko, true},
-		"KO":    {Ko, true},
+		"ko":    {Default, false},
+		"ko-KR": {Default, false},
+		"KO":    {Default, false},
 		"fr":    {Default, false},
 		"":      {Default, false},
 		"zh-CN": {Default, false},
@@ -33,28 +33,22 @@ func TestNormalize(t *testing.T) {
 
 func TestFromRequestPrecedence(t *testing.T) {
 	SetServerDefault(En)
-	// query wins over everything
+	// An unsupported query language falls through to the header.
 	r := newReq("/x?lang=ko", "en-US,en;q=0.9", "en")
-	if got := FromRequest(r); got != Ko {
-		t.Errorf("query should win: got %q", got)
+	if got := FromRequest(r); got != En {
+		t.Errorf("unsupported query should fall through: got %q", got)
 	}
-	// Accept-Language wins over cookie when no query
-	r = newReq("/x", "ko-KR,ko;q=0.9,en;q=0.5", "en")
-	if got := FromRequest(r); got != Ko {
+	// Accept-Language wins over cookie when no query.
+	r = newReq("/x", "zh-KR,zh;q=0.9,en;q=0.5", "en")
+	if got := FromRequest(r); got != En {
 		t.Errorf("accept-language should win over cookie: got %q", got)
 	}
-	// cookie wins when no query and no supported Accept-Language
+	// Unsupported cookie and header leave the server default.
 	r = newReq("/x", "fr-FR,fr;q=0.9", "ko")
-	if got := FromRequest(r); got != Ko {
-		t.Errorf("cookie should win: got %q", got)
-	}
-	// server default when nothing matches
-	SetServerDefault(Ko)
-	r = newReq("/x", "", "")
-	if got := FromRequest(r); got != Ko {
+	if got := FromRequest(r); got != En {
 		t.Errorf("server default should apply: got %q", got)
 	}
-	SetServerDefault(En)
+	// Server default when nothing matches.
 	r = newReq("/x", "", "")
 	if got := FromRequest(r); got != En {
 		t.Errorf("default en: got %q", got)
@@ -62,9 +56,9 @@ func TestFromRequestPrecedence(t *testing.T) {
 }
 
 func TestAcceptLanguageQWeights(t *testing.T) {
-	// ko has higher q than en -> ko
-	r := newReq("/x", "en;q=0.3, ko;q=0.9", "")
-	if got := FromRequest(r); got != Ko {
+	// en is the only candidate: unsupported higher-q entries are skipped.
+	r := newReq("/x", "ko;q=0.3, en;q=0.9", "")
+	if got := FromRequest(r); got != En {
 		t.Errorf("q-weight pick: got %q", got)
 	}
 	// unsupported primary with supported fallback
@@ -74,14 +68,15 @@ func TestAcceptLanguageQWeights(t *testing.T) {
 	}
 }
 
-func TestFromEnvPrefersScopeWeaver(t *testing.T) {
-	env := map[string]string{"SCOPEWEAVER_LANGUAGE": "ko", "ARTEX_LANGUAGE": "en"}
-	if l, ok := FromEnv(func(k string) string { return env[k] }); !ok || l != Ko {
-		t.Errorf("SCOPEWEAVER_LANGUAGE should win: got %q,%v", l, ok)
+func TestFromEnvPrefersARTEX(t *testing.T) {
+	env := map[string]string{"ARTEX_LANGUAGE": "en"}
+	if l, ok := FromEnv(func(k string) string { return env[k] }); !ok || l != En {
+		t.Errorf("ARTEX_LANGUAGE should resolve: got %q,%v", l, ok)
 	}
+	// A removed language no longer resolves.
 	env = map[string]string{"ARTEX_LANGUAGE": "ko"}
-	if l, ok := FromEnv(func(k string) string { return env[k] }); !ok || l != Ko {
-		t.Errorf("legacy ARTEX_LANGUAGE honored: got %q,%v", l, ok)
+	if _, ok := FromEnv(func(k string) string { return env[k] }); ok {
+		t.Errorf("removed language should not resolve")
 	}
 	if _, ok := FromEnv(func(string) string { return "" }); ok {
 		t.Errorf("empty env should not resolve")
@@ -95,8 +90,12 @@ func TestFromEnvPrefersScopeWeaver(t *testing.T) {
 
 func TestContextRoundTrip(t *testing.T) {
 	SetServerDefault(En)
-	ctx := WithLang(context.Background(), Ko)
-	if got := FromContext(ctx); got != Ko {
+	ctx := WithLang(context.Background(), "ko")
+	if got := FromContext(ctx); got != En {
+		t.Errorf("removed language must coerce to default: got %q", got)
+	}
+	ctx = WithLang(context.Background(), En)
+	if got := FromContext(ctx); got != En {
 		t.Errorf("FromContext = %q", got)
 	}
 	if got := FromContext(context.Background()); got != En {
@@ -105,13 +104,9 @@ func TestContextRoundTrip(t *testing.T) {
 }
 
 func TestCatalogFallback(t *testing.T) {
-	Register("test.hello", "Hello %s", "")
-	if got := T(Ko, "test.hello", "world"); got != "Hello world" {
-		t.Errorf("Ko should fall back to En: %q", got)
-	}
-	Register("test.bye", "Bye", "안녕")
-	if got := T(Ko, "test.bye"); got != "안녕" {
-		t.Errorf("Ko lookup: %q", got)
+	Register("test.hello", "Hello %s")
+	if got := T(En, "test.hello", "world"); got != "Hello world" {
+		t.Errorf("catalog lookup: %q", got)
 	}
 	if got := T(En, "test.missing.key"); got != "test.missing.key" {
 		t.Errorf("unknown key returns key: %q", got)
@@ -130,7 +125,7 @@ func newReq(target, acceptLang, cookie string) *http.Request {
 }
 
 func TestRejectedLanguageWeights(t *testing.T) {
-	for _, header := range []string{"ko;q=0", "ko;q=-1", "ko;q=2", "ko;q=NaN", "ko;q=Inf", "ko;q=broken"} {
+	for _, header := range []string{"en;q=0", "en;q=-1", "en;q=2", "en;q=NaN", "en;q=Inf", "en;q=broken"} {
 		if got, ok := fromAcceptLanguage(header); ok {
 			t.Errorf("accepted excluded/malformed language %q: %s", header, got)
 		}
@@ -138,28 +133,25 @@ func TestRejectedLanguageWeights(t *testing.T) {
 	if got, ok := fromAcceptLanguage("ko;q=0,en;q=0.5"); !ok || got != En {
 		t.Fatal("q=0 language was selected")
 	}
-	if got, ok := fromAcceptLanguage("ko;q=0.5,en;q=0.5"); !ok || got != Ko {
-		t.Fatal("equal weights lost header order")
-	}
 }
 
 func TestLocalizedErrorPreservesWrapping(t *testing.T) {
 	cause := errors.New("user supplied 原文 %s")
-	Register("Operation %s failed: %w", "Operation %s failed: %w", "작업 %s 실패: %w")
+	Register("Operation %s failed: %w", "Operation %s failed: %w")
 	err := Errorf("Operation %s failed: %w", "raw-id", cause)
 	if !errors.Is(err, cause) {
 		t.Fatal("error wrapping lost")
 	}
-	if got := ErrorMessage(Ko, err); got != "작업 raw-id 실패: user supplied 原文 %s" {
+	if got := ErrorMessage(En, err); got != "Operation raw-id failed: user supplied 原文 %s" {
 		t.Fatalf("raw cause changed: %q", got)
 	}
 }
 
 func TestJoinedErrorsPreserveRawCauses(t *testing.T) {
-	Register("Missing task", "Missing task", "작업 없음")
+	Register("Missing task", "Missing task")
 	raw := errors.New("driver 原文 %s")
 	joined := errors.Join(NewError("Missing task"), raw)
-	if got := ErrorMessage(Ko, joined); got != "작업 없음\ndriver 原文 %s" {
+	if got := ErrorMessage(En, joined); got != "Missing task\ndriver 原文 %s" {
 		t.Fatalf("joined localization altered raw content: %q", got)
 	}
 	if !errors.Is(joined, raw) {

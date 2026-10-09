@@ -16,7 +16,7 @@ import (
 // Asset synchronization from ScopeSentry.
 //
 // ScopeSentry is an attack-surface-management platform. Its MCP interface retrieves subdomains,
-// web apps, and services by project or task, mapping them into ScopeWeaver's company and asset model.
+// web apps, and services by project or task, mapping them into ARTEX's company and asset model.
 // The source is an HTTP MCP row named "ScopeSentry", with URL and X-API-Key stored in mcp_servers.
 //
 // Unlike agent tools, this directly calls mcphttp.Client.Call for raw JSON without
@@ -419,7 +419,7 @@ func (s *Server) ssPageAll(ctx context.Context, cl *mcphttp.Client, ssType strin
 	return items, truncated, nil
 }
 
-// ssIngest maps one ScopeSentry asset JSON to the ScopeWeaver asset store and upserts it.
+// ssIngest maps one ScopeSentry asset JSON to the ARTEX asset store and upserts it.
 // Returns a non-empty error string on failure. synced is incremented per kind.
 func (s *Server) ssIngest(as *db.AssetStore, assetType string, raw json.RawMessage, synced map[string]int) string {
 	return s.ssIngestForLanguage(as, assetType, raw, synced, locale.ServerDefault())

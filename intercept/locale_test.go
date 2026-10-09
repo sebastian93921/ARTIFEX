@@ -29,7 +29,7 @@ func TestVerdictLanguageContractsRemainStrict(t *testing.T) {
 }
 
 func TestJudgePromptLanguagesPreservePolicyAndCustomText(t *testing.T) {
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		p := EffectiveJudgePrompt(DefaultJudgePrompt, lang)
 		for _, rule := range []string{"D1", "D2", "D3", "D4", "D5", "D6", "A1", "A2", "A3", "A4", "A5", "A6", "ASK", "DEFAULT", "tool_name", "arguments"} {
 			if !strings.Contains(p, rule) {

@@ -61,7 +61,7 @@ jobs:
           ./build.sh --target "${ARTEX_TARGET_OS}/${ARTEX_TARGET_ARCH}"
       - name: Smoke test Linux amd64 binary
         if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
-        run: dist/scopeweaver-linux-amd64/scopeweaver -h
+        run: dist/artex-linux-amd64/artex -h
       - uses: actions/upload-artifact@v4
         with:
           name: pkg-${{ matrix.goos }}-${{ matrix.goarch }}
@@ -102,7 +102,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ghcr.io/cskwork/scopeweaver
+          images: ghcr.io/autumn-27/artex
           tags: |
             type=ref,event=tag
             type=raw,value=latest

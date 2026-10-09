@@ -2,7 +2,7 @@
 
 [한국어](../docs/ko/sidequestion/VALIDATION.md)
 
-Historical upstream record. Date: 2026-09-10. Branch: `codex/btw-side-question`. Baseline: `8dae851b9b622f2ff2631f332fde9719d0b16fba`. These are not new ScopeWeaver results.
+Historical upstream record. Date: 2026-09-10. Branch: `codex/btw-side-question`. Baseline: `8dae851b9b622f2ff2631f332fde9719d0b16fba`. These are not new ARTEX results.
 
 Used an isolated PostgreSQL test database and data directory. Real-model credentials were injected only into that environment, never source or this record. The product default model was unchanged. Go 1.26.3, norma v0.3.6, Next.js 16.2.9.
 

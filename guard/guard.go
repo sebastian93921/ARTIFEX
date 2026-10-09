@@ -138,7 +138,7 @@ func (g *Guard) applyIntercept(ctx context.Context, ev hook.Event) hook.Result {
 // Audit/history rows keep the raw reason (see Interceptor.Log); only the
 // model-facing tool_result carries this framing.
 func systemBlockMessage(reason string) string {
-	return locale.Text(locale.ServerDefault(), "[ScopeWeaver platform control, not target defense] This call was blocked by the platform. ") +
+	return locale.Text(locale.ServerDefault(), "[ARTEX platform control, not target defense] This call was blocked by the platform. ") +
 		locale.Text(locale.ServerDefault(), "Reason: ") + reason + locale.Text(locale.ServerDefault(), ". This operation is prohibited.")
 }
 

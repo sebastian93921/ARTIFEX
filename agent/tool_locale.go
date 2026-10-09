@@ -23,20 +23,11 @@ func localizeBuiltinTools(tools []actool.CoreTool, lang locale.Lang) []actool.Co
 		for _, t := range NewToolSet(nil, "", locale.En).AllDomainTools() {
 			builtinTranslations.entries[t.Name()] = [2]actool.CoreTool{t, nil}
 		}
-		for _, t := range NewToolSet(nil, "", locale.Ko).AllDomainTools() {
-			p := builtinTranslations.entries[t.Name()]
-			p[1] = t
-			builtinTranslations.entries[t.Name()] = p
-		}
 	})
 	out := append([]actool.CoreTool(nil), tools...)
 	for i, t := range out {
 		if p, ok := builtinTranslations.entries[t.Name()]; ok && p[0] != nil && p[1] != nil {
-			if lang == locale.Ko {
-				out[i] = TranslateToolMetadata(t, p[0], p[1])
-			} else {
-				out[i] = TranslateToolMetadata(t, p[1], p[0])
-			}
+			out[i] = TranslateToolMetadata(t, p[1], p[0])
 		}
 	}
 	return out

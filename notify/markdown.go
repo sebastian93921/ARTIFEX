@@ -84,7 +84,7 @@ func markdownBody(m Message, maxBytes int) (string, int) {
 
 	footer := ""
 	if m.HomeURL != "" {
-		footer = fmt.Sprintf(locale.Text(locale.Resolve(m.Language), "\n[View all in ScopeWeaver](%s)\n"), m.HomeURL)
+		footer = fmt.Sprintf(locale.Text(locale.Resolve(m.Language), "\n[View all in ARTEX](%s)\n"), m.HomeURL)
 	}
 	kept := packItemCount(m.Items, maxBytes, markdownReservedBytes, footer, byteSize, func(it Item, idx int) string {
 		var b strings.Builder

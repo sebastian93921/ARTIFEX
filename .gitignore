@@ -56,10 +56,10 @@ Thumbs.db
 /bench/
 /Dockerfile.bench
 /Dockerfile.bench.v2
-/scopeweaver
-/scopeweaver.exe
-/scopeweaver.new
-/scopeweaver.new.sha256
-/scopeweaver.old
-/scopeweaver.failed
-/scopeweaver.upgrade.json
+/artex
+/artex.exe
+/artex.new
+/artex.new.sha256
+/artex.old
+/artex.failed
+/artex.upgrade.json

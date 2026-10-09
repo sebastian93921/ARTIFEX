@@ -10,13 +10,12 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"unicode"
 
 	"github.com/Autumn-27/artex/locale"
 )
 
 func TestAssetInterceptLocalizedValidationPreservesRules(t *testing.T) {
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		req := assetInterceptRuleReq{Kind: "exact_ip", Pattern: "raw-invalid-address", Note: "User note"}
 		err := validateAssetInterceptRuleReq(&req)
 		if err == nil {
@@ -27,9 +26,6 @@ func TestAssetInterceptLocalizedValidationPreservesRules(t *testing.T) {
 			t.Fatalf("Raw pattern lost: %q", text)
 		}
 		label := "not a valid IP address"
-		if lang == locale.Ko {
-			label = "유효한 IP 주소가 아닙니다"
-		}
 		if !strings.Contains(text, label) {
 			t.Fatalf("%s validation not localized: %q", lang, text)
 		}
@@ -48,14 +44,12 @@ func TestAssetInterceptLocalizedValidationPreservesRules(t *testing.T) {
 		if err == nil || filter.Status != "invalid" {
 			t.Fatal("Invalid filter handling changed")
 		}
-		if text := locale.ErrorMessage(lang, err); lang == locale.Ko && !strings.Contains(text, "이어야 합니다") {
-			t.Fatalf("Filter error not localized: %q", text)
-		}
+
 	}
 }
 
 func TestAssetInterceptRequestLanguageErrors(t *testing.T) {
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		t.Run(string(lang), func(t *testing.T) {
 			r := httptest.NewRequest(http.MethodPost, "/api/intercept/1/decide", strings.NewReader(`{"decision":"invalid"}`))
 			r.SetPathValue("id", "1")
@@ -63,9 +57,6 @@ func TestAssetInterceptRequestLanguageErrors(t *testing.T) {
 			w := httptest.NewRecorder()
 			withLocale(http.HandlerFunc((&Server{}).interceptDecide)).ServeHTTP(w, r)
 			label := "decision must be allowed or denied"
-			if lang == locale.Ko {
-				label = "decision은 allowed 또는 denied여야 합니다"
-			}
 			if w.Code != 400 || !strings.Contains(w.Body.String(), label) {
 				t.Fatalf("Unexpected decision response: %d %s", w.Code, w.Body)
 			}
@@ -79,9 +70,6 @@ func TestAssetInterceptRequestLanguageErrors(t *testing.T) {
 				decodeCompanyMutationRequest(w, r, &value)
 			})).ServeHTTP(w, r)
 			label = "scope[0] must be a string"
-			if lang == locale.Ko {
-				label = "scope[0]는 문자열"
-			}
 			if w.Code != 400 || !strings.Contains(w.Body.String(), label) {
 				t.Fatalf("Nested validation lost language: %d %s", w.Code, w.Body)
 			}
@@ -129,10 +117,6 @@ func TestAssetInterceptCatalogCoverage(t *testing.T) {
 			en, ok := locale.Lookup(locale.En, key)
 			if !ok || en != key {
 				t.Errorf("Missing English template %q", key)
-			}
-			ko, ok := locale.Lookup(locale.Ko, key)
-			if !ok || !strings.ContainsFunc(ko, func(r rune) bool { return unicode.Is(unicode.Hangul, r) }) {
-				t.Errorf("Missing Korean template %q", key)
 			}
 			return true
 		})

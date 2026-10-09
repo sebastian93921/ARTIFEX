@@ -99,7 +99,7 @@ func TestTaskContextHeaderTruncatesLongGoal(t *testing.T) {
 }
 
 func TestTriggerLocalizedMergePreservesPayloads(t *testing.T) {
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		items := sameTaskFires(3)
 		for i := range items {
 			items[i].language = lang
@@ -113,9 +113,6 @@ func TestTriggerLocalizedMergePreservesPayloads(t *testing.T) {
 				t.Fatal("Merge altered or duplicated user context")
 			}
 			want := "Trigger 3"
-			if lang == locale.Ko {
-				want = "트리거 3"
-			}
 			if !strings.Contains(out.message, want) {
 				t.Fatalf("Merge ignored language %s: %s", lang, out.message)
 			}
@@ -133,7 +130,7 @@ func TestTriggerLocalizedMergePreservesPayloads(t *testing.T) {
 		if reporterTriggerText(reporterToolCallMessage, lang) != locale.Text(lang, reporterToolCallMessage) {
 			t.Fatal("Stock reporter trigger ignored language")
 		}
-		if got := validateTrigger(&triggerReq{}, lang); got == "" || lang == locale.Ko && !strings.Contains(got, "선택하세요") {
+		if got := validateTrigger(&triggerReq{}, lang); got == "" {
 			t.Fatalf("Trigger validation ignored language: %s", got)
 		}
 	}

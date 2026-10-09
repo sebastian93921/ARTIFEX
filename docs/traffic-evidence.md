@@ -1,7 +1,5 @@
 # Multiple traffic records as finding evidence
 
-[한국어](ko/traffic-evidence.md)
-
 Finding details support selecting traffic across pages, assigning roles and notes, ordering records, and removing bindings. The traffic page also lets you select multiple records and attach them to an existing finding. Evidence inherited from another task is read only; edit it in the source task.
 
 “Agent automatic traffic binding” is off by default. Read or change `agent_traffic_binding` through `/api/settings`. Enabling it adds token costs for request/response review, tool calls and instructions; the next agent turn uses the new setting. When off, automatic binding parameters and the supplemental binding tool are hidden, no automatic binding instructions are injected, and new automatic binding submissions from already-running sessions are rejected. Manual binding, capture, saved evidence reading and export remain available.

@@ -2,15 +2,15 @@
 // and the node tests. Keep this module free of DOM access and path aliases so
 // `node --test` can import it directly.
 
-export const LOCALES = ["en", "ko"] as const;
+export const LOCALES = ["en"] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = "en";
 
 // Persistence contract shared with the backend (see status notes):
 // localStorage for the UI, a cookie so the server can negotiate too.
-export const LOCALE_STORAGE_KEY = "scopeweaver.locale";
-export const LOCALE_COOKIE = "scopeweaver_locale";
+export const LOCALE_STORAGE_KEY = "artex.locale";
+export const LOCALE_COOKIE = "artex_locale";
 export const LOCALE_COOKIE_MAX_AGE = 365 * 24 * 60 * 60;
 
 // Query parameter used where headers cannot be set (EventSource, downloads).
@@ -19,12 +19,10 @@ export const LOCALE_QUERY_PARAM = "lang";
 // Native names are shown in the language selector regardless of UI locale.
 export const LOCALE_NATIVE_NAMES: Record<Locale, string> = {
   en: "English",
-  ko: "한국어",
 };
 
 const INTL_LOCALES: Record<Locale, string> = {
   en: "en-US",
-  ko: "ko-KR",
 };
 
 export function isLocale(value: unknown): value is Locale {

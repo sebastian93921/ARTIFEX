@@ -163,7 +163,7 @@ type TaskCreateOptions struct {
 // and the ordered task LLM chain in one transaction.
 func (d *DB) CreateTaskWithOptions(description, goal string, opts TaskCreateOptions) (*Task, error) {
 	if opts.Language != "" && !locale.Supported(opts.Language) {
-		return nil, locale.NewError("language must be en or ko")
+		return nil, locale.NewError("language must be en")
 	}
 	if len(opts.SourceTaskIDs) > MaxTaskSourceCount {
 		return nil, locale.Errorf("too many source tasks: got %d, maximum is %d", len(opts.SourceTaskIDs), MaxTaskSourceCount)

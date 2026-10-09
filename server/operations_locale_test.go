@@ -25,19 +25,15 @@ func TestOperationsMCPValidationLanguages(t *testing.T) {
 			t.Fatalf("%s accepted without configuration", transport)
 		}
 		en := locale.ErrorMessage(locale.En, err)
-		ko := locale.ErrorMessage(locale.Ko, err)
-		if en == ko {
-			t.Fatalf("untranslated %s: %q", transport, en)
-		}
-		if transport == "custom%raw" && !strings.Contains(ko, transport) {
-			t.Fatalf("raw transport changed: %q", ko)
+		if transport == "custom%raw" && !strings.Contains(en, transport) {
+			t.Fatalf("raw transport changed: %q", en)
 		}
 	}
 }
 
 func TestOperationsCustomToolLocalePreservesSchema(t *testing.T) {
 	raw := json.RawMessage(`{"type":"object","description":"User description 원본","properties":{"args":{"type":"string","description":"User args 100%"}}}`)
-	got := ensureSchemaForLanguage(raw, locale.Ko)
+	got := ensureSchemaForLanguage(raw, locale.En)
 	if got["description"] != "User description 원본" {
 		t.Fatal("user schema translated")
 	}
@@ -45,18 +41,18 @@ func TestOperationsCustomToolLocalePreservesSchema(t *testing.T) {
 	if props["args"].(map[string]any)["description"] != "User args 100%" {
 		t.Fatal("user parameter description changed")
 	}
-	fallback := ensureSchemaForLanguage(nil, locale.Ko)["properties"].(map[string]any)["args"].(map[string]any)
-	if fallback["description"] != "명령/인수(자유 형식 텍스트)" {
+	fallback := ensureSchemaForLanguage(nil, locale.En)["properties"].(map[string]any)["args"].(map[string]any)
+	if fallback["description"] != "Command/arguments (free text)" {
 		t.Fatalf("fallback=%v", fallback)
 	}
 	s := &Server{}
-	ctx := locale.WithLang(context.Background(), locale.Ko)
+	ctx := locale.WithLang(context.Background(), locale.En)
 	result, err := s.runCommandTool(ctx, json.RawMessage(`{}`), nil, nil)
-	if err != nil || !result.IsError || !strings.Contains(result.Flatten(), "command가 비어 있습니다") {
+	if err != nil || !result.IsError || !strings.Contains(result.Flatten(), "command is empty") {
 		t.Fatalf("command result=%+v err=%v", result, err)
 	}
 	result, err = s.runHTTPTool(ctx, json.RawMessage(`{}`), nil, nil)
-	if err != nil || !result.IsError || !strings.Contains(result.Flatten(), "HTTP URL이 비어 있습니다") {
+	if err != nil || !result.IsError || !strings.Contains(result.Flatten(), "HTTP URL is empty") {
 		t.Fatalf("HTTP result=%+v err=%v", result, err)
 	}
 }
@@ -65,8 +61,8 @@ func TestOperationsAttachmentAndWorkspaceDataRemainVerbatim(t *testing.T) {
 	dir := t.TempDir()
 	msg := "User text 100% 원본"
 	name := "attachment.txt"
-	got := composeAgentMessageForLanguage(msg, []chatAttachment{{Path: name, Size: 12}}, dir, locale.Ko)
-	if !strings.HasPrefix(got, msg) || !strings.Contains(got, "사용자가 업로드한 첨부 파일") || !strings.Contains(got, filepath.Join(dir, name)) {
+	got := composeAgentMessageForLanguage(msg, []chatAttachment{{Path: name, Size: 12}}, dir, locale.En)
+	if !strings.HasPrefix(got, msg) || !strings.Contains(got, "[User-uploaded attachments]") || !strings.Contains(got, filepath.Join(dir, name)) {
 		t.Fatalf("attachment message=%q", got)
 	}
 	if err := os.WriteFile(filepath.Join(dir, name), []byte(msg), 0600); err != nil {
@@ -74,7 +70,7 @@ func TestOperationsAttachmentAndWorkspaceDataRemainVerbatim(t *testing.T) {
 	}
 	s := &Server{m: &Manager{dir: dir}}
 	rec := httptest.NewRecorder()
-	s.wsRead(&localeWriter{rec, locale.Ko}, httptest.NewRequest(http.MethodGet, "/api/workspace/read?path="+name, nil))
+	s.wsRead(&localeWriter{rec, locale.En}, httptest.NewRequest(http.MethodGet, "/api/workspace/read?path="+name, nil))
 	var payload struct {
 		Content string `json:"content"`
 	}
@@ -85,16 +81,16 @@ func TestOperationsAttachmentAndWorkspaceDataRemainVerbatim(t *testing.T) {
 		t.Fatalf("workspace content changed: %d %+v", rec.Code, payload)
 	}
 	rec = httptest.NewRecorder()
-	s.wsRead(&localeWriter{rec, locale.Ko}, httptest.NewRequest(http.MethodGet, "/api/workspace/read?path=missing", nil))
-	if rec.Code != 404 || !strings.Contains(rec.Body.String(), "파일을 찾을 수 없습니다") {
+	s.wsRead(&localeWriter{rec, locale.En}, httptest.NewRequest(http.MethodGet, "/api/workspace/read?path=missing", nil))
+	if rec.Code != 404 || !strings.Contains(rec.Body.String(), "File not found") {
 		t.Fatalf("workspace error=%d %s", rec.Code, rec.Body.String())
 	}
 }
 
 func TestOperationsSyncParseErrorsUseRequestLanguage(t *testing.T) {
 	for _, kind := range []string{"subdomain", "app", "service"} {
-		got := (&Server{}).ssIngestForLanguage(nil, kind, json.RawMessage(`{`), map[string]int{}, locale.Ko)
-		if !strings.Contains(got, "해석 실패") || !strings.Contains(got, "unexpected end of JSON input") {
+		got := (&Server{}).ssIngestForLanguage(nil, kind, json.RawMessage(`{`), map[string]int{}, locale.En)
+		if !strings.Contains(got, "Could not parse") || !strings.Contains(got, "unexpected end of JSON input") {
 			t.Fatalf("%s lost localized prefix/raw decoder error: %q", kind, got)
 		}
 	}
@@ -111,7 +107,7 @@ func TestOperationsCustomToolValidationHTTP(t *testing.T) {
 	}
 	defer pg.Close()
 	s := &Server{m: &Manager{pg: pg}}
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodPost, "/api/tools/custom", strings.NewReader(`{"key":"INVALID","kind":"command"}`))
 		s.pgCreateCustomTool(&localeWriter{rec, lang}, req)
@@ -161,10 +157,9 @@ func TestOperationsMessageCatalogCoverage(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			en, found := locale.Lookup(locale.En, key)
-			ko, kfound := locale.Lookup(locale.Ko, key)
-			if !found || !kfound || en == ko {
-				t.Errorf("%s: missing Korean key %q", name, key)
+			_, found := locale.Lookup(locale.En, key)
+			if !found {
+				t.Errorf("%s: missing message %q", name, key)
 			}
 			count++
 			return true

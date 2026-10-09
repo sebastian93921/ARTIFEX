@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"unicode"
 )
 
 func TestConversationListRunningState(t *testing.T) {
@@ -73,7 +72,7 @@ func TestConversationListRunningState(t *testing.T) {
 
 func TestConversationLocalizedDefaultsAndRawTitles(t *testing.T) {
 	s, _ := newRetestServer(t)
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		for _, title := range []string{"", "Raw user title"} {
 			raw, _ := json.Marshal(map[string]string{"agent_key": db.FindingRetestAgentKey, "title": title})
 			req := httptest.NewRequest(http.MethodPost, "/api/conversations?lang="+string(lang), strings.NewReader(string(raw)))
@@ -96,7 +95,7 @@ func TestConversationLocalizedDefaultsAndRawTitles(t *testing.T) {
 			}
 		}
 	}
-	for _, title := range []string{"", locale.Text(locale.En, "New conversation"), locale.Text(locale.Ko, "New conversation")} {
+	for _, title := range []string{"", locale.Text(locale.En, "New conversation")} {
 		if !isDefaultConversationTitle(title) {
 			t.Fatalf("Built-in default not recognized: %q", title)
 		}
@@ -146,10 +145,6 @@ func TestConversationCatalogCoverage(t *testing.T) {
 			en, ok := locale.Lookup(locale.En, key)
 			if !ok || en != key {
 				t.Errorf("Missing English template %q", key)
-			}
-			ko, ok := locale.Lookup(locale.Ko, key)
-			if !ok || !strings.ContainsFunc(ko, func(r rune) bool { return unicode.Is(unicode.Hangul, r) }) {
-				t.Errorf("Missing Korean template %q", key)
 			}
 			return true
 		})

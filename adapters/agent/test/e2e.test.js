@@ -5,25 +5,25 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import extension from "../pi-extension.js";
 
-const url = process.env.SCOPEWEAVER_E2E_URL;
-assert.ok(url, "Run through SCOPEWEAVER_ADAPTER_E2E=1 go test ./server -run TestAgentAdapterE2E -count=1 -v with a disposable database.");
-const password = process.env.SCOPEWEAVER_E2E_PASSWORD;
-const findingID = process.env.SCOPEWEAVER_E2E_FINDING_ID;
+const url = process.env.ARTEX_E2E_URL;
+assert.ok(url, "Run through ARTEX_ADAPTER_E2E=1 go test ./server -run TestAgentAdapterE2E -count=1 -v with a disposable database.");
+const password = process.env.ARTEX_E2E_PASSWORD;
+const findingID = process.env.ARTEX_E2E_FINDING_ID;
 
 async function connect(t, overrides = {}) {
   const transport = new StdioClientTransport({
     command: process.execPath, args: [fileURLToPath(new URL("../src/mcp.js", import.meta.url))],
-    env: { ...process.env, SCOPEWEAVER_URL: url, SCOPEWEAVER_TOKEN: "", SCOPEWEAVER_PASSWORD: password,
-      SCOPEWEAVER_ALLOW_WRITES: "true", ...overrides }, stderr: "pipe",
+    env: { ...process.env, ARTEX_URL: url, ARTEX_TOKEN: "", ARTEX_PASSWORD: password,
+      ARTEX_ALLOW_WRITES: "true", ...overrides }, stderr: "pipe",
   });
-  const client = new Client({ name: "scopeweaver-e2e", version: "1.0.0" });
+  const client = new Client({ name: "artex-e2e", version: "1.0.0" });
   await client.connect(transport);
   t.after(() => client.close());
   return client;
 }
 
 async function call(client, name, args = {}) {
-  const result = await client.callTool({ name: `scopeweaver_${name}`, arguments: args });
+  const result = await client.callTool({ name: `artex_${name}`, arguments: args });
   assert.ok(!result.isError, JSON.stringify(result.content));
   assert.deepEqual(JSON.parse(result.content[0].text), result.structuredContent);
   return result.structuredContent.data;
@@ -33,7 +33,7 @@ test("MCP stdio → real authenticated backend → persisted task, controls, cov
   const client = await connect(t);
   const { tools } = await client.listTools();
   assert.equal(tools.length, 8);
-  assert.equal(tools.find((tool) => tool.name === "scopeweaver_create_task").annotations.readOnlyHint, false);
+  assert.equal(tools.find((tool) => tool.name === "artex_create_task").annotations.readOnlyHint, false);
   const health = await call(client, "health");
   assert.ok(health);
   const created = await call(client, "create_task", {
@@ -62,18 +62,18 @@ test("MCP stdio → real authenticated backend → persisted task, controls, cov
 });
 
 test("MCP surfaces authentication, missing tasks and invalid input as errors; read-only mode hides writes", async (t) => {
-  const readonly = await connect(t, { SCOPEWEAVER_ALLOW_WRITES: "false" });
+  const readonly = await connect(t, { ARTEX_ALLOW_WRITES: "false" });
   assert.equal((await readonly.listTools()).tools.length, 6);
-  const disabled = await readonly.callTool({ name: "scopeweaver_create_task", arguments: { description: "x", goal: "y" } });
+  const disabled = await readonly.callTool({ name: "artex_create_task", arguments: { description: "x", goal: "y" } });
   assert.equal(disabled.isError, true);
   assert.match(disabled.content[0].text, /not found/);
-  const missing = await readonly.callTool({ name: "scopeweaver_get_task", arguments: { task_id: "999999999" } });
+  const missing = await readonly.callTool({ name: "artex_get_task", arguments: { task_id: "999999999" } });
   assert.equal(missing.isError, true);
   assert.match(missing.content[0].text, /HTTP 404/);
-  const invalid = await readonly.callTool({ name: "scopeweaver_get_task", arguments: { task_id: "../settings" } });
+  const invalid = await readonly.callTool({ name: "artex_get_task", arguments: { task_id: "../settings" } });
   assert.equal(invalid.isError, true);
-  const invalidAuth = await connect(t, { SCOPEWEAVER_TOKEN: "invalid-fixture-token", SCOPEWEAVER_PASSWORD: "" });
-  const denied = await invalidAuth.callTool({ name: "scopeweaver_list_tasks", arguments: {} });
+  const invalidAuth = await connect(t, { ARTEX_TOKEN: "invalid-fixture-token", ARTEX_PASSWORD: "" });
+  const denied = await invalidAuth.callTool({ name: "artex_list_tasks", arguments: {} });
   assert.equal(denied.isError, true);
   assert.match(denied.content[0].text, /HTTP 401/);
   assert.ok(!denied.content[0].text.includes("invalid-fixture-token"));
@@ -81,14 +81,14 @@ test("MCP surfaces authentication, missing tasks and invalid input as errors; re
 
 test("Pi tools → same real backend → create and read task, retrieve evidence, reject bad IDs", async () => {
   const saved = { ...process.env };
-  Object.assign(process.env, { SCOPEWEAVER_URL: url, SCOPEWEAVER_TOKEN: "", SCOPEWEAVER_PASSWORD: password, SCOPEWEAVER_ALLOW_WRITES: "true" });
+  Object.assign(process.env, { ARTEX_URL: url, ARTEX_TOKEN: "", ARTEX_PASSWORD: password, ARTEX_ALLOW_WRITES: "true" });
   const tools = new Map();
   try { extension({ registerTool: (tool) => tools.set(tool.name, tool) }); }
   finally {
     for (const key of Object.keys(process.env)) if (!(key in saved)) delete process.env[key];
     Object.assign(process.env, saved);
   }
-  const run = async (name, args) => (await tools.get(`scopeweaver_${name}`).execute("e2e", args)).details.data;
+  const run = async (name, args) => (await tools.get(`artex_${name}`).execute("e2e", args)).details.data;
   const created = await run("create_task", { description: "Pi local fixture", goal: "Verify Pi tool adapter" });
   assert.equal((await run("get_task", { task_id: created.id })).goal, "Verify Pi tool adapter");
   assert.equal((await run("get_finding", { finding_id: findingID })).id, findingID);

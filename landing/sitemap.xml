@@ -2,15 +2,8 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://cskwork.github.io/scopeweaver/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://cskwork.github.io/scopeweaver/"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://cskwork.github.io/scopeweaver/ko/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://cskwork.github.io/scopeweaver/"/>
-  </url>
-  <url>
-    <loc>https://cskwork.github.io/scopeweaver/ko/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://cskwork.github.io/scopeweaver/"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://cskwork.github.io/scopeweaver/ko/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://cskwork.github.io/scopeweaver/"/>
+    <loc>https://github.com/Autumn-27/ARTEX/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://github.com/Autumn-27/ARTEX/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://github.com/Autumn-27/ARTEX/"/>
   </url>
 </urlset>

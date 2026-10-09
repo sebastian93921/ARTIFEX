@@ -54,9 +54,8 @@ func TestDatabaseErrorTemplateCoverage(t *testing.T) {
 			}
 			if helper, ok := call.Fun.(*ast.Ident); ok && helper.Name == "newCompanyScopeValidationError" {
 				template, literal := literalTemplate(call.Args[0])
-				en, present := locale.Lookup(locale.En, template)
-				ko, kopresent := locale.Lookup(locale.Ko, template)
-				if !literal || !present || !kopresent || en == ko {
+				_, present := locale.Lookup(locale.En, template)
+				if !literal || !present {
 					t.Errorf("%s: incomplete validation template %q", path, template)
 				}
 				count++
@@ -79,8 +78,7 @@ func TestDatabaseErrorTemplateCoverage(t *testing.T) {
 				return true
 			}
 			en, present := locale.Lookup(locale.En, template)
-			ko, kopresent := locale.Lookup(locale.Ko, template)
-			if !present || !kopresent || en != template || (ko == en && template != "%w: %v") {
+			if !present || en != template {
 				t.Errorf("%s: incomplete bilingual error template %q", path, template)
 			}
 			count++
@@ -98,23 +96,23 @@ func TestDatabaseTypedErrorsPreserveEvidenceAndIdentity(t *testing.T) {
 	if !errors.Is(err, ErrAssetIPInvalid) {
 		t.Fatalf("lost error identity: %v", err)
 	}
-	ko := locale.ErrorMessage(locale.Ko, err)
-	if !strings.Contains(ko, "IPv4/IPv6 주소") || !strings.Contains(ko, raw) {
-		t.Fatalf("localized error lost template or raw input: %q", ko)
+	en := locale.ErrorMessage(locale.En, err)
+	if !strings.Contains(en, "IPv4/IPv6") || !strings.Contains(en, raw) {
+		t.Fatalf("localized error lost template or raw input: %q", en)
 	}
 	external := errors.New("driver-owned detail / 원본")
 	wrapped := locale.Errorf("restore %s: %w", "user-table", external)
-	if !errors.Is(wrapped, external) || !strings.Contains(locale.ErrorMessage(locale.Ko, wrapped), external.Error()) {
+	if !errors.Is(wrapped, external) || !strings.Contains(locale.ErrorMessage(locale.En, wrapped), external.Error()) {
 		t.Fatal("wrapped external cause changed")
 	}
-	if locale.ErrorMessage(locale.Ko, external) != external.Error() {
+	if locale.ErrorMessage(locale.En, external) != external.Error() {
 		t.Fatal("unknown error translated")
 	}
 }
 
 func TestBuiltinMetadataLocalePreservesCustomValues(t *testing.T) {
 	for _, seed := range builtinAgents {
-		for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+		for _, lang := range []locale.Lang{locale.En} {
 			a := &Agent{Key: seed.key, Builtin: true, Name: legacyDefaultMetadata(seed.name), Description: legacyDefaultMetadata(seed.desc)}
 			LocalizeBuiltinAgentMetadata(a, lang)
 			if a.Name != locale.Text(lang, seed.name) || a.Description != locale.Text(lang, seed.desc) {
@@ -129,7 +127,7 @@ func TestBuiltinMetadataLocalePreservesCustomValues(t *testing.T) {
 		}
 	}
 	vars := []PromptVar{{Name: "Goal", Description: "Custom description", Example: "Custom example"}}
-	LocalizeBuiltinPromptVars("planner", vars, locale.Ko)
+	LocalizeBuiltinPromptVars("planner", vars, locale.En)
 	if vars[0].Description != "Custom description" || vars[0].Example != "Custom example" {
 		t.Fatal("custom variable metadata changed")
 	}
@@ -138,11 +136,10 @@ func TestBuiltinMetadataLocalePreservesCustomValues(t *testing.T) {
 func TestRetestInitialMessageLanguagePreservesNotes(t *testing.T) {
 	r := &FindingRetest{FindingID: 42, Notes: "Raw user evidence / 원본"}
 	en := r.InitialMessageForLanguage(locale.En)
-	ko := r.InitialMessageForLanguage(locale.Ko)
-	if !strings.HasPrefix(en, "Please retest finding #42.") || !strings.HasPrefix(ko, "취약점 #42") {
-		t.Fatalf("unexpected retest messages: %q / %q", en, ko)
+	if !strings.HasPrefix(en, "Please retest finding #42.") {
+		t.Fatalf("unexpected retest messages: %q", en)
 	}
-	for _, msg := range []string{en, ko} {
+	for _, msg := range []string{en} {
 		if !strings.HasSuffix(msg, r.Notes) || !strings.Contains(msg, "get_finding_retest_context") || !strings.Contains(msg, "record_finding_retest_result") {
 			t.Fatal("notes or tool contract changed")
 		}
@@ -222,12 +219,12 @@ func TestSeedLocalizationPreservesCustomization(t *testing.T) {
 func TestAssetGateLocalePreservesDecisionAndUserNote(t *testing.T) {
 	rule := AssetInterceptRule{Kind: "exact_domain", Pattern: "target.example", Note: "Custom note / 원본", Enabled: true}
 	en := EvaluateAssetGateForLanguage(locale.En, []AssetInterceptRule{rule}, nil, []string{"target.example"}, nil, nil)
-	ko := EvaluateAssetGateForLanguage(locale.Ko, []AssetInterceptRule{rule}, nil, []string{"target.example"}, nil, nil)
-	if en.Allowed || ko.Allowed || !strings.Contains(ko.Reason, "자산 차단 규칙") || !strings.Contains(ko.Reason, rule.Note) || !strings.Contains(ko.Reason, rule.Pattern) {
-		t.Fatalf("gate localization changed decision/data: %+v / %+v", en, ko)
+	en2 := EvaluateAssetGateForLanguage(locale.En, []AssetInterceptRule{rule}, nil, []string{"target.example"}, nil, nil)
+	if en.Allowed || en2.Allowed || !strings.Contains(en2.Reason, rule.Note) || !strings.Contains(en2.Reason, rule.Pattern) {
+		t.Fatalf("gate changed decision/data: %+v / %+v", en, en2)
 	}
-	miss := EvaluateAssetGateForLanguage(locale.Ko, nil, []AssetInterceptRule{rule}, []string{"other.example"}, nil, nil)
-	if miss.Allowed || !strings.Contains(miss.Reason, "허용 범위") {
+	miss := EvaluateAssetGateForLanguage(locale.En, nil, []AssetInterceptRule{rule}, []string{"other.example"}, nil, nil)
+	if miss.Allowed {
 		t.Fatalf("allowlist miss: %+v", miss)
 	}
 }
@@ -235,7 +232,7 @@ func TestAssetGateLocalePreservesDecisionAndUserNote(t *testing.T) {
 func TestCompanyScopeValidationLocale(t *testing.T) {
 	err := ValidateCompanyScopeInputBounds([]ScopeInput{{Value: strings.Repeat("x", MaxCompanyScopeRawRunes+1)}})
 	var scopeErr *CompanyScopeValidationError
-	if !errors.As(err, &scopeErr) || !strings.Contains(locale.ErrorMessage(locale.Ko, err), "기업 범위 규칙") {
+	if !errors.As(err, &scopeErr) || !strings.Contains(locale.ErrorMessage(locale.En, err), "Company scope rule") {
 		t.Fatalf("validation error not localized: %v", err)
 	}
 }
@@ -246,7 +243,7 @@ func TestTaskOriginUsesExplicitLanguage(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer d.Close()
-	task, err := d.CreateTaskWithOptions("Raw description 원본", "Raw goal", TaskCreateOptions{Language: locale.Ko})
+	task, err := d.CreateTaskWithOptions("Raw description 원본", "Raw goal", TaskCreateOptions{Language: locale.En})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -19,14 +19,14 @@ import (
 func TestTaskTrancheBilingualValidation(t *testing.T) {
 	long := strings.Repeat("x", db.MaxTaskTemplateNameRunes+1)
 	tests := []struct {
-		name   string
-		err    error
-		en, ko string
+		name string
+		err  error
+		en   string
 	}{
-		{"archive empty", func() error { _, err := normalizeArchiveIDs(nil); return err }(), "archive_ids must not be empty", "archive_ids는 비워 둘 수 없습니다"},
-		{"archive id", func() error { _, err := normalizeArchiveIDs([]int64{-42}); return err }(), "Invalid archive ID -42", "유효하지 않은 보관 ID -42"},
-		{"template", validateTaskTemplateRequest(taskTemplateRequest{Name: &long}), "name must be at most 120 characters", "name은(는) 120자 이하여야 합니다"},
-		{"archive path", validateArchivePath(t.TempDir(), ""), "Archive package path is empty", "보관 패키지 경로가 비어 있습니다"},
+		{"archive empty", func() error { _, err := normalizeArchiveIDs(nil); return err }(), "archive_ids must not be empty"},
+		{"archive id", func() error { _, err := normalizeArchiveIDs([]int64{-42}); return err }(), "Invalid archive ID -42"},
+		{"template", validateTaskTemplateRequest(taskTemplateRequest{Name: &long}), "name must be at most 120 characters"},
+		{"archive path", validateArchivePath(t.TempDir(), ""), "Archive package path is empty"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -36,15 +36,12 @@ func TestTaskTrancheBilingualValidation(t *testing.T) {
 			if got := locale.ErrorMessage(locale.En, tt.err); got != tt.en {
 				t.Fatalf("English=%q, want %q", got, tt.en)
 			}
-			if got := locale.ErrorMessage(locale.Ko, tt.err); got != tt.ko {
-				t.Fatalf("Korean=%q, want %q", got, tt.ko)
-			}
 		})
 	}
 }
 
 func TestTaskTrancheLocalizedBatchAndRequestErrors(t *testing.T) {
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		rec := httptest.NewRecorder()
 		w := &localeWriter{ResponseWriter: rec, lang: lang}
 		req := httptest.NewRequest(http.MethodPost, "/api/task-categories", strings.NewReader(`{"name":""}`))
@@ -60,11 +57,11 @@ func TestTaskTrancheLocalizedBatchAndRequestErrors(t *testing.T) {
 func TestTaskTrancheResolutionPreservesProfileData(t *testing.T) {
 	s := &Server{}
 	p := &db.LLMProfile{ID: 7, Name: "Raw profile 원본", Format: "openai", Model: "user-model"}
-	got := s.resolutionFromProfileForLanguage(p, "agent_binding", locale.Ko)
+	got := s.resolutionFromProfileForLanguage(p, "agent_binding", locale.En)
 	if got.Name != p.Name || got.Model != p.Model || got.Source != "agent_binding" || got.ProfileID == nil || *got.ProfileID != p.ID || got.Available {
 		t.Fatalf("profile data changed: %+v", got)
 	}
-	if got.Reason != "LLM 프로필에 API 키가 설정되지 않았습니다" {
+	if got.Reason != "LLM profile has no API key" {
 		t.Fatalf("reason=%q", got.Reason)
 	}
 }
@@ -76,8 +73,8 @@ func TestTaskTrancheArchiveErrorsPreserveCauses(t *testing.T) {
 	if !errors.Is(joined, cause) {
 		t.Fatal("lost wrapped error identity")
 	}
-	ko := locale.ErrorMessage(locale.Ko, joined)
-	for _, part := range []string{"작업 보관 경로", "user/path 원본", cause.Error(), "체크섬이 일치하지 않습니다"} {
+	ko := locale.ErrorMessage(locale.En, joined)
+	for _, part := range []string{"stage task archive path", "user/path 원본", cause.Error(), "checksum mismatch"} {
 		if !strings.Contains(ko, part) {
 			t.Fatalf("missing %q in %q", part, ko)
 		}
@@ -127,10 +124,9 @@ func TestTaskTrancheMessageCatalogCoverage(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			en, found := locale.Lookup(locale.En, key)
-			ko, kfound := locale.Lookup(locale.Ko, key)
-			if !found || !kfound || en == ko {
-				t.Errorf("%s: missing Korean message %q", path, key)
+			_, found := locale.Lookup(locale.En, key)
+			if !found {
+				t.Errorf("%s: missing message %q", path, key)
 			}
 			count++
 			return true

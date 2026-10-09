@@ -1,26 +1,24 @@
 <div align="center">
 
-# ScopeWeaver
+# ARTEX
 
 An LLM multi-agent autonomous penetration-testing system (Go backend + Next.js frontend)
 
-English · [한국어](README.ko.md)
+English
 
 </div>
 
 ---
 
-> **About this project.** ScopeWeaver is a derivative of [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX),
-> rebranded and translated into English and Korean. It is built from upstream commit `160fe13`.
-
-Modification date: **2026-10-02**. See [provenance and changes](docs/PROVENANCE.md); this is not a release tag.
+> **About this project.** ARTEX — an LLM multi-agent autonomous penetration-testing system by
+> [Autumn-27](https://github.com/Autumn-27/ARTEX) (Baidu "Agent+" attack-defense challenge champion
+> project). Built from upstream commit `160fe13`; the original product name has been restored.
 
 [Verification status and known limitations](docs/VERIFICATION.md).
 
-> The code and architecture originate in ARTEX. This standalone derivative changes the product
-> name, English/Korean interface and messages, documentation, and distribution targets. See [Provenance and changes](#provenance-and-changes)
-> for the full list of what differs from upstream, and [License and disclaimer](#license-and-disclaimer)
-> for the terms, which are unchanged (AGPL-3.0).
+> The code and architecture originate in ARTEX. This tree restores the original ARTEX product
+> name across the interface, documentation, and distribution targets. See [License and disclaimer](#license-and-disclaimer)
+> for the terms (AGPL-3.0).
 >
 > **Authorization.** This is a security-testing tool. Use it only against systems you own or are
 > explicitly authorized to test. The upstream usage restrictions still apply — read them below.
@@ -29,21 +27,21 @@ Modification date: **2026-10-02**. See [provenance and changes](docs/PROVENANCE.
 
 ## Language
 
-English is the default. Select English or Korean in the interface. The server's durable default is
-`language` in system settings; `SCOPEWEAVER_LANGUAGE` (or `ARTEX_LANGUAGE`) supplies the environment
-fallback. Operating-system `LANG` does not select the application language.
+English is the only interface language. The server's durable default is
+`language` in system settings; `ARTEX_LANGUAGE` supplies the environment fallback. Operating-system
+`LANG` does not select the application language.
 
-Requests prefer `lang`, then supported `Accept-Language` preferences, then the `scopeweaver_locale`
+Requests prefer `lang`, then supported `Accept-Language` preferences, then the `artex_locale`
 cookie, then the server default. New HTTP-created tasks retain their language across queues and
 restarts; older tasks without saved language use the server default. Built-in agent guidance and
 output instructions use the run language; user-edited templates and stored evidence remain intact.
-Report/CSV/ZIP labels use the export request's language. [Full documentation](docs/README.md) and
-[Korean references](docs/ko/README.md) include the bundled skill guidance.
+Report/CSV/ZIP labels use the export request's language. [Full documentation](docs/README.md)
+includes the bundled skill guidance.
 
 ## Screenshots
 
-These captures show ScopeWeaver's English interface with the included fictional demo data.
-They do not represent scans of live targets. See the [Korean screenshots](README.ko.md#스크린샷)
+These captures show ARTEX's English interface with the included fictional demo data.
+They do not represent scans of live targets. See the English captures below
 and [mobile view](screenshots/en/mobile.png).
 
 | Dashboard | Tasks |
@@ -84,7 +82,7 @@ which saves you from collecting the same data twice:
 The **LLM → New** form includes GLM-5.3 configuration templates for Z.ai's General API and a
 separately labeled Coding Plan reference. Add your own API key; template selection does not save,
 activate, or contact a provider. Coding Plan use is restricted to officially supported tools, and
-ScopeWeaver is not listed. See [provider setup and support limits](docs/llm-providers.md).
+ARTEX is not listed. See [provider setup and support limits](docs/llm-providers.md).
 
 > Requires a **PostgreSQL** database. Exploration needs an **LLM** configured
 > (`ANTHROPIC_API_KEY` or `OPENAI_API_KEY`, or set it in the UI).
@@ -92,8 +90,8 @@ ScopeWeaver is not listed. See [provider setup and support limits](docs/llm-prov
 ### Option 1: one-click install script (recommended)
 
 ```bash
-git clone https://github.com/cskwork/scopeweaver.git
-cd scopeweaver
+git clone https://github.com/Autumn-27/ARTEX.git
+cd artex
 ./install.sh
 ```
 
@@ -108,21 +106,20 @@ The script detects (and optionally installs) Docker, then lets you choose **① 
 Once it is up, open **http://localhost:8787** (the first visit lands on `/setup` to set the admin
 password).
 
-> The scripts speak English by default. For Korean prompts, set `SCOPEWEAVER_LANGUAGE=ko` (or
-> `ARTEX_LANGUAGE=ko`) before running, for example `SCOPEWEAVER_LANGUAGE=ko ./install.sh`.
+> The scripts speak English by default.
 
 ### Option 2: Docker Compose (manual)
 
 ```bash
-git clone https://github.com/cskwork/scopeweaver.git
-cd scopeweaver
+git clone https://github.com/Autumn-27/ARTEX.git
+cd artex
 cp .env.example .env          # set POSTGRES_PASSWORD, optionally ANTHROPIC_API_KEY
-docker compose up -d --build  # builds the scopeweaver image locally + postgres
+docker compose up -d --build  # builds the artex image locally + postgres
 # → http://localhost:8787
 ```
 
 > The default compose file **builds the image locally** from this source. To use a published
-> release image from `ghcr.io/cskwork/scopeweaver`, explicitly select its version in compose.
+> release image from `ghcr.io/autumn-27/artex`, explicitly select its version in compose.
 
 The image bundles common tools (ripgrep/curl/vim/npm/nmap…); `./skills` and `./data` are
 bind-mounted so they persist.
@@ -134,9 +131,9 @@ servers usually open the event stream with `GET /sse` and then receive JSON-RPC 
 
 ### Option 3: download a prebuilt binary (Releases)
 
-> Download a platform archive from [Releases](https://github.com/cskwork/scopeweaver/releases).
+> Download a platform archive from [Releases](https://github.com/Autumn-27/ARTEX/releases).
 > The archive for each platform is
-> `scopeweaver-<version>-<os>-<arch>.zip`, unpacking to `scopeweaver` + `start.sh`
+> `artex-<version>-<os>-<arch>.zip`, unpacking to `artex` + `start.sh`
 > (`start.bat` on Windows) + `skills/` + `config.example.json`:
 
 The archive also includes `adapters/agent/`; see the [agent setup instructions](adapters/agent/README.md).
@@ -146,11 +143,11 @@ cp config.example.json config.json   # fill in the database connection
 ./start.sh                            # → http://localhost:8787
 ```
 
-> Start with `start.sh` / `start.bat`, not `./scopeweaver` directly. It is a supervisor: after the
+> Start with `start.sh` / `start.bat`, not `./artex` directly. It is a supervisor: after the
 > program exits it decides, from the exit code, whether to relaunch, and the
 > [in-app one-click update](#option-1-in-app-one-click-update-recommended) relies on it to swap in
-> the new build. Running `./scopeweaver` directly means an update will not be relaunched.
-> To run in the background: `nohup ./start.sh >scopeweaver.log 2>&1 &`.
+> the new build. Running `./artex` directly means an update will not be relaunched.
+> To run in the background: `nohup ./start.sh >artex.log 2>&1 &`.
 
 ### Option 4: build a single binary from source
 
@@ -161,12 +158,12 @@ cd web && npm ci && npm run build:static && cd ..
 mkdir -p server/webui/dist
 cp -R web/out/. server/webui/dist/
 # 3) build (the embedui tag embeds the frontend)
-CGO_ENABLED=0 go build -tags embedui -o scopeweaver ./cmd/artex
+CGO_ENABLED=0 go build -tags embedui -o artex ./cmd/artex
 ./start.sh
 ```
 
 > The build source path stays `./cmd/artex` and the Go module stays `github.com/Autumn-27/artex`
-> for compatibility with upstream. Only the output binary is named `scopeweaver`.
+> for compatibility with upstream. Only the output binary is named `artex`.
 
 ### Option 5: build cross-platform release archives
 
@@ -175,7 +172,7 @@ release. Release mode builds Linux amd64/arm64, macOS amd64/arm64, and Windows a
 
 ```bash
 ./build.sh --release
-# output: dist/scopeweaver-0.3.3-*.zip
+# output: dist/artex-0.3.3-*.zip
 ```
 
 UPX-packed self-extracting binaries can clash with some Linux kernels, virtualization, or security
@@ -192,7 +189,7 @@ ARTEX_TARGETS=linux/amd64,windows/amd64 ./build.sh --release
 
 > Updates swap the program only; your data stays put. The Postgres volume `pgdata`, `./data`
 > (jwt.key / SQLite / …), and `./skills` are all preserved. **Database migrations run on their
-> own** — `scopeweaver` re-runs `schema.sql` idempotently on every start (including `ADD COLUMN` /
+> own** — `artex` re-runs `schema.sql` idempotently on every start (including `ADD COLUMN` /
 > `CREATE INDEX IF NOT EXISTS`), so "restart is migrate." Still, back up `./data` and the database
 > before upgrading.
 
@@ -202,15 +199,15 @@ On the **System configuration** page (sidebar "System configuration" → `/syste
 **Version and updates** card checks for and installs new versions without logging into the server.
 
 After you click "Update": it downloads the release for your platform → checks it against the
-release's `SHA256SUMS` → smoke-tests the new binary with `-h` → stages it as `scopeweaver.new` →
+release's `SHA256SUMS` → smoke-tests the new binary with `-h` → stages it as `artex.new` →
 the program exits and `start.sh` / `start.bat` relaunches it to finish the swap. The page waits for
 the new version to come up and refreshes.
 
 - **A failed update leaves no broken program**: if verification or the smoke test fails, the staged
   file is discarded and the current version keeps running. If a swapped-in version fails to start
-  three times in a row, it rolls back to `scopeweaver.old` automatically (the failed one is kept as
-  `scopeweaver.failed` for inspection).
-- **Roll back anytime**: the previous version is kept as `scopeweaver.old`, and the card has a
+  three times in a row, it rolls back to `artex.old` automatically (the failed one is kept as
+  `artex.failed` for inspection).
+- **Roll back anytime**: the previous version is kept as `artex.old`, and the card has a
   "Roll back to previous version" button. Note that the database schema does not roll back.
 - **Updating interrupts running tasks** — an update is a restart, so do it when idle.
 - **Development builds get no updates**: this is disabled when the version is `dev` or a
@@ -218,46 +215,46 @@ the new version to come up and refreshes.
 - **Under Docker, only the program changes, not the image**: the playwright / nmap toolchains in the
   image do not upgrade along with it, and rebuilding the container with `docker compose up -d` reverts
   to the versions baked into the image. To upgrade the image too, use
-  `docker compose pull scopeweaver && docker compose up -d scopeweaver` (once a published image exists;
-  otherwise `docker compose up -d --build scopeweaver`).
+  `docker compose pull artex && docker compose up -d artex` (once a published image exists;
+  otherwise `docker compose up -d --build artex`).
 - If reaching GitHub needs a proxy, configure the **global proxy** on the same page and the update
   path uses it. Updates download only from GitHub domains and force HTTPS.
 
 ### Option 2: one-click update script
 
 ```bash
-cd scopeweaver
+cd artex
 ./update.sh
 ```
 
 The script optionally runs `git pull` first, then lets you choose **① Docker update** or
 **② local build update** (matching `install.sh`):
 
-- **① Docker**: rebuild the current checkout with `docker compose build scopeweaver`, then
-  recreate the service with `docker compose up -d scopeweaver`.
-- **② Local**: rebuild the frontend static output → recompile `./scopeweaver` (restart the process
+- **① Docker**: rebuild the current checkout with `docker compose build artex`, then
+  recreate the service with `docker compose up -d artex`.
+- **② Local**: rebuild the frontend static output → recompile `./artex` (restart the process
   to apply).
 
 ### Option 3: Docker Compose (manual)
 
 ```bash
-cd scopeweaver
+cd artex
 git pull                       # update compose / scripts (optional)
 # To pin a source version, check out a reviewed tag or commit before building.
-docker compose up -d --build scopeweaver   # rebuild from source and restart → auto-migrate schema
+docker compose up -d --build artex   # rebuild from source and restart → auto-migrate schema
 docker image prune -f          # clean up old images (optional)
 ```
 
 > Once a published image exists and compose explicitly selects it, replace the build step with
-> `docker compose pull scopeweaver && docker compose up -d scopeweaver`.
+> `docker compose pull artex && docker compose up -d artex`.
 
 ### Option 4: prebuilt binary (Releases)
 
-Download the new `scopeweaver-<version>-<os>-<arch>.zip`, stop the old process,
-overwrite `scopeweaver` and `skills/` (keep your `config.json` and `data/`), and restart:
+Download the new `artex-<version>-<os>-<arch>.zip`, stop the old process,
+overwrite `artex` and `skills/` (keep your `config.json` and `data/`), and restart:
 
 ```bash
-cp -r <unpacked>/skills ./ && cp <unpacked>/scopeweaver ./
+cp -r <unpacked>/skills ./ && cp <unpacked>/artex ./
 ./start.sh
 ```
 
@@ -267,7 +264,7 @@ cp -r <unpacked>/skills ./ && cp <unpacked>/scopeweaver ./
 git pull
 cd web && npm ci && npm run build:static && cd ..
 cp -r web/out server/webui/dist
-CGO_ENABLED=0 go build -tags embedui -o scopeweaver ./cmd/artex
+CGO_ENABLED=0 go build -tags embedui -o artex ./cmd/artex
 # restart ./start.sh
 ```
 
@@ -280,7 +277,7 @@ CGO_ENABLED=0 go build -tags embedui -o scopeweaver ./cmd/artex
 Claude Code, Codex and Pi can create tasks, read progress, coverage and findings through the
 [agent adapter](adapters/agent/README.md). Claude Code/Codex use local stdio MCP; Pi uses a native
 extension. Reads are enabled by default, with task creation and pause/resume explicitly enabled
-through configuration. The adapter uses the existing authenticated API and keeps ScopeWeaver's
+through configuration. The adapter uses the existing authenticated API and keeps ARTEX's
 internal agents and model configuration intact.
 
 **Database** (`config.json`, or override with the environment variable `ARTEX_PG_DSN`):
@@ -296,7 +293,7 @@ internal agents and model configuration intact.
 ```
 
 > The configuration and environment keys keep the `ARTEX_*` prefix and the `artex` database defaults
-> for compatibility with upstream. Scripts also accept the `SCOPEWEAVER_*` aliases where noted.
+> for compatibility with upstream. Scripts also accept the `ARTEX_*` aliases where noted.
 
 **LLM**: `export ANTHROPIC_API_KEY=sk-...` (or `OPENAI_API_KEY`), or set it on the UI's "LLM
 configuration" page. Optional: `ARTEX_LLM_PROVIDER` / `ARTEX_LLM_MODEL` / `ARTEX_LLM_BASE_URL` /
@@ -305,7 +302,7 @@ configuration" page. Optional: `ARTEX_LLM_PROVIDER` / `ARTEX_LLM_MODEL` / `ARTEX
 **Concurrency**: the number of work agents per task is set in "System settings" (default 3).
 
 **Common flags**: `./start.sh -addr :8787 -proxy :8788` (`-addr` is frontend + API, `-proxy` is the
-traffic-capture proxy). The start script passes flags straight through to `scopeweaver`.
+traffic-capture proxy). The start script passes flags straight through to `artex`.
 
 ---
 
@@ -351,7 +348,7 @@ Demo mode only produces clearly labeled simulated records and does not touch rea
 
 ## Architecture
 
-ScopeWeaver (ARTEX under the hood) is an **LLM multi-agent autonomous penetration system**: a single
+ARTEX (ARTEX under the hood) is an **LLM multi-agent autonomous penetration system**: a single
 Go backend (with the Next.js frontend embedded) plus PostgreSQL. Agent capabilities come from the
 [`norma`](https://github.com/Autumn-27/norma) SDK (`agentcore` / `tool` / `permission` / `harness` /
 `memory` / `transcript`). The core is a **two-graph architecture**, with two autonomy mechanisms
@@ -556,49 +553,35 @@ own.
 
 ---
 
-## Provenance and changes
+## Provenance
 
-ScopeWeaver is derived from [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) at upstream commit
-`160fe13`. Changes in this standalone derivative:
+ARTEX is [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) at upstream commit `160fe13`, with
+the original product name restored (an intermediate rebrand was reverted). The Go module
+(`github.com/Autumn-27/artex`), the build source path (`./cmd/artex`), the `ARTEX_*` config/env
+keys, and the `artex` database defaults are original. The executable is `artex`; release archives
+follow `artex-<version>-<os>-<arch>.zip`. An intermediate Korean localization was removed; English
+is the only interface language, and unsupported `ARTEX_LANGUAGE`/`?lang=ko` values negotiate back
+to English. See [docs/PROVENANCE.md](docs/PROVENANCE.md).
 
-- **Product name**: "ARTEX" → "ScopeWeaver" in the user-visible documentation, scripts, and
-  distribution. The Go module (`github.com/Autumn-27/artex`), the build source path (`./cmd/artex`),
-  the `ARTEX_*` config/env keys, and the `artex` database defaults are **kept** for compatibility.
-- **Documentation language**: English is the default; a Korean translation lives in
-  [README.ko.md](README.ko.md) and under [docs/ko](docs/ko/README.md).
-- **Script language**: setup/build/start/update/reset-password prompts default to English, with
-  Korean selectable via `SCOPEWEAVER_LANGUAGE=ko` (`ARTEX_LANGUAGE=ko` also works). No network
-  translation is used.
-- **Distribution**: the output binary is `scopeweaver`, release archives are
-  `scopeweaver-<version>-<os>-<arch>.zip`, the repository is
-  `https://github.com/cskwork/scopeweaver`, and container images target this repo's GHCR. Upstream's
-  Docker Hub image (`autumn27/artex`) is not used.
-- **ScopeWeaver release history**: standalone releases start at `v0.1.0`, with notes under
-  [log/](log/changelog-v0.1.0.md). Version tags trigger platform archives and container builds.
-  Docker Compose continues to build locally unless a published image is explicitly selected.
+### Screenshots
 
-The changelog translation in [CHANGELOG.md](CHANGELOG.md) describes the history of the **upstream
-ARTEX** project faithfully; it does not attribute those changes to ScopeWeaver.
-
-### Screenshots and localized assets
-
-The localized captures are in `screenshots/en/` and `screenshots/ko/`. They show the included demo
-fixtures on desktop and mobile. Original ARTEX screenshots elsewhere in `screenshots/` remain
-unchanged and credited to upstream.
+The English captures live in `screenshots/en/`. They show the included demo fixtures on desktop
+and mobile. Original ARTEX screenshots elsewhere in `screenshots/` remain unchanged and credited
+to upstream.
 
 ---
 
 ## Credits
 
-- **Upstream**: [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) — the project this derivative is
-  derived from. The original code and architecture are credited to its authors.
+- **Upstream**: [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) — the original project. The
+  code and architecture are credited to its authors.
 - **Agent SDK**: [`norma`](https://github.com/Autumn-27/norma).
 - **Asset sync**: [ScopeSentry](https://github.com/Autumn-27/ScopeSentry).
 - **Approval-detail UI**: [AegisHook](https://github.com/RuoJi6/AegisHook).
 - **Reference**: [Cairn](https://github.com/oritera/Cairn).
 - **Upstream community**: the ARTEX authors run the WeChat public account **SecSentry**
   (`screenshots/wx.png` is their QR code, kept as an upstream asset). This is the upstream project's
-  channel, not a ScopeWeaver channel.
+  channel, not a ARTEX channel.
 
 ---
 

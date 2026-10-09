@@ -18,22 +18,3 @@ export const en = {
   updateLauncher: "One-click updates rely on the supervisor script to restart the application. Start with <code>start.sh</code> (Windows: <code>start.bat</code>). Running the binary directly does not restart it automatically after exit.",
   pagination: "{from}–{to} / {total} records",
 };
-export const ko: Record<keyof typeof en, string> = {
-  captureDisabled: "끄면(기본값) 트래픽을 기록하지 않습니다. 에이전트에 <b>프록시 설정과 트래픽 도구를 제공하지 않으며</b>, 프롬프트에도 <b>프록시 안내를 포함하지 않습니다</b>. 전환하면 에이전트를 즉시 재구성하여 적용합니다.",
-  binding: "기본적으로 꺼져 있습니다. 켜면 취약점 등록 시 보고서 에이전트가 기존 HTTP 요청과 응답을 검토하고 관련 트래픽을 연결한 후 보고서를 작성합니다. <b>패킷 확인과 추가 도구 호출로 토큰 사용량이 늘어납니다.</b>",
-  proxy: "모든 에이전트의 <b>대상 트래픽</b>을 이 프록시로 보내 원본 IP를 숨기거나 중계 호스트를 사용할 수 있습니다. <b>HTTP, HTTPS, SOCKS5</b>와 선택적 <code>user:pass</code> 인증을 지원합니다. 비우면 직접 연결합니다.",
-  proxyCapture: "<b>트래픽 캡처를 켜면</b> 기록 프록시의 <b>상위 프록시</b>로 사용하여 트래픽을 기록한 후 전달합니다. 캡처를 끄면 에이전트의 Bash/WebFetch에 프록시 설정을 직접 제공합니다. 웹 검색 및 LLM 프록시와는 독립적입니다.",
-  proxySocks: "<b>SOCKS5 참고:</b> 캡처를 끄면 각 명령줄 도구가 <code>ALL_PROXY</code>를 지원해야 합니다. curl은 지원하지만 일부 도구는 무시할 수 있습니다. SOCKS5에는 캡처 활성화를 권장합니다. MITM 프록시가 직접 연결하므로 도구의 지원 여부와 관계없이 적용됩니다.",
-  constraints: "켜면 각 작업의 <b>작업 제약 조건</b>을 에이전트 시스템 프롬프트에 포함합니다. 작업 개요에서 관리하는 allow/deny 항목으로, 현재 포트만 테스트하거나 무차별 대입을 금지하는 등 탐색 경계를 정합니다.",
-  constraintTargets: "<b>플래너</b>와 <b>워커</b>에 제공할지 각각 설정할 수 있으며 기본적으로 둘 다 켜져 있습니다. 에이전트를 재구성하지 않고 다음 읽기부터 적용합니다. 끄면 해당 에이전트는 제약 조건을 볼 수 없습니다.",
-  compression: "<b>noa 문맥 압축</b>은 모델이 긴 대화 기록을 직접 압축하는 기능입니다(norma v0.4.0). 켜면 <b>플래너, 워커, 메인 에이전트, 대화</b>에서 기본 압축 대신 noa를 사용합니다. 압축 전 원문은 검토할 수 있도록 작업 디렉터리에 보관합니다. 에이전트를 재구성하지 않고 이후 실행에 적용하며, 끄면 즉시 기본 압축으로 돌아갑니다.",
-  webSearch: "웹 검색의 <b>전체 전환 및 소스 설정</b>입니다. 먼저 이 기능을 켠 후 <b>각 에이전트 설정에서 web_search를 활성화</b>하세요. 검색은 제목, 링크, 요약을 반환하며 본문은 WebFetch가 가져옵니다. 웹 검색은 <b>기록 프록시를 사용하지 않으며</b> 트래픽 캡처와 독립적으로 동작합니다.",
-  searchSources: "검색 소스는 API 키가 필요 없는 <b>DuckDuckGo(ddgs)</b>, Brave API 키가 필요한 <b>Brave 무료 요금제</b>, Tavily API 키가 필요한 <b>Tavily</b>, 현재 LLM 프로필을 사용하는 <b>DeepSeek</b> 중에서 선택합니다. 전체 전환을 켜야 에이전트별 웹 검색을 활성화할 수 있습니다.",
-  deepseekRequirements: "이 소스는 <b>현재 활성 LLM 프로필</b>을 재사용합니다. <b>공식 DeepSeek 모델만 지원</b>하며 프로필은 <b>Anthropic 프로토콜을 사용해야 합니다</b>. DeepSeek의 OpenAI 엔드포인트는 서버 측 검색을 지원하지 않습니다. LLM 프로필을 바꾸면 이 소스를 사용할 수 없게 될 수 있습니다.",
-  deepseekBehavior: "다른 소스와 달리 검색을 <b>DeepSeek 서버에서 실행</b>합니다. 검색마다 모델 호출과 토큰 비용이 추가됩니다. 검색 요청은 <b>위의 외부 연결 프록시를 거치지 않으며</b> <b>트래픽 기록에도 포함되지 않습니다</b>. 결과에는 요약 없이 <b>제목과 링크만 포함</b>되므로 본문이 필요하면 WebFetch를 사용하세요.",
-  python: "사용자 지정 <b>script</b> 도구에서 사용할 Python 인터프리터입니다. 시작 시 python3를 우선하여 자동으로 찾습니다. 가상 환경 또는 특정 버전의 절대 경로를 입력하거나, 실행 시 자동으로 찾으려면 비워 두세요.",
-  workers: "작업마다 동시에 실행할 워커 에이전트 수입니다(기본값: 3). 늘리면 병렬 탐색과 비용이 증가합니다. 변경 사항은 <b>이후 시작하는 작업에 적용</b>하며 실행 중인 작업에는 영향을 주지 않습니다.",
-  sendPreference: "이 환경설정은 <b>현재 브라우저에만 저장</b>되며 계정과 동기화되지 않습니다. 브라우저를 바꾸거나 사이트 데이터를 지우면 다시 설정해야 합니다.",
-  updateLauncher: "원클릭 업데이트는 관리 스크립트로 애플리케이션을 재시작합니다. <code>start.sh</code>(Windows: <code>start.bat</code>)로 시작하세요. 실행 파일을 직접 실행하면 종료 후 자동으로 다시 시작되지 않습니다.",
-  pagination: "{from}–{to} / 총 {total}건",
-};

@@ -101,7 +101,7 @@ export default function LoginPage() {
           <div className="absolute size-60 rounded-full border border-primary-foreground/15" />
           <div className="absolute size-40 rounded-full border border-primary-foreground/20" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/scopeweaver.svg" alt="ScopeWeaver" width={160} height={160} className="relative" />
+          <img src="/artex.svg" alt="ARTEX" width={160} height={160} className="relative" />
         </div>
       </div>
 

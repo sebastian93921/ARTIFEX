@@ -1,4 +1,4 @@
-// Command artex runs the ScopeWeaver backend: the PostgreSQL graph stores,
+// Command artex runs the ARTEX backend: the PostgreSQL graph stores,
 // the event-driven exploration engine, and the JSON HTTP API consumed by the
 // shadcn/ui frontend.
 package main
@@ -28,7 +28,7 @@ import (
 var version = "dev"
 
 const banner = `
-  ScopeWeaver
+  ARTEX
 `
 
 // printBanner writes the startup banner + version/runtime info to stdout.
@@ -119,7 +119,7 @@ func run() int {
 	}
 
 	go func() {
-		log.Printf("ScopeWeaver %s backend listening on %s (data=%s, workers=%d)", version, *addr, *dataDir, mgr.Workers())
+		log.Printf("ARTEX %s backend listening on %s (data=%s, workers=%d)", version, *addr, *dataDir, mgr.Workers())
 		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("serve: %v", err)
 		}

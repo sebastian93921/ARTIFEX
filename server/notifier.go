@@ -20,7 +20,7 @@ const (
 	// Configured channels, rather than this switch, determine whether notifications exist.
 	settingNotifyEnabled = "notify_enabled"
 	// settingNotifyPublicBaseURL supplies the externally accessible finding-detail URL,
-	// such as https://scopeweaver.example.com. Empty omits the return-link button.
+	// such as https://artex.example.com. Empty omits the return-link button.
 	// No existing external-base setting can be reused, so notifications own this key.
 	settingNotifyPublicBaseURL = "notify_public_base_url"
 	// settingNotifyDigestMinutes controls the digest period in minutes.

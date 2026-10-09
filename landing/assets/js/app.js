@@ -1,4 +1,4 @@
-/* ScopeWeaver landing — minimal progressive enhancement.
+/* ARTEX landing — minimal progressive enhancement.
    No dependencies, no network calls. Everything degrades to readable HTML
    when JavaScript is off. Localised feedback strings follow <html lang>. */
 (function () {

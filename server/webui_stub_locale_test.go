@@ -17,11 +17,8 @@ func TestWebUIStubUsesRequestLanguage(t *testing.T) {
 		if rec.Code != 404 {
 			t.Fatalf("status=%d", rec.Code)
 		}
-		want := "The frontend is not embedded"
-		if lang == "ko" {
-			want = "프런트엔드가 포함되지 않았습니다"
-		}
-		if !strings.Contains(rec.Body.String(), want) {
+		// A removed language negotiates back to the English stub.
+		if !strings.Contains(rec.Body.String(), "The frontend is not embedded") {
 			t.Fatalf("%s response=%q", lang, rec.Body.String())
 		}
 	}

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-/* Integrity check for the ScopeWeaver landing page.
+/* Integrity check for the ARTEX landing page.
    Lives outside landing/ so it is never published. Verifies that every
-   referenced asset exists, that relative paths resolve under /scopeweaver/
-   and /scopeweaver/ko/, that EN/KO structural parity holds, and that no
+   referenced asset exists, that relative paths resolve under /artex/
+   and /artex/ko/, that EN/KO structural parity holds, and that no
    planning/seed/contract metadata leaked into the shipped folder. */
 
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
@@ -63,7 +63,7 @@ for (const { file, base, lang } of pages) {
   }
   ok(`${lang}: ${refs.size} references scanned, all local assets present`);
 
-  // no absolute-root asset paths (would break under /scopeweaver/ base)
+  // no absolute-root asset paths (would break under /artex/ base)
   if (/(?:src|href)="\/(?!\/)/.test(html))
     fail(`${lang}: absolute root path found (breaks project-pages base)`);
   else ok(`${lang}: no absolute root asset paths`);

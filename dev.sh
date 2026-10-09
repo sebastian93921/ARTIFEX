@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-LANG_SEL="${SCOPEWEAVER_LANGUAGE:-${ARTEX_LANGUAGE:-en}}"
+LANG_SEL="${ARTEX_LANGUAGE:-${ARTEX_LANGUAGE:-en}}"
 case "$LANG_SEL" in ko|ko_*|ko-*|KO) LANG_SEL=ko ;; *) LANG_SEL=en ;; esac
 msg(){ if [ "$LANG_SEL" = ko ]; then printf '%s' "$2"; else printf '%s' "$1"; fi; }
 

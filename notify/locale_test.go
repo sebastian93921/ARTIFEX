@@ -17,7 +17,6 @@ import (
 	"strings"
 	"sync"
 	"testing"
-	"unicode"
 
 	"github.com/Autumn-27/artex/locale"
 )
@@ -31,7 +30,7 @@ func localizedMessage(lang locale.Lang) Message {
 }
 
 func TestNotificationRenderLanguagesPreserveRawContent(t *testing.T) {
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		t.Run(string(lang), func(t *testing.T) {
 			m := localizedMessage(lang)
 			md, kept := markdownBody(m, 0)
@@ -57,9 +56,6 @@ func TestNotificationRenderLanguagesPreserveRawContent(t *testing.T) {
 					}
 				}
 				expected := "Status change"
-				if lang == locale.Ko {
-					expected = "상태 변경"
-				}
 				if !strings.Contains(body, expected) {
 					t.Errorf("%s/%s missing localized status label: %s", lang, name, body)
 				}
@@ -89,19 +85,19 @@ func TestNotificationLanguagePrecedenceAndConcurrentIsolation(t *testing.T) {
 	if got := SeverityLabel("high"); got != "🟠 High" {
 		t.Fatalf("OS locale changed default: %q", got)
 	}
-	locale.SetServerDefault(locale.Ko)
-	if got := (Message{}).withContextLanguage(context.Background()).Language; got != locale.Ko {
+	locale.SetServerDefault("ko")
+	if got := (Message{}).withContextLanguage(context.Background()).Language; got != locale.En {
 		t.Fatalf("Server default not applied: %s", got)
 	}
 	m := localizedMessage(locale.En)
 	if got := m.withContextLanguage(context.Background()).Language; got != locale.En {
 		t.Fatalf("Message language lost: %s", got)
 	}
-	if got := m.withContextLanguage(locale.WithLang(context.Background(), locale.Ko)).Language; got != locale.Ko {
+	if got := m.withContextLanguage(locale.WithLang(context.Background(), "ko")).Language; got != locale.En {
 		t.Fatalf("Context did not take precedence: %s", got)
 	}
 	var wg sync.WaitGroup
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		wg.Add(1)
 		go func(lang locale.Lang) {
 			defer wg.Done()
@@ -109,9 +105,6 @@ func TestNotificationLanguagePrecedenceAndConcurrentIsolation(t *testing.T) {
 				m := localizedMessage(lang)
 				body, _ := markdownBody(m, 0)
 				label := "**Status change**"
-				if lang == locale.Ko {
-					label = "**상태 변경**"
-				}
 				if !strings.Contains(body, label) {
 					t.Errorf("Concurrent locale crossed: %s", body)
 					return
@@ -124,27 +117,27 @@ func TestNotificationLanguagePrecedenceAndConcurrentIsolation(t *testing.T) {
 
 func TestNotificationErrorsLocalizeOnlyBuiltins(t *testing.T) {
 	fallback := locale.Errorf("Request failed: %s", redactedTransportArgument(&url.Error{Op: "POST", URL: "https://example.test/secret"}))
-	if got := ErrorMessage(locale.Ko, fallback); !strings.Contains(got, "알 수 없는 오류") || strings.Contains(got, "secret") {
+	if got := ErrorMessage(locale.En, fallback); !strings.Contains(got, "unknown error") || strings.Contains(got, "secret") {
 		t.Fatalf("Fallback error language/redaction mismatch: %s", got)
 	}
 	invalid := locale.Errorf("Cannot parse URL (%s)", redactedTargetArgument(":%broken"))
-	if got := ErrorMessage(locale.Ko, invalid); !strings.Contains(got, "해석할 수 없는 URL") {
+	if got := ErrorMessage(locale.En, invalid); !strings.Contains(got, "Cannot parse URL") {
 		t.Fatalf("Invalid URL fallback not localized: %s", got)
 	}
 	raw := errors.New("Raw provider response: View details")
 	err := Permanent(locale.Errorf("Failed to parse Telegram response: %w (%s)", raw, "raw snippet"))
-	got := ErrorMessage(locale.Ko, err)
-	if !strings.Contains(got, "Telegram 응답을 해석하지 못했습니다") || !strings.Contains(got, raw.Error()) || !strings.Contains(got, "raw snippet") {
+	got := ErrorMessage(locale.En, err)
+	if !strings.Contains(got, "Failed to parse Telegram response") || !strings.Contains(got, raw.Error()) || !strings.Contains(got, "raw snippet") {
 		t.Fatalf("Incorrect localized error: %s", got)
 	}
 	if !IsPermanent(err) || !errors.Is(err, raw) {
 		t.Fatal("Error classification or wrapping changed")
 	}
-	if got := ErrorMessage(locale.Ko, raw); got != raw.Error() {
+	if got := ErrorMessage(locale.En, raw); got != raw.Error() {
 		t.Fatalf("Unknown error changed: %q", got)
 	}
 	changed := &ErrDestinationChangedWithoutCredentials{Changed: []string{"base_url"}, Missing: []string{"bot_token"}}
-	if got := ErrorMessage(locale.Ko, changed); !strings.Contains(got, "변경되었습니다") || !strings.Contains(got, "bot_token") {
+	if got := ErrorMessage(locale.En, changed); !strings.Contains(got, "changed") || !strings.Contains(got, "bot_token") {
 		t.Fatalf("Destination error not localized: %s", got)
 	}
 	for _, reply := range []string{"550 rejected", "450 greylisted"} {
@@ -152,14 +145,14 @@ func TestNotificationErrorsLocalizeOnlyBuiltins(t *testing.T) {
 		if IsPermanent(e) != (reply[:1] == "5") {
 			t.Fatalf("SMTP classification changed: %v", e)
 		}
-		if got := ErrorMessage(locale.Ko, e); !strings.Contains(got, "받는 사람 raw@example.test") || !strings.Contains(got, reply) {
+		if got := ErrorMessage(locale.En, e); !strings.Contains(got, "Recipient raw@example.test") || !strings.Contains(got, reply) {
 			t.Fatalf("SMTP error lost localization/raw data: %s", got)
 		}
 	}
 }
 
 // Audit every explicit built-in call against both catalog languages. Structural
-// formatting alone does not need translation; all human templates must have Korean.
+// formatting alone does not need translation; all human templates must be registered.
 func TestNotificationCatalogCoverage(t *testing.T) {
 	paths, err := filepath.Glob("*.go")
 	if err != nil {
@@ -214,10 +207,6 @@ func TestNotificationCatalogCoverage(t *testing.T) {
 			if !ok || en != key {
 				t.Errorf("Missing English template %q", key)
 			}
-			ko, ok := locale.Lookup(locale.Ko, key)
-			if !ok || !strings.ContainsFunc(ko, func(r rune) bool { return unicode.Is(unicode.Hangul, r) }) {
-				t.Errorf("Missing Korean template %q", key)
-			}
 			return true
 		})
 	}
@@ -228,7 +217,7 @@ func TestNotificationCatalogCoverage(t *testing.T) {
 }
 
 func TestNotificationDigestPackingInBothLanguages(t *testing.T) {
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		m := batchMsg(200)
 		m.Language = lang
 		md, kept := markdownBody(m, weComMarkdownLimit)
@@ -259,8 +248,8 @@ func TestNotificationSendUsesContextLanguage(t *testing.T) {
 					t.Error(err)
 					return
 				}
-				if !strings.Contains(string(encoded), "높음") {
-					t.Errorf("%s Send ignored Korean context: %s", kind, encoded)
+				if !strings.Contains(string(encoded), "High") {
+					t.Errorf("%s Send ignored context language: %s", kind, encoded)
 				}
 				if !strings.Contains(string(encoded), "Raw user title") {
 					t.Errorf("%s Send changed user title", kind)
@@ -269,7 +258,7 @@ func TestNotificationSendUsesContextLanguage(t *testing.T) {
 			addr := srv.URL
 			cfg := map[string]any{"webhook": addr, "url": addr, "base_url": addr, "bot_token": "synthetic-token", "chat_id": "1"}
 			channel, _ := Get(kind)
-			_, err := channel.Send(locale.WithLang(context.Background(), locale.Ko), cfg, localizedMessage(locale.En))
+			_, err := channel.Send(locale.WithLang(context.Background(), locale.En), cfg, localizedMessage(locale.En))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -279,7 +268,7 @@ func TestNotificationSendUsesContextLanguage(t *testing.T) {
 
 func TestNotificationEmailSendUsesContextLanguage(t *testing.T) {
 	f := newFakeSMTP(t)
-	kept, err := (emailChannel{}).Send(locale.WithLang(context.Background(), locale.Ko), emailCfg(t, f, nil), localizedMessage(locale.En))
+	kept, err := (emailChannel{}).Send(locale.WithLang(context.Background(), locale.En), emailCfg(t, f, nil), localizedMessage(locale.En))
 	if err != nil || kept != 1 {
 		t.Fatalf("SMTP send: kept=%d error=%v", kept, err)
 	}
@@ -292,13 +281,13 @@ func TestNotificationEmailSendUsesContextLanguage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(decoded), "상태 변경") || !strings.Contains(string(decoded), "Raw evidence stays unchanged") {
+	if !strings.Contains(string(decoded), "Status change") || !strings.Contains(string(decoded), "Raw evidence stays unchanged") {
 		t.Fatalf("Email language/raw evidence mismatch: %s", decoded)
 	}
 	for _, line := range strings.Split(parts[0], "\r\n") {
 		if strings.HasPrefix(line, "Subject: ") {
 			subject, err := new(mime.WordDecoder).DecodeHeader(strings.TrimPrefix(line, "Subject: "))
-			if err != nil || !strings.Contains(subject, "높음") || !strings.Contains(subject, "Raw user title") {
+			if err != nil || !strings.Contains(subject, "High") || !strings.Contains(subject, "Raw user title") {
 				t.Fatalf("Email subject mismatch: %q, %v", subject, err)
 			}
 			return

@@ -1,4 +1,4 @@
-// Package locale provides ScopeWeaver's backend internationalization: the
+// Package locale provides ARTEX's backend internationalization: the
 // supported interface languages, request-safe locale negotiation, and a small
 // message catalog used for human-facing API/report/notification/CLI text.
 //
@@ -21,26 +21,24 @@ import (
 type Lang string
 
 const (
-	// En is English, the product default.
+	// En is English, the product's only interface language.
 	En Lang = "en"
-	// Ko is Korean, the selectable alternative.
-	Ko Lang = "ko"
 )
 
 // Default is the fallback language when nothing else is negotiated.
 const Default = En
 
 // CookieName is the browser cookie the UI sets to persist the chosen locale.
-const CookieName = "scopeweaver_locale"
+const CookieName = "artex_locale"
 
 // QueryParam is the URL query key used on SSE streams and download links, where
 // a header cannot be attached easily.
 const QueryParam = "lang"
 
-// Supported reports whether l is a language ScopeWeaver ships translations for.
-func Supported(l Lang) bool { return l == En || l == Ko }
+// Supported reports whether l is a language ARTEX ships translations for.
+func Supported(l Lang) bool { return l == En }
 
-// Normalize parses a raw locale token (e.g. "en", "EN", "en-US", "ko_KR") into a
+// Normalize parses a raw locale token (e.g. "en", "EN", "en-US") into a
 // supported Lang. ok is false when the token does not map to a supported
 // language, so callers can fall through to the next negotiation source.
 func Normalize(s string) (Lang, bool) {
@@ -55,8 +53,6 @@ func Normalize(s string) (Lang, bool) {
 	switch Lang(s) {
 	case En:
 		return En, true
-	case Ko:
-		return Ko, true
 	default:
 		return Default, false
 	}
@@ -86,12 +82,12 @@ func ServerDefault() Lang {
 	return Default
 }
 
-// FromEnv resolves a server default from the ScopeWeaver/ARTEX language env vars.
-// SCOPEWEAVER_LANGUAGE wins over the legacy ARTEX_LANGUAGE. It intentionally does
+// FromEnv resolves a server default from the ARTEX_LANGUAGE environment
+// variable. It intentionally does
 // NOT consult the OS LANG/LC_* locale, so a Korean desktop never silently flips
 // the product to Korean. ok is false when neither var names a supported language.
 func FromEnv(getenv func(string) string) (Lang, bool) {
-	for _, key := range []string{"SCOPEWEAVER_LANGUAGE", "ARTEX_LANGUAGE"} {
+	for _, key := range []string{"ARTEX_LANGUAGE"} {
 		if raw := getenv(key); strings.TrimSpace(raw) != "" {
 			if l, ok := Normalize(raw); ok {
 				return l, true
@@ -123,7 +119,7 @@ func FromContext(ctx context.Context) Lang {
 }
 
 // FromRequest negotiates the language for an HTTP request using the agreed
-// precedence: ?lang= query > Accept-Language header > scopeweaver_locale cookie >
+// precedence: ?lang= query > Accept-Language header > artex_locale cookie >
 // server default. It is pure (reads only the request) and so is safe to call from
 // concurrent handlers.
 func FromRequest(r *http.Request) Lang {

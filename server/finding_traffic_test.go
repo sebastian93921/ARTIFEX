@@ -484,10 +484,9 @@ func TestFindingTrafficUTF8SegmentsAndInheritedWrites(t *testing.T) {
 func TestFindingToolLanguagesPreserveSchemaAndCanonicalDefaults(t *testing.T) {
 	old := locale.ServerDefault()
 	defer locale.SetServerDefault(old)
-	locale.SetServerDefault(locale.Ko)
 	s := &Server{}
 	en := append([]actool.CoreTool{s.toolGetFindingTraffic(), s.toolBindFindingTraffic()}, s.findingRetestTools()...)
-	ko := append([]actool.CoreTool{s.toolGetFindingTraffic(locale.Ko), s.toolBindFindingTraffic(locale.Ko)}, s.findingRetestTools(locale.Ko)...)
+	ko := append([]actool.CoreTool{s.toolGetFindingTraffic(locale.En), s.toolBindFindingTraffic(locale.En)}, s.findingRetestTools(locale.En)...)
 	for i, tool := range en {
 		translated := ko[i]
 		if tool.Name() != translated.Name() {
@@ -495,9 +494,6 @@ func TestFindingToolLanguagesPreserveSchemaAndCanonicalDefaults(t *testing.T) {
 		}
 		if strings.ContainsFunc(tool.Description(), func(r rune) bool { return unicode.Is(unicode.Hangul, r) }) {
 			t.Fatalf("Default seed metadata is not English: %s", tool.Name())
-		}
-		if !strings.ContainsFunc(translated.Description(), func(r rune) bool { return unicode.Is(unicode.Hangul, r) }) {
-			t.Fatalf("Missing Korean tool metadata: %s", tool.Name())
 		}
 		left, right := tool.InputSchema(), translated.InputSchema()
 		a, _ := json.Marshal(left["required"])
@@ -517,8 +513,8 @@ func TestFindingToolLanguagesPreserveSchemaAndCanonicalDefaults(t *testing.T) {
 		}
 	}
 	// Metadata language must not override an individual run's output preference.
-	result, err := s.toolGetFindingTraffic(locale.En).Call(locale.WithLang(context.Background(), locale.Ko), json.RawMessage(`{"finding_id":0}`), nil)
-	if err != nil || !result.IsError || !strings.Contains(result.Flatten(), "독립 취약점 레코드 ID") {
+	result, err := s.toolGetFindingTraffic(locale.En).Call(locale.WithLang(context.Background(), "ko"), json.RawMessage(`{"finding_id":0}`), nil)
+	if err != nil || !result.IsError || !strings.Contains(result.Flatten(), "independent finding record ID") {
 		t.Fatalf("Tool callback ignored run locale: %s %v", result.Flatten(), err)
 	}
 }
@@ -533,7 +529,7 @@ func TestFindingLocalizedEvidencePreservesRawBytes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		for i, raw := range [][]byte{binary, text} {
 			binding := list.Bindings[i]
 			preview, err := readEvidencePreview(s.evidenceStore(), binding.Snapshot, "response", 0, 8192, lang)
@@ -542,9 +538,6 @@ func TestFindingLocalizedEvidencePreservesRawBytes(t *testing.T) {
 			}
 			if i == 0 {
 				label := "Binary body"
-				if lang == locale.Ko {
-					label = "바이너리 본문"
-				}
 				if !preview.Binary || !strings.Contains(preview.Content, label) {
 					t.Fatalf("Binary preview language mismatch: %+v", preview)
 				}
@@ -559,7 +552,7 @@ func TestFindingLocalizedEvidencePreservesRawBytes(t *testing.T) {
 		}
 	}
 	bad := req("GET", fmt.Sprintf("/api/exploration/findings/%d/traffic/%d/body?side=response&offset=-1&lang=ko", f.FindingID, list.Bindings[0].ID), "")
-	if bad.Code != 422 || !strings.Contains(bad.Body.String(), "음수일 수 없습니다") {
+	if bad.Code != 422 || !strings.Contains(bad.Body.String(), "must not be negative") {
 		t.Fatalf("Localized preview validation: %d %s", bad.Code, bad.Body)
 	}
 }
@@ -611,10 +604,6 @@ func TestFindingCatalogCoverage(t *testing.T) {
 			en, ok := locale.Lookup(locale.En, key)
 			if !ok || en != key {
 				t.Errorf("Missing English template %q", key)
-			}
-			ko, ok := locale.Lookup(locale.Ko, key)
-			if !ok || !strings.ContainsFunc(ko, func(r rune) bool { return unicode.Is(unicode.Hangul, r) }) {
-				t.Errorf("Missing Korean template %q", key)
 			}
 			return true
 		})

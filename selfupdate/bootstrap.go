@@ -17,7 +17,7 @@ import (
 
 // smokeEnv makes the smoke-test subprocess skip Bootstrap explicitly.
 //
-// Even without it, the subprocess executable is scopeweaver.new, so its derived
+// Even without it, the subprocess executable is artex.new, so its derived
 // paths have a .new prefix and cannot touch the real update files. Relying on
 // that coincidence is fragile; an explicit bypass is clearer and avoids disk I/O.
 const smokeEnv = "ARTEX_SELFUPDATE_SMOKE"
@@ -45,7 +45,7 @@ type State struct {
 //
 // Three possible states:
 //
-// 1. scopeweaver.new exists: verify and smoke-test, then replace/restart; discard on failure.
+// 1. artex.new exists: verify and smoke-test, then replace/restart; discard on failure.
 // 2. Only a marker remains: increment the post-replacement attempt count; roll back after repeated failures.
 // 3. Neither exists: start normally.
 func Bootstrap() (Action, State) {

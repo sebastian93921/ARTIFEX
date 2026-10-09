@@ -19,19 +19,19 @@ func TestRecordsMentionProtocolAndLocalizedErrors(t *testing.T) {
 	}
 	_, err = parseChatMentions("@[漏洞#0]")
 	var input *chatMentionInputError
-	if !errors.As(err, &input) || !strings.Contains(locale.ErrorMessage(locale.Ko, err), "참조 ID") {
+	if !errors.As(err, &input) || !strings.Contains(locale.ErrorMessage(locale.En, err), "reference ID") {
 		t.Fatalf("validation error=%v", err)
 	}
 	missing := newChatMentionInputError("Referenced %s #%d does not exist or has the wrong type; remove it and select again", locale.NewError(chatMentionLabel("finding")), 42)
-	if got := locale.ErrorMessage(locale.Ko, missing); !strings.Contains(got, "취약점 #42") {
+	if got := locale.ErrorMessage(locale.En, missing); !strings.Contains(got, "Finding #42") {
 		t.Fatalf("nested record label=%q", got)
 	}
 	raw := "Untouched user text 원본 100%"
-	if got, err := composeChatMentionMessageForLanguage(nil, raw, locale.Ko); err != nil || got != raw {
+	if got, err := composeChatMentionMessageForLanguage(nil, raw, locale.En); err != nil || got != raw {
 		t.Fatalf("plain user message changed: %q %v", got, err)
 	}
-	bounded := boundChatMentionValueForLanguage(map[string]any{"content": raw, "long": strings.Repeat("x", 16001)}, locale.Ko).(map[string]any)
-	if bounded["content"] != raw || !strings.HasSuffix(bounded["long"].(string), "[필드가 너무 길어 잘렸습니다]") {
+	bounded := boundChatMentionValueForLanguage(map[string]any{"content": raw, "long": strings.Repeat("x", 16001)}, locale.En).(map[string]any)
+	if bounded["content"] != raw || !strings.HasSuffix(bounded["long"].(string), "[Field too long; truncated]") {
 		t.Fatal("content or generated truncation marker changed incorrectly")
 	}
 }
@@ -39,7 +39,7 @@ func TestRecordsMentionProtocolAndLocalizedErrors(t *testing.T) {
 func TestRecordsGoalConstraintValidationLanguages(t *testing.T) {
 	m := &Manager{tasks: map[string]*Task{"7": {ID: "7"}}}
 	s := &Server{m: m, engine: NewEngine(m)}
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		for _, tc := range []struct {
 			handler http.HandlerFunc
 			key     string
@@ -61,17 +61,14 @@ func TestRecordsZipErrorsLocalizeWithoutChangingNames(t *testing.T) {
 	if err == nil {
 		t.Fatal("unsupported method accepted")
 	}
-	for _, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for _, lang := range []locale.Lang{locale.En} {
 		msg := locale.ErrorMessage(lang, err)
 		if !strings.Contains(msg, "Deflate64") || !strings.Contains(msg, name) || !strings.Contains(msg, "zip -r") {
 			t.Fatalf("method, path, or repair instruction lost: %q", msg)
 		}
-		if lang == locale.Ko && !strings.Contains(msg, "지원하지 않는 압축 방식") {
-			t.Fatalf("not Korean: %q", msg)
-		}
 	}
 	_, err = newSkillZipReader([]byte("not a zip"))
-	if err == nil || !strings.Contains(locale.ErrorMessage(locale.Ko, err), "ZIP 형식 필요") {
+	if err == nil || !strings.Contains(locale.ErrorMessage(locale.En, err), "ZIP format required") {
 		t.Fatalf("decode error=%v", err)
 	}
 }

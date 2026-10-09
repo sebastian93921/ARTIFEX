@@ -13,7 +13,7 @@ import (
 
 // Repo is the fixed release source. Making it configurable would grant anyone
 // who can edit configuration a remote-code-execution path, which is unacceptable here.
-const Repo = "cskwork/scopeweaver"
+const Repo = "Autumn-27/ARTEX"
 
 // latestURL is GitHub's latest stable release endpoint; prereleases and drafts are skipped.
 const latestURL = "https://api.github.com/repos/" + Repo + "/releases/latest"
@@ -95,7 +95,7 @@ func FetchLatest(ctx context.Context, c *http.Client) (*Release, error) {
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "scopeweaver-selfupdate")
+	req.Header.Set("User-Agent", "artex-selfupdate")
 
 	resp, err := c.Do(req)
 	if err != nil {
@@ -124,9 +124,9 @@ func FetchLatest(ctx context.Context, c *http.Client) (*Release, error) {
 }
 
 // AssetName returns the platform package name, matching build.sh package_binary:
-// scopeweaver-<version>-<os>-<arch>.zip, with the leading v removed from the version.
+// artex-<version>-<os>-<arch>.zip, with the leading v removed from the version.
 func AssetName(tag, goos, goarch string) string {
-	return fmt.Sprintf("scopeweaver-%s-%s-%s.zip", strings.TrimPrefix(tag, "v"), goos, goarch)
+	return fmt.Sprintf("artex-%s-%s-%s.zip", strings.TrimPrefix(tag, "v"), goos, goarch)
 }
 
 // FindAsset looks up a release asset by name.

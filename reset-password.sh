@@ -5,7 +5,7 @@
 # The new password is passed through the environment and psql \getenv, not argv.
 # psql :'newpw' quotes the value safely; pgcrypto generates a compatible bcrypt hash.
 set -euo pipefail
-LANG_SEL="${SCOPEWEAVER_LANGUAGE:-${ARTEX_LANGUAGE:-en}}"
+LANG_SEL="${ARTEX_LANGUAGE:-${ARTEX_LANGUAGE:-en}}"
 case "$LANG_SEL" in ko|ko_*|ko-*|KO) LANG_SEL=ko ;; *) LANG_SEL=en ;; esac
 msg(){ if [ "$LANG_SEL" = ko ]; then printf '%s' "$2"; else printf '%s' "$1"; fi; }
 
@@ -26,7 +26,7 @@ die() { echo "$(msg "Error: $*" "오류: $*")" >&2; exit 1; }
 info() { echo "· $*" >&2; }
 
 usage() {
-  echo "$(msg 'Reset ScopeWeaver administrator password (legacy username ARTEX).' 'ScopeWeaver 관리자 비밀번호 재설정 (기존 사용자 이름 ARTEX).')"
+  echo "$(msg 'Reset ARTEX administrator password (legacy username ARTEX).' 'ARTEX 관리자 비밀번호 재설정 (기존 사용자 이름 ARTEX).')"
   echo "$(msg 'Usage: ./reset-password.sh [options]; prompts for a password when omitted.' '사용법: ./reset-password.sh [옵션]; 비밀번호 생략 시 입력을 요청합니다.')"
   echo '-m/--mode local|docker; --dsn DSN; --config PATH; --sslmode MODE'
   echo '-H/--host HOST; -P/--port PORT; -U/--user USER; -W/--db-password PASSWORD'

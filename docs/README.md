@@ -1,7 +1,5 @@
 # Documentation
 
-[한국어](ko/README.md)
-
 - [Setup and operation](../README.md)
 - [Provenance and modifications](PROVENANCE.md)
 - [Verification and known limitations](VERIFICATION.md)
@@ -16,4 +14,4 @@
 - [Playwright CLI guidance](../skills/playwright-cli/SKILL.md)
 - [Upstream change history](../CHANGELOG.md)
 
-English skill files remain the executable skill entries. Korean copies under `docs/ko/skills` are reference documentation and do not register additional skills. Code identifiers, commands and compatibility patterns keep their original spelling in both languages.
+English skill files are the executable skill entries. Code identifiers, commands and compatibility patterns keep their original spelling.

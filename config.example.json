@@ -16,5 +16,5 @@
     }
   },
   "_comment_skill_dir": "Skill root: each child directory contains SKILL.md. Precedence: ARTEX_SKILL_DIR, this field, then skills/ beside the executable. Omit or leave empty for the default. Relative paths resolve against the working directory.",
-  "skill_dir": "/opt/scopeweaver/skills"
+  "skill_dir": "/opt/artex/skills"
 }

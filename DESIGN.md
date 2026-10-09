@@ -1,16 +1,16 @@
-# ScopeWeaver landing — DESIGN.md
+# ARTEX landing — DESIGN.md
 
 <!-- impeccable:design-schema 1 -->
 
-Static GitHub Pages landing page for ScopeWeaver. English is the default
+Static GitHub Pages landing page for ARTEX. English is the default
 (`landing/index.html`); Korean is a peer (`landing/ko/index.html`). Plain
 HTML/CSS/JS, no framework, no CDN, no tracker, no backend. Served under the
-project base `/scopeweaver/` (and `/scopeweaver/ko/`) with relative asset paths.
+project base `/artex/` (and `/artex/ko/`) with relative asset paths.
 
 ## Mode
 
 Persuade. The surface is the product's shop window: a developer or security
-researcher should grasp what ScopeWeaver is, see it running, understand how a
+researcher should grasp what ARTEX is, see it running, understand how a
 task flows and how a coding agent drives it, trust the limits, and reach the
 release or setup commands.
 
@@ -107,7 +107,7 @@ Up/Down/Home/End; the horizontal agent tablist uses Left/Right.
 Every screenshot is captioned fictional demo data. The owner-workflow paragraph
 is deidentified orchestration evidence only — no targets, findings, messages,
 model usage or credentials. Claims trace to README, the adapter README,
-PROVENANCE, VERIFICATION and the v0.1.0 changelog. ScopeWeaver is a derivative of
+PROVENANCE, VERIFICATION and the v0.1.0 changelog. ARTEX is a derivative of
 ARTEX under AGPL-3.0; usage is restricted to locally isolated research.
 
 ## Verification performed (build-time, non-browser)

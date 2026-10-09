@@ -13,7 +13,7 @@ import (
 // operations, provider calls, or filesystem actions are executed by constructors.
 func (s *Server) knownToolLanguages() map[string][2]actool.CoreTool {
 	pairs := map[string][2]actool.CoreTool{}
-	for index, lang := range []locale.Lang{locale.En, locale.Ko} {
+	for index, lang := range []locale.Lang{locale.En} {
 		tools := agent.NewToolSet(nil, "", lang).AllDomainTools()
 		tools = append(tools, (&traffic.Traffic{}).Tools(lang)...)
 		tools = append(tools, s.orchestrationTools(lang)...)
@@ -31,9 +31,6 @@ func (s *Server) knownToolLanguages() map[string][2]actool.CoreTool {
 func translatedToolMetadata(tool actool.CoreTool, pair [2]actool.CoreTool, lang locale.Lang) actool.CoreTool {
 	if pair[0] == nil || pair[1] == nil {
 		return tool
-	}
-	if lang == locale.Ko {
-		return agent.TranslateToolMetadata(tool, pair[0], pair[1])
 	}
 	return agent.TranslateToolMetadata(tool, pair[1], pair[0])
 }

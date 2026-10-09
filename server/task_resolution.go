@@ -34,7 +34,8 @@ func (s *Server) resolutionFromProfileForLanguage(p *db.LLMProfile, source strin
 		Model:     p.Model,
 		Source:    source,
 	}
-	if p.APIKey == "" {
+	// Custom endpoints (Ollama, vLLM, LM Studio, …) legitimately run without keys.
+	if p.APIKey == "" && p.BaseURL == "" {
 		result.Reason = locale.Text(lang, "LLM profile has no API key")
 		return result
 	}

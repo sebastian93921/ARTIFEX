@@ -103,18 +103,8 @@ func nz(s, d string) string {
 
 // severityLabel and statusLabel are display-only; export machine fields remain unchanged.
 func severityLabel(lang locale.Lang, value string) string {
-	if lang == locale.Ko {
-		if label, ok := map[string]string{"critical": "치명적", "high": "높음", "medium": "보통", "low": "낮음", "info": "정보"}[value]; ok {
-			return label
-		}
-	}
 	return strings.ToUpper(value)
 }
 func statusLabel(lang locale.Lang, value string) string {
-	if lang == locale.Ko {
-		if label, ok := map[string]string{"pending": "대기", "confirmed": "확인됨", "fixed": "수정됨", "false_positive": "오탐", "accepted_risk": "위험 수용", "open": "미해결", "resolved": "해결됨"}[value]; ok {
-			return label
-		}
-	}
 	return value
 }

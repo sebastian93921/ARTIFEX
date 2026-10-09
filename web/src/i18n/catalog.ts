@@ -3,6 +3,7 @@
 // as Record<keyof typeof en, string>, so a missing or extra Korean entry is a
 // compile error; i18n.test.mjs additionally checks placeholder/tag parity.
 
+import type { Locale } from "./config.ts";
 import * as providers from "./messages/providers.ts";
 import * as app from "./messages/app.ts";
 import * as interfaceMessages from "./messages/interface.ts";
@@ -28,7 +29,7 @@ export type MessageKey = {
 
 export type Catalog = Record<MessageKey, string>;
 
-function flatten(locale: "en" | "ko"): Catalog {
+function flatten(locale: Locale): Catalog {
   const out: Record<string, string> = {};
   for (const [ns, mod] of Object.entries(namespaces)) {
     for (const [key, value] of Object.entries(mod[locale] as Record<string, string>)) out[`${ns}.${key}`] = value;
@@ -36,6 +37,6 @@ function flatten(locale: "en" | "ko"): Catalog {
   return out as Catalog;
 }
 
-export const catalogs = { en: flatten("en"), ko: flatten("ko") } as const;
+export const catalogs = { en: flatten("en") } as const;
 
 export const namespaceNames = Object.keys(namespaces);

@@ -30,7 +30,7 @@ var legacyPromptDefaults = map[string]string{
 // English/Korean/legacy template. All other text is returned byte-for-byte.
 func CanonicalBuiltinPrompt(text string) string {
 	for _, builtin := range []string{goalsDefaultTmpl, plannerDefaultTmpl, workerDefaultTmpl, mainAgentDefaultTmpl, autoDefaultTmpl, pentestDefaultTmpl, DefaultAssistantPrompt, ReporterDefaultPrompt, RetesterDefaultPrompt, settleWrapUpPrompt, plannerWrapUpDefault, mainAgentWrapUpDefault, genericWrapUpDefault, workerTaskTimeoutDefault, plannerTaskTimeoutDefault} {
-		if text == builtin || text == locale.Text(locale.Ko, builtin) {
+		if text == builtin {
 			return builtin
 		}
 	}

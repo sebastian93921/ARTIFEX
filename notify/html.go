@@ -43,7 +43,7 @@ func htmlBody(m Message, maxRunes int) string {
 		b.WriteString(htmlItem(m.Items[0], true, locale.Resolve(m.Language)))
 	}
 	if m.HomeURL != "" {
-		fmt.Fprintf(&b, locale.Text(locale.Resolve(m.Language), `<p style="margin:16px 0 0;"><a href="%s" style="color:#1677ff;">View all in ScopeWeaver</a></p>`), htmlEscapeAttr(m.HomeURL))
+		fmt.Fprintf(&b, locale.Text(locale.Resolve(m.Language), `<p style="margin:16px 0 0;"><a href="%s" style="color:#1677ff;">View all in ARTEX</a></p>`), htmlEscapeAttr(m.HomeURL))
 	}
 	b.WriteString(`</div>`)
 	return TruncateHTML(b.String(), maxRunes)

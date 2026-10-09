@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { ScopeWeaverClient } from "./client.js";
+import { ARTEXClient } from "./client.js";
 import { createTools, executeTool } from "./tools.js";
 
 try {
-  const client = new ScopeWeaverClient();
-  const server = new McpServer({ name: "scopeweaver-mcp-server", version: "0.1.0" });
+  const client = new ARTEXClient();
+  const server = new McpServer({ name: "artex-mcp-server", version: "0.1.0" });
   for (const tool of createTools(client)) {
     server.registerTool(tool.name, {
       title: tool.title, description: tool.description, inputSchema: tool.schema,

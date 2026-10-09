@@ -336,7 +336,8 @@ func (s *Server) loadLLMConfig() (agent.Config, bool) {
 	cfg.MaxTokens, cfg.MaxTokensField = p.MaxTokens, p.MaxTokensField
 	cfg.SessionHeaderKey = p.SessionHeaderKey
 	s.applyProfileRetry(&cfg, p)
-	if cfg.APIKey == "" {
+	// Custom endpoints (Ollama, vLLM, LM Studio, …) legitimately run without keys.
+	if cfg.APIKey == "" && cfg.BaseURL == "" {
 		return cfg, false
 	}
 	s.cfgMu.Lock()
@@ -507,7 +508,8 @@ func (s *Server) loadProfileConfig(id int64) (agent.Config, bool) {
 	cfg.MaxTokens, cfg.MaxTokensField = p.MaxTokens, p.MaxTokensField
 	cfg.SessionHeaderKey = p.SessionHeaderKey
 	s.applyProfileRetry(&cfg, p)
-	if cfg.APIKey == "" {
+	// Custom endpoints (Ollama, vLLM, LM Studio, …) legitimately run without keys.
+	if cfg.APIKey == "" && cfg.BaseURL == "" {
 		return cfg, false
 	}
 	return cfg, true
@@ -1337,7 +1339,8 @@ func (s *Server) setLLM(w http.ResponseWriter, r *http.Request) {
 		cfg.APIKey = s.llmCfg.APIKey // keep existing key if not re-entered
 		s.cfgMu.Unlock()
 	}
-	if cfg.APIKey == "" {
+	// A custom base URL (local OpenAI-compatible runtimes) may run keyless.
+	if cfg.APIKey == "" && cfg.BaseURL == "" {
 		writeErr(w, 400, "api_key required")
 		return
 	}
@@ -1413,7 +1416,8 @@ func (s *Server) testLLM(w http.ResponseWriter, r *http.Request) {
 		cfg.APIKey = s.llmCfg.APIKey
 		s.cfgMu.Unlock()
 	}
-	if cfg.APIKey == "" {
+	// Custom endpoints (Ollama, vLLM, LM Studio, …) legitimately run without keys.
+	if cfg.APIKey == "" && cfg.BaseURL == "" {
 		writeJSON(w, 200, map[string]any{"ok": false, "error": locale.Text(responseLanguage(w), "API key was not provided")})
 		return
 	}
@@ -3404,7 +3408,7 @@ func (s *Server) putSettings(w http.ResponseWriter, r *http.Request) {
 	if req.Language != nil {
 		lang := locale.Lang(*req.Language)
 		if !locale.Supported(lang) {
-			writeErr(w, 400, "language must be en or ko")
+			writeErr(w, 400, "language must be en")
 			return
 		}
 		if err := s.m.pg.SetSetting(settingLanguage, string(lang)); err != nil {

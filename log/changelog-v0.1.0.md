@@ -1,6 +1,6 @@
-# ScopeWeaver v0.1.0 — Agent integrations
+# ARTEX v0.1.0 — Agent integrations
 
-First standalone ScopeWeaver release. ScopeWeaver versioning starts at v0.1.0; the upstream ARTEX changelog and frontend package version retain their upstream history.
+First standalone ARTEX release. ARTEX versioning starts at v0.1.0; the upstream ARTEX changelog and frontend package version retain their upstream history.
 
 ## Added
 
@@ -10,11 +10,11 @@ First standalone ScopeWeaver release. ScopeWeaver versioning starts at v0.1.0; t
 - English/Korean setup instructions and real-backend end-to-end tests.
 - Adapter source files included in each platform's release archive; install their Node.js dependencies with `npm ci` in `adapters/agent`.
 
-This release also includes the English/Korean ScopeWeaver edition and GLM provider configuration templates already merged on main. ScopeWeaver is derived from ARTEX at upstream commit `160fe13`; original authorship and AGPL-3.0 terms are preserved.
+This release also includes the English/Korean ARTEX edition and GLM provider configuration templates already merged on main. ARTEX is derived from ARTEX at upstream commit `160fe13`; original authorship and AGPL-3.0 terms are preserved.
 
 ## Downloads
 
-Platform ZIP archives are built for Linux amd64/arm64, macOS amd64/arm64 and Windows amd64. Each archive includes the embedded web interface, supervisor, skills, configuration example, documentation and agent adapter. `SHA256SUMS` lists the archive checksums. Docker images are built for Linux amd64/arm64 at `ghcr.io/cskwork/scopeweaver`.
+Platform ZIP archives are built for Linux amd64/arm64, macOS amd64/arm64 and Windows amd64. Each archive includes the embedded web interface, supervisor, skills, configuration example, documentation and agent adapter. `SHA256SUMS` lists the archive checksums. Docker images are built for Linux amd64/arm64 at `ghcr.io/autumn-27/artex`.
 
 ## Verification and limitations
 

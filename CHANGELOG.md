@@ -1,6 +1,6 @@
 # Upstream ARTEX changelog
 
-This is the translated upstream ARTEX history from baseline `160fe13`, preserving its original dates, contributors and technical history. These entries are not ScopeWeaver releases. ScopeWeaver's 2026-10-02 modifications are recorded separately in [provenance](docs/PROVENANCE.md). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). [한국어](CHANGELOG.ko.md).
+This is the translated upstream ARTEX history from baseline `160fe13`, preserving its original dates, contributors and technical history. These entries are not ARTEX releases. ARTEX's 2026-10-02 modifications are recorded separately in [provenance](docs/PROVENANCE.md). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). [한국어](CHANGELOG.ko.md).
 
 ## [Unreleased]
 
@@ -387,7 +387,7 @@ This is the translated upstream ARTEX history from baseline `160fe13`, preservin
 
 #### Known limits
 
-- In upstream Docker deployments, updates replace the program only. Toolchains stay unchanged and recreating a container restores its image version; the historical command was `docker compose pull artex`. ScopeWeaver's current source-build instructions are in README.
+- In upstream Docker deployments, updates replace the program only. Toolchains stay unchanged and recreating a container restores its image version; the historical command was `docker compose pull artex`. ARTEX's current source-build instructions are in README.
 - Updates do not synchronize release `skills/`; new bundled skills do not appear automatically.
 - Updates restart the process and interrupt running tasks.
 

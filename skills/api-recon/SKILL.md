@@ -5,7 +5,6 @@ description: Use to inventory a website's API interfaces within authorized scope
 
 # API Recon (frontend interface discovery)
 
-[한국어](../../docs/ko/skills/api-recon.md)
 
 With authorization, discover backend APIs (paths, methods, parameters, response bodies), frontend routes and UI triggers (tabs, dialogs, table actions) as completely as possible.
 

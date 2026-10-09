@@ -1,6 +1,6 @@
 # LLM provider templates
 
-ScopeWeaver uses its existing provider formats and custom base URL fields. A template only fills a **new profile's form**; it does not contact a provider, save credentials, activate a profile, or modify existing profiles.
+ARTEX uses its existing provider formats and custom base URL fields. A template only fills a **new profile's form**; it does not contact a provider, save credentials, activate a profile, or modify existing profiles.
 
 ## Z.ai GLM-5.3
 
@@ -8,7 +8,7 @@ ScopeWeaver uses its existing provider formats and custom base URL fields. A tem
 
 Template preview with no API key entered; this is not a live provider connection.
 
-Open **LLM → New → Configuration template**. Choose **General API (recommended)** for API billing, or **Coding Plan (reference)** only after obtaining Z.ai authorization for ScopeWeaver.
+Open **LLM → New → Configuration template**. Choose **General API (recommended)** for API billing, or **Coding Plan (reference)** only after obtaining Z.ai authorization for ARTEX.
 
 | Field | General API | Coding Plan reference |
 | --- | --- | --- |
@@ -24,10 +24,33 @@ The endpoints and billing are distinct: General API usage is separate from Codin
 
 GLM-5.3 accepts text, has a 1M-token context window, and requires reasoning to remain enabled. Supported effort values are `low`, `high`, and `max`; this template uses `max`. The model field remains editable, so review reasoning and context settings when choosing another model. See the [official GLM-5.3 guide](https://docs.z.ai/guides/llm/glm-5.3).
 
-**Coding Plan support boundary:** Z.ai limits Coding Plan to officially supported tools. ScopeWeaver is not on that list; an endpoint template does not establish permission or support. Obtain Z.ai authorization before using it here. See [tool integration](https://docs.z.ai/devpack/tool/others) and [usage policy](https://docs.z.ai/devpack/usage-policy). ScopeWeaver does not impersonate supported tools or switch billing endpoints automatically.
+**Coding Plan support boundary:** Z.ai limits Coding Plan to officially supported tools. ARTEX is not on that list; an endpoint template does not establish permission or support. Obtain Z.ai authorization before using it here. See [tool integration](https://docs.z.ai/devpack/tool/others) and [usage policy](https://docs.z.ai/devpack/usage-policy). ARTEX does not impersonate supported tools or switch billing endpoints automatically.
 
 Enter a profile name and your own API key. Applying either template preserves any name, key, proxy, session-header setting, and other unrelated preferences already entered. Save when ready; a new profile must be activated separately. The existing **Test connection** and **Load models** controls make real provider requests only when clicked; this change does not perform a live provider test.
 
 Verified against official documentation on **2026-10-03**. Provider availability, account entitlement, and policies may change.
 
-[한국어 안내](ko/llm-providers.md)
+## Local models (Ollama, vLLM, LM Studio, llama.cpp)
+
+Any OpenAI-compatible endpoint works as a profile: **LLM → New**, Format `OpenAI Chat Completions`, your `Base URL` and `Model`. The **API key is optional for custom base URLs** — local runtimes typically need none; leave the field blank (Ollama, LM Studio, vLLM without `--api-key`). Set one only if your endpoint enforces it (vLLM `--api-key`, LiteLLM proxy, etc.).
+
+| Runtime | Base URL | Example model |
+| --- | --- | --- |
+| Ollama | `http://127.0.0.1:11434/v1` | `qwen3:8b` |
+| LM Studio | `http://127.0.0.1:1234/v1` | loaded model id |
+| vLLM | `http://127.0.0.1:8000/v1` | served model name |
+| llama.cpp server | `http://127.0.0.1:8080/v1` | `default` |
+
+Anthropic-format local proxies work the same way with Format `Anthropic`.
+
+Environment bootstrap (when no profile is saved yet) follows the same rule — a custom base URL makes the key optional:
+
+```sh
+ARTEX_LLM_PROVIDER=openai
+ARTEX_LLM_BASE_URL=http://127.0.0.1:11434/v1
+ARTEX_LLM_MODEL=qwen3:8b
+# OPENAI_API_KEY unset — accepted because a base URL is configured
+```
+
+Use **Test connection** to verify the endpoint before relying on it. Agentic penetration testing needs long-context, tool-calling-capable models; small local models will plan poorly and loop.
+

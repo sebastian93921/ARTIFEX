@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 // Mock mode has no backend SSE; provide example log lines.
 const MOCK_LOGS: LogLine[] = [
-  { seq: 1, ts: "2026-07-26T03:55:00Z", level: "info", tag: "engine", text: "ScopeWeaver v0.1.0 backend listening on :8787 (workers=3)" },
+  { seq: 1, ts: "2026-07-26T03:55:00Z", level: "info", tag: "engine", text: "ARTEX v0.1.0 backend listening on :8787 (workers=3)" },
   { seq: 2, ts: "2026-07-26T03:55:01Z", level: "info", tag: "config", text: "LLM configured from DB: anthropic / claude-opus-4-8" },
   { seq: 3, ts: "2026-07-26T03:56:10Z", level: "info", tag: "planner", get text() { return swt("interface.m1434"); } },
   { seq: 4, ts: "2026-07-26T03:57:00Z", level: "warn", tag: "guard", get text() { return swt("interface.m1435"); } },

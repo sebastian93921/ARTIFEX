@@ -28,7 +28,7 @@ func EffectiveJudgePrompt(prompt string, langs ...locale.Lang) string {
 
 // IsDefaultJudgePrompt recognizes bundled language variants without treating them as edits.
 func IsDefaultJudgePrompt(prompt string) bool {
-	return strings.TrimSpace(prompt) == strings.TrimSpace(DefaultJudgePrompt) || strings.TrimSpace(prompt) == strings.TrimSpace(locale.Text(locale.Ko, DefaultJudgePrompt))
+	return strings.TrimSpace(prompt) == strings.TrimSpace(DefaultJudgePrompt)
 }
 
 // Output is an application contract, also applied to saved custom policies.

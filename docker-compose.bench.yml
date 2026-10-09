@@ -3,16 +3,16 @@
 # Host networking exposes ports 8787, 8788 and 5432; they must be available.
 
 services:
-  scopeweaver-bench:
+  artex-bench:
     build:
       context: .
       dockerfile: Dockerfile.bench
-    image: scopeweaver-bench:latest
-    container_name: scopeweaver-bench
+    image: artex-bench:latest
+    container_name: artex-bench
     env_file:
       - bench/.env
     network_mode: host
     restart: "no"
 
 volumes:
-  scopeweaver_bench_data:
+  artex_bench_data:

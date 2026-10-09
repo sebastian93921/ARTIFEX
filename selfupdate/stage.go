@@ -41,7 +41,7 @@ type Progress func(ph Phase, pct int, msg string)
 // MessageProgress carries a localizable progress event without modifying raw arguments.
 type MessageProgress func(ph Phase, pct int, msg locale.Message)
 
-// Stage downloads and verifies the platform package, then stages scopeweaver.new.
+// Stage downloads and verifies the platform package, then stages artex.new.
 //
 // Use the full ZIP rather than a bare executable because SHA256SUMS covers ZIPs.
 // This matches the release pipeline and its existing archives. The package also
@@ -238,7 +238,7 @@ func get(ctx context.Context, c *http.Client, rawURL string) (io.ReadCloser, err
 	if err := checkURL(req.URL); err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "scopeweaver-selfupdate")
+	req.Header.Set("User-Agent", "artex-selfupdate")
 	resp, err := c.Do(req)
 	if err != nil {
 		return nil, err
@@ -250,14 +250,14 @@ func get(ctx context.Context, c *http.Client, rawURL string) (io.ReadCloser, err
 	return resp.Body, nil
 }
 
-// extractBinary extracts the ScopeWeaver executable from a release package.
+// extractBinary extracts the ARTEX executable from a release package.
 //
-// The layout is scopeweaver-<version>-<os>-<arch>/scopeweaver. Match by basename
+// The layout is artex-<version>-<os>-<arch>/artex. Match by basename
 // rather than duplicating the version-dependent path, reducing naming fragility.
 func extractBinary(zipPath, dst string) error {
-	want := "scopeweaver"
+	want := "artex"
 	if runtime.GOOS == "windows" {
-		want = "scopeweaver.exe"
+		want = "artex.exe"
 	}
 	zr, err := zip.OpenReader(zipPath)
 	if err != nil {
@@ -299,7 +299,7 @@ func extractBinary(zipPath, dst string) error {
 // checkWritable verifies directory permissions before downloading. Otherwise a
 // non-root/system-directory installation may fail only after downloading the entire package.
 func checkWritable(dir string) error {
-	probe, err := os.CreateTemp(dir, ".scopeweaver-update-probe-*")
+	probe, err := os.CreateTemp(dir, ".artex-update-probe-*")
 	if err != nil {
 		return locale.Errorf("Application directory %s is not writable; automatic update unavailable (check permissions or update manually): %w", dir, err)
 	}

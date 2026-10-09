@@ -31,7 +31,7 @@ func TestTaskLanguageAtomicCreation(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer d.Exec("DROP TRIGGER " + trigger + " ON settings")
-	task, err := d.CreateTaskWithOptions(marker, "no network target", TaskCreateOptions{Language: locale.Ko})
+	task, err := d.CreateTaskWithOptions(marker, "no network target", TaskCreateOptions{Language: locale.En})
 	if err == nil || task != nil || !strings.Contains(err.Error(), "injected task language failure") {
 		t.Fatalf("expected atomic metadata failure: task=%v err=%v", task, err)
 	}
@@ -49,14 +49,14 @@ func TestTaskLanguageSavedAndRemovedWithTask(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer d.Close()
-	task, err := d.CreateTaskWithOptions("language persistence", "no network target", TaskCreateOptions{Language: locale.Ko})
+	task, err := d.CreateTaskWithOptions("language persistence", "no network target", TaskCreateOptions{Language: locale.En})
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer d.DeleteTask(task.ID)
 	key := "task_language." + strconv.FormatInt(task.ID, 10)
 	value, ok, err := d.GetSetting(key)
-	if err != nil || !ok || value != "ko" {
+	if err != nil || !ok || value != "en" {
 		t.Fatalf("language missing: %q %v %v", value, ok, err)
 	}
 	if err = d.DeleteTask(task.ID); err != nil {

@@ -12,7 +12,7 @@ Historical upstream fix, 2026-09-11. The original implementation treated request
 - [OpenCode session compaction](https://github.com/anomalyco/opencode/blob/b3f1a96c6dd7adeb28b36dd11add1998fc84d67b/packages/core/src/session/compaction.ts): estimates the full request, reserves output/buffer space, combines recent content and rolling summaries, and makes summary requests without tools. Defaults in that implementation are 8000 recent-context tokens and 4096 summary-output tokens.
 - [OpenCode overflow recovery](https://github.com/anomalyco/opencode/blob/b3f1a96c6dd7adeb28b36dd11add1998fc84d67b/packages/core/src/session/runner/llm.ts): attempts recovery only before assistant output begins, and recovered calls do not re-enter the same recovery path.
 
-ARTEX borrowed separate output budgets, recent content plus rolling summaries, and bounded recovery. It retained norma v0.3.6 structured messages and tool pairing rather than Grok's text excerpts. OpenCode-style main-session compaction events were not written to ARTEX's main transcript. ScopeWeaver retains this design; cited versions describe the historical implementation.
+ARTEX borrowed separate output budgets, recent content plus rolling summaries, and bounded recovery. It retained norma v0.3.6 structured messages and tool pairing rather than Grok's text excerpts. OpenCode-style main-session compaction events were not written to ARTEX's main transcript. ARTEX retains this design; cited versions describe the historical implementation.
 
 ## Request budget and execution
 
@@ -36,7 +36,7 @@ POST accepts and returns the request before background preparation/compaction, h
 
 ## Historical verification record
 
-These are upstream results recorded for the 2026-09-11 fix, not new ScopeWeaver results.
+These are upstream results recorded for the 2026-09-11 fix, not new ARTEX results.
 
 - Replay of 19/20/21/50 exchanges, retention of conclusions older than 20 exchanges, and summary-cache reuse after restart: automated checks passed.
 - Very long Chinese answers/code context, chunk budgets, tool pairing, unchanged snapshots and cache invalidation for new snapshots: automated checks passed.
@@ -57,4 +57,4 @@ npx tsc --noEmit
 npm run build -- --webpack
 ```
 
-The historical frontend production build used a separate copy to avoid overwriting the active preview's `.next`. The candidate was `/private/tmp/artex-btw-budget-candidate`, copied to `/private/tmp/artex-btw-preview/artex` and started. The previous binary was backed up there as `artex.before-context-budget`. These paths describe that run, not files distributed with ScopeWeaver.
+The historical frontend production build used a separate copy to avoid overwriting the active preview's `.next`. The candidate was `/private/tmp/artex-btw-budget-candidate`, copied to `/private/tmp/artex-btw-preview/artex` and started. The previous binary was backed up there as `artex.before-context-budget`. These paths describe that run, not files distributed with ARTEX.

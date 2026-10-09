@@ -1,4 +1,4 @@
-// Package selfupdate implements ScopeWeaver's one-click update: download a GitHub
+// Package selfupdate implements ARTEX's one-click update: download a GitHub
 // release executable, verify and stage it, then atomically replace it on startup.
 //
 // Responsibilities (see start.sh / start.bat):
@@ -12,12 +12,12 @@
 //
 // A complete upgrade involves three process starts:
 //
-// 1. Old server receives /api/update/apply, downloads/verifies, stages scopeweaver.new, exits 75.
+// 1. Old server receives /api/update/apply, downloads/verifies, stages artex.new, exits 75.
 // 2. Supervisor restarts old server; Bootstrap verifies/smoke-tests/replaces the staged file, exits 75.
 // 3. Supervisor starts the new version; Bootstrap records an attempt and clears the marker after stability.
 //
 // Failure preserves/restores the old version: step 2 discards invalid staging;
-// three consecutive unstable starts in step 3 automatically restore scopeweaver.old.
+// three consecutive unstable starts in step 3 automatically restore artex.old.
 package selfupdate
 
 import (
@@ -42,11 +42,11 @@ const maxAttempts = 3
 // put staging files elsewhere and break replacement.
 type Paths struct {
 	Dir     string // Executable directory.
-	Current string // Current executable: scopeweaver / scopeweaver.exe.
-	New     string // Staged version: scopeweaver.new / scopeweaver.new.exe.
-	Sum     string // Staged SHA256 (hex): scopeweaver.new.sha256 / scopeweaver.new.exe.sha256.
-	Old     string // Previous executable: scopeweaver.old / scopeweaver.old.exe.
-	Marker  string // Upgrade state marker: scopeweaver.upgrade.json.
+	Current string // Current executable: artex / artex.exe.
+	New     string // Staged version: artex.new / artex.new.exe.
+	Sum     string // Staged SHA256 (hex): artex.new.sha256 / artex.new.exe.sha256.
+	Old     string // Previous executable: artex.old / artex.old.exe.
+	Marker  string // Upgrade state marker: artex.upgrade.json.
 }
 
 // ResolvePaths derives all upgrade paths from the current executable.
@@ -106,7 +106,7 @@ func writeMarker(path string, m marker) error {
 }
 
 // cleanStaged removes staging files after replacement, failed verification, or
-// cancellation, so a leftover scopeweaver.new is not retried on the next startup.
+// cancellation, so a leftover artex.new is not retried on the next startup.
 func cleanStaged(p Paths) {
 	_ = os.Remove(p.New)
 	_ = os.Remove(p.Sum)

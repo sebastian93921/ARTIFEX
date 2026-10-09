@@ -138,15 +138,20 @@ func compactionConfig(windowTokens int) *compaction.Config {
 
 // FromEnv resolves the LLM provider config:
 //
-//	ARTEX_LLM_PROVIDER = anthropic|openai (default: inferred from keys)
+//	ARTEX_LLM_PROVIDER = anthropic|openai|openai-responses (default: inferred from
+//	                     keys; with only a base URL set, openai is assumed for
+//	                     local OpenAI-compatible runtimes)
 //	ARTEX_LLM_MODEL    = model id        (default: per provider)
-//	ARTEX_LLM_BASE_URL = endpoint        (optional)
+//	ARTEX_LLM_BASE_URL = endpoint        (optional; custom/local endpoints make the
+//	                     API key optional — Ollama, vLLM, LM Studio, llama.cpp
+//	                     typically need none)
 //	ARTEX_LLM_PROXY    = proxy URL        (optional; http/https/socks5)
 //	ANTHROPIC_API_KEY / OPENAI_API_KEY         = credentials
 func FromEnv() (Config, bool) {
 	prov := os.Getenv("ARTEX_LLM_PROVIDER")
 	anthKey := os.Getenv("ANTHROPIC_API_KEY")
 	oaiKey := os.Getenv("OPENAI_API_KEY")
+	baseURL := strings.TrimSpace(os.Getenv("ARTEX_LLM_BASE_URL"))
 
 	if prov == "" {
 		switch {
@@ -154,13 +159,17 @@ func FromEnv() (Config, bool) {
 			prov = "anthropic"
 		case oaiKey != "":
 			prov = "openai"
+		case baseURL != "":
+			// Custom endpoint without a key: assume a local OpenAI-compatible
+			// runtime rather than leaving the engine idle.
+			prov = "openai"
 		default:
 			return Config{}, false
 		}
 	}
 
 	c := Config{
-		BaseURL: os.Getenv("ARTEX_LLM_BASE_URL"),
+		BaseURL: baseURL,
 		Model:   os.Getenv("ARTEX_LLM_MODEL"),
 		Proxy:   strings.TrimSpace(os.Getenv("ARTEX_LLM_PROXY")),
 		// Streaming defaults on; ARTEX_LLM_STREAM=false/0/off explicitly disables it.
@@ -186,7 +195,9 @@ func FromEnv() (Config, bool) {
 			c.Model = "claude-opus-4-8"
 		}
 	}
-	if c.APIKey == "" {
+	// A custom base URL (Ollama, vLLM, LM Studio, llama.cpp, corporate gateways)
+	// may run without any API key; cloud providers still need one.
+	if c.APIKey == "" && c.BaseURL == "" {
 		return Config{}, false
 	}
 	return c, true

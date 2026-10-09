@@ -124,7 +124,7 @@ func feishuCard(m Message) (map[string]any, int) {
 			elements = append(elements, feishuMarkdownDiv(feishuBatchLine(it, i+1, locale.Resolve(m.Language))))
 		}
 		if m.HomeURL != "" {
-			elements = append(elements, feishuButton(locale.Text(locale.Resolve(m.Language), "View all in ScopeWeaver"), m.HomeURL))
+			elements = append(elements, feishuButton(locale.Text(locale.Resolve(m.Language), "View all in ARTEX"), m.HomeURL))
 		}
 	} else if len(m.Items) > 0 {
 		kept = 1
