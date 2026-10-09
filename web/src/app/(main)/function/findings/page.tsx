@@ -67,7 +67,7 @@ import {
   UNASSIGNED_TASK,
 } from "./_components/findings-table";
 
-const FINDING_LIST_PREFERENCE_KEY = "artex_finding_list_preferences";
+const FINDING_LIST_PREFERENCE_KEY = "artifex_finding_list_preferences";
 
 // List modes: flat cross-task table (default), grouped collapsible task sections,
 // or asset tree on the left with subtree findings on the right.

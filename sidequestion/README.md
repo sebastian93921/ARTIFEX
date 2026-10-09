@@ -1,4 +1,4 @@
-# ARTEX `/btw`
+# ARTIFEX `/btw`
 
 [한국어](../docs/ko/sidequestion/README.md)
 
@@ -63,6 +63,6 @@ Questions are limited to 4000 characters. Missing snapshots, changed profiles, b
 
 ## Verification and references
 
-[VALIDATION.md](VALIDATION.md) records upstream automated checks, actual model use and known limits. These historical receipts are not fresh ARTEX test results.
+[VALIDATION.md](VALIDATION.md) records upstream automated checks, actual model use and known limits. These historical receipts are not fresh ARTIFEX test results.
 
-Independent requests reference [Grok CLI side-question.ts at a fixed commit](https://github.com/superagent-ai/grok-cli/blob/fb97af83f06dca873281d60168430f06c8de6324/src/utils/side-question.ts); execution isolation references [OpenCode at a fixed commit](https://github.com/anomalyco/opencode/tree/b3f1a96c6dd7adeb28b36dd11add1998fc84d67b). ARTEX used norma's structured messages rather than reconstructing text from frontend logs; ARTEX retains that implementation.
+Independent requests reference [Grok CLI side-question.ts at a fixed commit](https://github.com/superagent-ai/grok-cli/blob/fb97af83f06dca873281d60168430f06c8de6324/src/utils/side-question.ts); execution isolation references [OpenCode at a fixed commit](https://github.com/anomalyco/opencode/tree/b3f1a96c6dd7adeb28b36dd11add1998fc84d67b). ARTIFEX used norma's structured messages rather than reconstructing text from frontend logs; ARTIFEX retains that implementation.

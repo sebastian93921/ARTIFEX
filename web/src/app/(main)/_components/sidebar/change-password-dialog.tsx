@@ -71,7 +71,7 @@ export function ChangePasswordDialog({
           <DialogHeader>
             <DialogTitle>{swt("interface.m0053")}</DialogTitle>
             <DialogDescription>
-              {swt("interface.m0059")}<b>ARTEX</b>{swt("interface.m0060")}</DialogDescription>
+              {swt("interface.m0059")}<b>ARTIFEX</b>{swt("interface.m0060")}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 py-4">
             <div className="flex flex-col gap-1.5">

@@ -109,7 +109,7 @@ export const CHANNEL_FIELDS: Record<string, FieldDef[]> = {
     },
     { key: "username", get label() { return swt("interface.m1501"); }, kind: "text" },
     { key: "password", get label() { return swt("interface.m1502"); }, kind: "password" },
-    { key: "from", get label() { return swt("interface.m1503"); }, kind: "text", placeholder: "artex@example.com" },
+    { key: "from", get label() { return swt("interface.m1503"); }, kind: "text", placeholder: "artifex@example.com" },
     { key: "to", get label() { return swt("interface.m1504"); }, kind: "list", get help() { return swt("interface.m1505"); } },
     { key: "tls", get label() { return swt("interface.m1506"); }, kind: "switch", get help() { return swt("interface.m1507"); } },
   ],

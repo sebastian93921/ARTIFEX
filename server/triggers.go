@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/locale"
 )
 
 // ---------- P3 agent triggers (custom agents only) ----------

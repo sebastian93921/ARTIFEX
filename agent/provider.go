@@ -11,7 +11,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"io"
 	"log"
 	"net/http"
@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/llmrec"
+	"github.com/sebastian93921/artifex/llmrec"
 	"github.com/Autumn-27/norma/agentcore"
 	"github.com/Autumn-27/norma/compaction"
 	"github.com/Autumn-27/norma/llm"
@@ -78,7 +78,7 @@ type Config struct {
 	SessionHeaderKey string
 	// MaxConcurrent caps in-flight requests to this provider (llmpool.Limiter).
 	// 0 = unlimited. The server applies it per profile (or from
-	// ARTEX_LLM_MAX_CONCURRENT for env configs) so a busy task cannot occupy
+	// ARTIFEX_LLM_MAX_CONCURRENT for env configs) so a busy task cannot occupy
 	// more than the endpoint's own concurrency budget.
 	MaxConcurrent int
 	// Retry holds resolved profile -> global -> built-in retry parameters, resolved
@@ -144,23 +144,23 @@ func compactionConfig(windowTokens int) *compaction.Config {
 
 // FromEnv resolves the LLM provider config:
 //
-//	ARTEX_LLM_PROVIDER = anthropic|openai|openai-responses (default: inferred from
+//	ARTIFEX_LLM_PROVIDER = anthropic|openai|openai-responses (default: inferred from
 //	                     keys; with only a base URL set, openai is assumed for
 //	                     local OpenAI-compatible runtimes)
-//	ARTEX_LLM_MODEL    = model id        (default: per provider)
-//	ARTEX_LLM_BASE_URL = endpoint        (optional; custom/local endpoints make the
+//	ARTIFEX_LLM_MODEL    = model id        (default: per provider)
+//	ARTIFEX_LLM_BASE_URL = endpoint        (optional; custom/local endpoints make the
 //	                     API key optional — Ollama, vLLM, LM Studio, llama.cpp
 //	                     typically need none)
-//	ARTEX_LLM_PROXY    = proxy URL        (optional; http/https/socks5)
-//	ARTEX_LLM_MAX_CONCURRENT = max in-flight requests (optional; 0/unset = unlimited;
+//	ARTIFEX_LLM_PROXY    = proxy URL        (optional; http/https/socks5)
+//	ARTIFEX_LLM_MAX_CONCURRENT = max in-flight requests (optional; 0/unset = unlimited;
 //	                     queue excess calls — useful when the endpoint serves a
 //	                     fixed number of concurrent sessions, e.g. a shared vLLM)
 //	ANTHROPIC_API_KEY / OPENAI_API_KEY         = credentials
 func FromEnv() (Config, bool) {
-	prov := os.Getenv("ARTEX_LLM_PROVIDER")
+	prov := os.Getenv("ARTIFEX_LLM_PROVIDER")
 	anthKey := os.Getenv("ANTHROPIC_API_KEY")
 	oaiKey := os.Getenv("OPENAI_API_KEY")
-	baseURL := strings.TrimSpace(os.Getenv("ARTEX_LLM_BASE_URL"))
+	baseURL := strings.TrimSpace(os.Getenv("ARTIFEX_LLM_BASE_URL"))
 
 	if prov == "" {
 		switch {
@@ -179,13 +179,13 @@ func FromEnv() (Config, bool) {
 
 	c := Config{
 		BaseURL: baseURL,
-		Model:   os.Getenv("ARTEX_LLM_MODEL"),
-		Proxy:   strings.TrimSpace(os.Getenv("ARTEX_LLM_PROXY")),
-		// Streaming defaults on; ARTEX_LLM_STREAM=false/0/off explicitly disables it.
-		Stream: !isFalsy(os.Getenv("ARTEX_LLM_STREAM")),
+		Model:   os.Getenv("ARTIFEX_LLM_MODEL"),
+		Proxy:   strings.TrimSpace(os.Getenv("ARTIFEX_LLM_PROXY")),
+		// Streaming defaults on; ARTIFEX_LLM_STREAM=false/0/off explicitly disables it.
+		Stream: !isFalsy(os.Getenv("ARTIFEX_LLM_STREAM")),
 	}
 	// Optional in-flight request cap; invalid values mean unlimited.
-	if n, err := strconv.Atoi(strings.TrimSpace(os.Getenv("ARTEX_LLM_MAX_CONCURRENT"))); err == nil && n > 0 {
+	if n, err := strconv.Atoi(strings.TrimSpace(os.Getenv("ARTIFEX_LLM_MAX_CONCURRENT"))); err == nil && n > 0 {
 		c.MaxConcurrent = n
 	}
 	switch prov {

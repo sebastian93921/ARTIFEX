@@ -9,8 +9,8 @@ export const DEFAULT_LOCALE: Locale = "en";
 
 // Persistence contract shared with the backend (see status notes):
 // localStorage for the UI, a cookie so the server can negotiate too.
-export const LOCALE_STORAGE_KEY = "artex.locale";
-export const LOCALE_COOKIE = "artex_locale";
+export const LOCALE_STORAGE_KEY = "artifex.locale";
+export const LOCALE_COOKIE = "artifex_locale";
 export const LOCALE_COOKIE_MAX_AGE = 365 * 24 * 60 * 60;
 
 // Query parameter used where headers cannot be set (EventSource, downloads).

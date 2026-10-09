@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 
-	"github.com/Autumn-27/artex/sidequestion"
+	"github.com/sebastian93921/artifex/sidequestion"
 	"github.com/google/uuid"
 )
 

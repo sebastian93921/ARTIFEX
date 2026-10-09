@@ -2,7 +2,7 @@ package notify
 
 import (
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"strings"
 )
 
@@ -84,7 +84,7 @@ func markdownBody(m Message, maxBytes int) (string, int) {
 
 	footer := ""
 	if m.HomeURL != "" {
-		footer = fmt.Sprintf(locale.Text(locale.Resolve(m.Language), "\n[View all in ARTEX](%s)\n"), m.HomeURL)
+		footer = fmt.Sprintf(locale.Text(locale.Resolve(m.Language), "\n[View all in ARTIFEX](%s)\n"), m.HomeURL)
 	}
 	kept := packItemCount(m.Items, maxBytes, markdownReservedBytes, footer, byteSize, func(it Item, idx int) string {
 		var b strings.Builder

@@ -6,7 +6,7 @@
 // cached in adapter fields.
 package notify
 
-import "github.com/Autumn-27/artex/locale"
+import "github.com/sebastian93921/artifex/locale"
 
 // Channel identifiers also define valid notification_channels.kind values. The server uses an
 // allowlist instead of a DB CHECK, as with finding statuses, to simplify adding adapters.

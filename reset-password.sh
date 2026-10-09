@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Reset the administrator password stored as bcrypt in settings/auth.password_hash.
-# Local connection precedence: CLI fields, --dsn/ARTEX_PG_DSN, config.json.
+# Local connection precedence: CLI fields, --dsn/ARTIFEX_PG_DSN, config.json.
 # Docker mode runs psql inside the PostgreSQL container (no published port needed).
 # The new password is passed through the environment and psql \getenv, not argv.
 # psql :'newpw' quotes the value safely; pgcrypto generates a compatible bcrypt hash.
 set -euo pipefail
-LANG_SEL="${ARTEX_LANGUAGE:-${ARTEX_LANGUAGE:-en}}"
+LANG_SEL="${ARTIFEX_LANGUAGE:-${ARTIFEX_LANGUAGE:-en}}"
 case "$LANG_SEL" in ko|ko_*|ko-*|KO) LANG_SEL=ko ;; *) LANG_SEL=en ;; esac
 msg(){ if [ "$LANG_SEL" = ko ]; then printf '%s' "$2"; else printf '%s' "$1"; fi; }
 
@@ -26,7 +26,7 @@ die() { echo "$(msg "Error: $*" "오류: $*")" >&2; exit 1; }
 info() { echo "· $*" >&2; }
 
 usage() {
-  echo "$(msg 'Reset ARTEX administrator password (legacy username ARTEX).' 'ARTEX 관리자 비밀번호 재설정 (기존 사용자 이름 ARTEX).')"
+  echo "$(msg 'Reset ARTIFEX administrator password (legacy username ARTIFEX).' 'ARTIFEX 관리자 비밀번호 재설정 (기존 사용자 이름 ARTIFEX).')"
   echo "$(msg 'Usage: ./reset-password.sh [options]; prompts for a password when omitted.' '사용법: ./reset-password.sh [옵션]; 비밀번호 생략 시 입력을 요청합니다.')"
   echo '-m/--mode local|docker; --dsn DSN; --config PATH; --sslmode MODE'
   echo '-H/--host HOST; -P/--port PORT; -U/--user USER; -W/--db-password PASSWORD'
@@ -105,7 +105,7 @@ apply_config_fields() {
 
 # Detect deployment mode.
 if [[ -z "$MODE" ]]; then
-  if [[ -n "$DSN$HOST$USER$DBNAME" || -n "${ARTEX_PG_DSN:-}" || -f "${CONFIG:-config.json}" ]]; then
+  if [[ -n "$DSN$HOST$USER$DBNAME" || -n "${ARTIFEX_PG_DSN:-}" || -f "${CONFIG:-config.json}" ]]; then
     MODE="local"
   elif command -v docker >/dev/null 2>&1 && [[ -f docker-compose.yml ]]; then
     MODE="docker"
@@ -117,7 +117,7 @@ info "$(msg "Deployment mode: $MODE" "배포 방식: $MODE")"
 
 # Collect and confirm the new password.
 if [[ -z "$NEWPASS" ]]; then
-  read -r -s -p "$(msg "New password (legacy username ARTEX): " "새 비밀번호 (기존 사용자 이름 ARTEX): ")" NEWPASS; echo >&2
+  read -r -s -p "$(msg "New password (legacy username ARTIFEX): " "새 비밀번호 (기존 사용자 이름 ARTIFEX): ")" NEWPASS; echo >&2
   [[ -n "$NEWPASS" ]] || die "$(msg "Password cannot be empty" "비밀번호는 비어 있을 수 없습니다")"
   read -r -s -p "$(msg "Confirm password: " "비밀번호 확인: ")" NEWPASS2; echo >&2
   [[ "$NEWPASS" == "$NEWPASS2" ]] || die "$(msg "Passwords do not match" "비밀번호가 일치하지 않습니다")"
@@ -125,13 +125,13 @@ fi
 [[ -n "$NEWPASS" ]] || die "$(msg "Password cannot be empty" "비밀번호는 비어 있을 수 없습니다")"
 
 # Pass the password through the environment for psql \getenv.
-export ARTEX_RESET_NEWPASS="$NEWPASS"
+export ARTIFEX_RESET_NEWPASS="$NEWPASS"
 
 # Generate bcrypt and upsert in the database; psql quotes the password safely.
 # CREATE EXTENSION is idempotent but requires an authorized database role.
 SQL=$(cat <<SQL
 \\set ON_ERROR_STOP on
-\\getenv newpw ARTEX_RESET_NEWPASS
+\\getenv newpw ARTIFEX_RESET_NEWPASS
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 INSERT INTO settings(key, value)
 VALUES ('$PASS_KEY', crypt(:'newpw', gen_salt('bf', $BCRYPT_COST)))
@@ -141,9 +141,9 @@ SQL
 
 # Execute the reset.
 if [[ "$MODE" == "local" ]]; then
-  # Connection precedence: CLI, --dsn/ARTEX_PG_DSN, config.json.
+  # Connection precedence: CLI, --dsn/ARTIFEX_PG_DSN, config.json.
   if [[ -z "$DSN" && -z "$HOST$USER$DBNAME" ]]; then
-    [[ -n "${ARTEX_PG_DSN:-}" ]] && DSN="$ARTEX_PG_DSN"
+    [[ -n "${ARTIFEX_PG_DSN:-}" ]] && DSN="$ARTIFEX_PG_DSN"
   fi
   if [[ -z "$DSN" && -z "$HOST$USER$DBNAME" ]]; then
     cfg="${CONFIG:-config.json}"
@@ -193,13 +193,13 @@ else
     fi
   fi
 
-  # Credentials: CLI, POSTGRES_* from .env, then compose defaults (artex).
+  # Credentials: CLI, POSTGRES_* from .env, then compose defaults (artifex).
   if [[ -f .env ]]; then
     # shellcheck disable=SC1091
     set -a; . ./.env; set +a
   fi
-  DUSER="${USER:-${POSTGRES_USER:-artex}}"
-  DNAME="${DBNAME:-${POSTGRES_DB:-artex}}"
+  DUSER="${USER:-${POSTGRES_USER:-artifex}}"
+  DNAME="${DBNAME:-${POSTGRES_DB:-artifex}}"
   [[ -n "$DBPASS" ]] && export PGPASSWORD="$DBPASS"
   [[ -z "${PGPASSWORD:-}" && -n "${POSTGRES_PASSWORD:-}" ]] && export PGPASSWORD="$POSTGRES_PASSWORD"
 
@@ -212,10 +212,10 @@ else
   # Pass only variable names to -e so secrets stay out of docker argv.
   declare -a EXEC_CMD
   if [[ "$EXEC_KIND" == "compose" ]]; then
-    EXEC_CMD=(docker compose exec -T -e ARTEX_RESET_NEWPASS -e PGPASSWORD "$CONTAINER"
+    EXEC_CMD=(docker compose exec -T -e ARTIFEX_RESET_NEWPASS -e PGPASSWORD "$CONTAINER"
               psql -U "$DUSER" -d "$DNAME" -v ON_ERROR_STOP=1 -q)
   else
-    EXEC_CMD=(docker exec -i -e ARTEX_RESET_NEWPASS -e PGPASSWORD "$CONTAINER"
+    EXEC_CMD=(docker exec -i -e ARTIFEX_RESET_NEWPASS -e PGPASSWORD "$CONTAINER"
               psql -U "$DUSER" -d "$DNAME" -v ON_ERROR_STOP=1 -q)
   fi
 
@@ -224,5 +224,5 @@ else
   fi
 fi
 
-unset ARTEX_RESET_NEWPASS
-echo "$(msg "Administrator password reset. Sign in as ARTEX with the new password; no restart needed." "관리자 비밀번호를 재설정했습니다. ARTEX와 새 비밀번호로 로그인하세요. 재시작은 필요하지 않습니다.")"
+unset ARTIFEX_RESET_NEWPASS
+echo "$(msg "Administrator password reset. Sign in as ARTIFEX with the new password; no restart needed." "관리자 비밀번호를 재설정했습니다. ARTIFEX와 새 비밀번호로 로그인하세요. 재시작은 필요하지 않습니다.")"

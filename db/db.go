@@ -1,4 +1,4 @@
-// Package db is ARTEX's PostgreSQL data source, replacing the legacy single-file graph SQLite store.
+// Package db is ARTIFEX's PostgreSQL data source, replacing the legacy single-file graph SQLite store.
 // It opens connections, applies the schema, and seeds built-in agents and variable catalogs.
 package db
 
@@ -7,12 +7,12 @@ import (
 	"database/sql"
 	_ "embed"
 	"errors"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/config"
+	"github.com/sebastian93921/artifex/config"
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib" // pgx database/sql driver ("pgx")
 )
@@ -82,7 +82,7 @@ func coordinateWithSchemaMigration(tx *sql.Tx) error {
 }
 
 // DSN resolves the PostgreSQL connection string and reports where it came from.
-// Precedence: env ARTEX_PG_DSN > config file (config.json). There is no
+// Precedence: env ARTIFEX_PG_DSN > config file (config.json). There is no
 // built-in default — it errors if neither source is configured.
 func DSN() (dsn, source string, err error) {
 	return config.PostgresDSN()

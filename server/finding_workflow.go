@@ -6,10 +6,10 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/locale"
-	"github.com/Autumn-27/artex/traffic"
+	"github.com/sebastian93921/artifex/agent"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/locale"
+	"github.com/sebastian93921/artifex/traffic"
 	actool "github.com/Autumn-27/norma/tool"
 )
 

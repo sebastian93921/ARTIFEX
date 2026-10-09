@@ -20,14 +20,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"log"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/sebastian93921/artifex/db"
 	"github.com/Autumn-27/norma/llm"
 	"github.com/Autumn-27/norma/transcript"
 )

@@ -1,4 +1,4 @@
-// Command artex runs the ARTEX backend: the PostgreSQL graph stores,
+// Command artifex runs the ARTIFEX backend: the PostgreSQL graph stores,
 // the event-driven exploration engine, and the JSON HTTP API consumed by the
 // shadcn/ui frontend.
 package main
@@ -7,7 +7,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"log"
 	"net/http"
 	"os"
@@ -17,10 +17,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/config"
-	"github.com/Autumn-27/artex/selfupdate"
-	"github.com/Autumn-27/artex/server"
+	"github.com/sebastian93921/artifex/agent"
+	"github.com/sebastian93921/artifex/config"
+	"github.com/sebastian93921/artifex/selfupdate"
+	"github.com/sebastian93921/artifex/server"
 )
 
 // version is the build version, injected at release time via
@@ -28,7 +28,7 @@ import (
 var version = "dev"
 
 const banner = `
-  ARTEX
+  ARTIFEX
 `
 
 // printBanner writes the startup banner + version/runtime info to stdout.
@@ -86,7 +86,7 @@ func run() int {
 	if _, e := os.Stat(cfgPath); e == nil {
 		log.Printf(locale.Text(locale.ServerDefault(), "[config] Configuration file: %s"), cfgPath)
 	} else {
-		log.Printf(locale.Text(locale.ServerDefault(), "[config] Configuration file: %s (not found; using ARTEX_PG_DSN only)"), cfgPath)
+		log.Printf(locale.Text(locale.ServerDefault(), "[config] Configuration file: %s (not found; using ARTIFEX_PG_DSN only)"), cfgPath)
 	}
 
 	sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -119,7 +119,7 @@ func run() int {
 	}
 
 	go func() {
-		log.Printf("ARTEX %s backend listening on %s (data=%s, workers=%d)", version, *addr, *dataDir, mgr.Workers())
+		log.Printf("ARTIFEX %s backend listening on %s (data=%s, workers=%d)", version, *addr, *dataDir, mgr.Workers())
 		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("serve: %v", err)
 		}

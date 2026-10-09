@@ -3,7 +3,7 @@
 web/.next
 web/out
 server/webui/dist
-/artex
+/artifex
 data
 *.db
 transcripts
@@ -14,8 +14,8 @@ bench/.env
 bench/scheduler.py
 bench/entrypoint_v2.sh
 bench/seed_v2.sh
-/artex
-/artex.exe
+/artifex
+/artifex.exe
 .env
 config.json
 jwt.key

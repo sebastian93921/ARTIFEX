@@ -12,7 +12,7 @@ import { mentionKinds, mentionToken, selectedMentions, mentionSearch } from "../
 import { sourceFiles, scanFile, SRC_ROOT } from "./han-scan.mjs";
 
 function browser(stored = null, cookie = "") {
-  const values = new Map(stored ? [["artex.locale", stored]] : []);
+  const values = new Map(stored ? [["artifex.locale", stored]] : []);
   globalThis.window = { localStorage: { getItem: (key) => values.get(key) ?? null, setItem: (key,value) => values.set(key,value) } };
   globalThis.document = { cookie, documentElement: { lang: "en" } };
   return values;
@@ -23,9 +23,9 @@ test("English is the default; unsupported and malformed preferences safely fall 
   reset(); assert.equal(getLocale(), "en");
   assert.equal(normalizeLocale("ko-KR"), null);
   assert.equal(normalizeLocale("zh-CN"), null);
-  assert.equal(readCookieLocale("artex_locale=%E0%A4%A"), null);
-  browser("unsupported", "artex_locale=ko"); initializeLocale(); assert.equal(getLocale(), "en");
-  reset(); browser("unsupported", "artex_locale=%bad"); initializeLocale(); assert.equal(getLocale(), "en"); reset();
+  assert.equal(readCookieLocale("artifex_locale=%E0%A4%A"), null);
+  browser("unsupported", "artifex_locale=ko"); initializeLocale(); assert.equal(getLocale(), "en");
+  reset(); browser("unsupported", "artifex_locale=%bad"); initializeLocale(); assert.equal(getLocale(), "en"); reset();
 });
 
 test("persisted unsupported locales stay English and still persist the active locale", () => {
@@ -33,7 +33,7 @@ test("persisted unsupported locales stay English and still persist the active lo
   assert.equal(getLocale(), "en"); assert.equal(translate("common.save"), "Save");
   let calls=0; const unsubscribe=subscribeLocale(()=>calls++); initializeLocale();
   assert.equal(getLocale(), "en"); assert.equal(translate("common.save"), "Save");
-  setLocale("en"); assert.equal(window.localStorage.getItem("artex.locale"),"en"); assert.equal(calls,0);
+  setLocale("en"); assert.equal(window.localStorage.getItem("artifex.locale"),"en"); assert.equal(calls,0);
   unsubscribe(); reset();
 });
 

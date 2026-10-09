@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
+	"github.com/sebastian93921/artifex/agent"
+	"github.com/sebastian93921/artifex/db"
 )
 
 // Without configuration, all resolved values must remain zero, preserving SDK/task_llm built-in defaults

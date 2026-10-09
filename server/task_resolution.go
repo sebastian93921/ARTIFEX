@@ -1,10 +1,10 @@
 package server
 
 import (
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"net/http"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/sebastian93921/artifex/db"
 )
 
 type taskLLMResolution struct {

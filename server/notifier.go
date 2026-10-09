@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"log"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/notify"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/notify"
 )
 
 // Global keys use the existing settings table; no new table is needed.
@@ -20,7 +20,7 @@ const (
 	// Configured channels, rather than this switch, determine whether notifications exist.
 	settingNotifyEnabled = "notify_enabled"
 	// settingNotifyPublicBaseURL supplies the externally accessible finding-detail URL,
-	// such as https://artex.example.com. Empty omits the return-link button.
+	// such as https://artifex.example.com. Empty omits the return-link button.
 	// No existing external-base setting can be reused, so notifications own this key.
 	settingNotifyPublicBaseURL = "notify_public_base_url"
 	// settingNotifyDigestMinutes controls the digest period in minutes.

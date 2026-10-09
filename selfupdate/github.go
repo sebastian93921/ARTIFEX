@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"net/http"
 	"net/url"
 	"strings"
@@ -13,7 +13,7 @@ import (
 
 // Repo is the fixed release source. Making it configurable would grant anyone
 // who can edit configuration a remote-code-execution path, which is unacceptable here.
-const Repo = "Autumn-27/ARTEX"
+const Repo = "sebastian93921/ARTIFEX"
 
 // latestURL is GitHub's latest stable release endpoint; prereleases and drafts are skipped.
 const latestURL = "https://api.github.com/repos/" + Repo + "/releases/latest"
@@ -95,7 +95,7 @@ func FetchLatest(ctx context.Context, c *http.Client) (*Release, error) {
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "artex-selfupdate")
+	req.Header.Set("User-Agent", "artifex-selfupdate")
 
 	resp, err := c.Do(req)
 	if err != nil {
@@ -124,9 +124,9 @@ func FetchLatest(ctx context.Context, c *http.Client) (*Release, error) {
 }
 
 // AssetName returns the platform package name, matching build.sh package_binary:
-// artex-<version>-<os>-<arch>.zip, with the leading v removed from the version.
+// artifex-<version>-<os>-<arch>.zip, with the leading v removed from the version.
 func AssetName(tag, goos, goarch string) string {
-	return fmt.Sprintf("artex-%s-%s-%s.zip", strings.TrimPrefix(tag, "v"), goos, goarch)
+	return fmt.Sprintf("artifex-%s-%s-%s.zip", strings.TrimPrefix(tag, "v"), goos, goarch)
 }
 
 // FindAsset looks up a release asset by name.

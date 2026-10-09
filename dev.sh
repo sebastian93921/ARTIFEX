@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-LANG_SEL="${ARTEX_LANGUAGE:-${ARTEX_LANGUAGE:-en}}"
+LANG_SEL="${ARTIFEX_LANGUAGE:-${ARTIFEX_LANGUAGE:-en}}"
 case "$LANG_SEL" in ko|ko_*|ko-*|KO) LANG_SEL=ko ;; *) LANG_SEL=en ;; esac
 msg(){ if [ "$LANG_SEL" = ko ]; then printf '%s' "$2"; else printf '%s' "$1"; fi; }
 
@@ -9,7 +9,7 @@ cd "$(dirname "$0")"
 cleanup() { kill 0 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
 
-go run ./cmd/artex -addr :8787 -proxy 127.0.0.1:8788 &
+go run ./cmd/artifex -addr :8787 -proxy 127.0.0.1:8788 &
 
 ( cd web && npm run dev ) &
 

@@ -7,7 +7,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"io"
 	"log"
 	"net/http"
@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/sebastian93921/artifex/db"
 	"github.com/Autumn-27/norma/permission"
 	actool "github.com/Autumn-27/norma/tool"
 )

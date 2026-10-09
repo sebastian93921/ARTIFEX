@@ -2,7 +2,7 @@ package server
 
 import (
 	"crypto/rand"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"log"
 	"math/big"
 	"net/http"
@@ -60,10 +60,10 @@ func loadOrCreateJWTKey(keyDir, dataDir string) ([]byte, error) {
 	return buf, nil
 }
 
-// signJWT issues a 7-day HS256 token for user ARTEX.
+// signJWT issues a 7-day HS256 token for user ARTIFEX.
 func signJWT(key []byte) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-		Subject:   "ARTEX",
+		Subject:   "ARTIFEX",
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(jwtTTL)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	}).SignedString(key)
@@ -81,12 +81,12 @@ func verifyJWT(tokenStr string, key []byte) bool {
 }
 
 // extractToken reads the JWT from Authorization: Bearer header,
-// artex_token cookie, or ?token= query param (for SSE connections).
+// artifex_token cookie, or ?token= query param (for SSE connections).
 func extractToken(r *http.Request) string {
 	if h := r.Header.Get("Authorization"); strings.HasPrefix(h, "Bearer ") {
 		return strings.TrimPrefix(h, "Bearer ")
 	}
-	if c, err := r.Cookie("artex_token"); err == nil && c.Value != "" {
+	if c, err := r.Cookie("artifex_token"); err == nil && c.Value != "" {
 		return c.Value
 	}
 	return r.URL.Query().Get("token")
@@ -218,7 +218,7 @@ func (s *Server) authLogin(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 400, locale.Text(responseLanguage(w), "Invalid request format"))
 		return
 	}
-	if req.Username != "ARTEX" {
+	if req.Username != "ARTIFEX" {
 		writeErr(w, 401, locale.Text(responseLanguage(w), "Incorrect username or password"))
 		return
 	}

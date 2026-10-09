@@ -2,9 +2,9 @@ package agent
 
 import (
 	"encoding/json"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/sebastian93921/artifex/db"
 	actool "github.com/Autumn-27/norma/tool"
 )
 

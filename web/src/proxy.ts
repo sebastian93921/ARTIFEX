@@ -8,7 +8,7 @@ export function proxy(request: NextRequest) {
   if (process.env.NEXT_PUBLIC_MOCK === "1") return NextResponse.next();
 
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("artex_token")?.value;
+  const token = request.cookies.get("artifex_token")?.value;
   const isAuthPage = AUTH_PAGES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   // Unauthenticated users redirect to login.

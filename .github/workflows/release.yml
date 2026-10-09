@@ -49,19 +49,19 @@ jobs:
           path: server/webui/dist
       - name: Build and package with build.sh
         env:
-          ARTEX_TARGET_OS: ${{ matrix.goos }}
-          ARTEX_TARGET_ARCH: ${{ matrix.goarch }}
-          ARTEX_BUILD_VERSION: ${{ github.ref_name }}
-          ARTEX_SKIP_FRONTEND: "1"
-          ARTEX_SKIP_NPM_CI: "1"
-          ARTEX_COMPRESS: "0"
-          ARTEX_PACKAGE: "1"
-          ARTEX_PACKAGE_DIR: dist
+          ARTIFEX_TARGET_OS: ${{ matrix.goos }}
+          ARTIFEX_TARGET_ARCH: ${{ matrix.goarch }}
+          ARTIFEX_BUILD_VERSION: ${{ github.ref_name }}
+          ARTIFEX_SKIP_FRONTEND: "1"
+          ARTIFEX_SKIP_NPM_CI: "1"
+          ARTIFEX_COMPRESS: "0"
+          ARTIFEX_PACKAGE: "1"
+          ARTIFEX_PACKAGE_DIR: dist
         run: |
-          ./build.sh --target "${ARTEX_TARGET_OS}/${ARTEX_TARGET_ARCH}"
+          ./build.sh --target "${ARTIFEX_TARGET_OS}/${ARTIFEX_TARGET_ARCH}"
       - name: Smoke test Linux amd64 binary
         if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
-        run: dist/artex-linux-amd64/artex -h
+        run: dist/artifex-linux-amd64/artifex -h
       - uses: actions/upload-artifact@v4
         with:
           name: pkg-${{ matrix.goos }}-${{ matrix.goarch }}
@@ -102,7 +102,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ghcr.io/autumn-27/artex
+          images: ghcr.io/autumn-27/artifex
           tags: |
             type=ref,event=tag
             type=raw,value=latest

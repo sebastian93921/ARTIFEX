@@ -1,20 +1,20 @@
 {
-  "_comment": "Copy to config.json, or select another path with ARTEX_CONFIG. Only database and skill_dir are read from this file. Configure LLM options through environment variables or application settings.",
-  "_comment_database": "PostgreSQL connection. ARTEX_PG_DSN overrides database. Use either individual fields below or database.dsn with a complete connection string.",
+  "_comment": "Copy to config.json, or select another path with ARTIFEX_CONFIG. Only database and skill_dir are read from this file. Configure LLM options through environment variables or application settings.",
+  "_comment_database": "PostgreSQL connection. ARTIFEX_PG_DSN overrides database. Use either individual fields below or database.dsn with a complete connection string.",
   "database": {
     "host": "127.0.0.1",
     "port": 5433,
-    "user": "artex",
+    "user": "artifex",
     "password": "",
-    "dbname": "artex",
+    "dbname": "artifex",
     "sslmode": "disable"
   },
   "_comment_database_dsn": "Alternative: replace database above with this DSN form. A nonempty dsn overrides individual fields.",
   "_example_database_dsn": {
     "database": {
-      "dsn": "postgres://user:pass@db.example.com:5432/artex?sslmode=require"
+      "dsn": "postgres://user:pass@db.example.com:5432/artifex?sslmode=require"
     }
   },
-  "_comment_skill_dir": "Skill root: each child directory contains SKILL.md. Precedence: ARTEX_SKILL_DIR, this field, then skills/ beside the executable. Omit or leave empty for the default. Relative paths resolve against the working directory.",
-  "skill_dir": "/opt/artex/skills"
+  "_comment_skill_dir": "Skill root: each child directory contains SKILL.md. Precedence: ARTIFEX_SKILL_DIR, this field, then skills/ beside the executable. Omit or leave empty for the default. Relative paths resolve against the working directory.",
+  "skill_dir": "/opt/artifex/skills"
 }

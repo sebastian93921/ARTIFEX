@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"io"
 	"net"
 	"net/http"
@@ -20,10 +20,10 @@ import (
 // allowLocalTargets defaults to blocking loopback/link-local destinations, including local
 // administration ports and cloud metadata at 169.254.169.254. A compromised/shared administrator
 // session could read response snippets through last_error and delivery history, creating a partial-
-// read SSRF primitive. Local SMTP relays are legitimate deployments, so ARTEX_NOTIFY_ALLOW_LOCAL=1
+// read SSRF primitive. Local SMTP relays are legitimate deployments, so ARTIFEX_NOTIFY_ALLOW_LOCAL=1
 // explicitly opts in. Exporting AllowLocalTargetsEnv also lets package/server tests enable loopback
 // fake receivers.
-const AllowLocalTargetsEnv = "ARTEX_NOTIFY_ALLOW_LOCAL"
+const AllowLocalTargetsEnv = "ARTIFEX_NOTIFY_ALLOW_LOCAL"
 
 func allowLocalTargets() bool {
 	v := strings.TrimSpace(os.Getenv(AllowLocalTargetsEnv))

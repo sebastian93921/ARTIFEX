@@ -5,14 +5,14 @@ primary_target: "landing/index.html"
 related_targets: ["landing/ko/index.html"]
 ---
 
-# Surface brief: ARTEX public landing page
+# Surface brief: ARTIFEX public landing page
 
 Scope: `landing/index.html` (English, default) and `landing/ko/index.html`
-static GitHub Pages at https://github.com/Autumn-27/ARTEX/. Mode:
+static GitHub Pages at https://github.com/sebastian93921/ARTIFEX/. Mode:
 Persuade. This brief is development-only context and is never shipped in
 `landing/`.
 
-Audience and job: developers and security researchers evaluating ARTEX
+Audience and job: developers and security researchers evaluating ARTIFEX
 for locally isolated research. They should see the real application, understand
 how a task moves across its actual screens, learn how a coding agent can drive
 it, trust the stated limits, and reach the v0.1.0 release or setup commands.
@@ -30,8 +30,8 @@ and frames it as orchestration evidence, not independent security validation.
 No testimonials, metrics or benchmarks.
 
 Constraints: plain HTML/CSS/JS, relative asset paths that resolve under
-`/artex/` and `/artex/ko/` (OG images are absolute
-`https://github.com/Autumn-27/ARTEX/assets/img/og-*.jpg` with `en_US`/`ko_KR`
+`/artifex/` and `/artifex/ko/` (OG images are absolute
+`https://github.com/sebastian93921/ARTIFEX/assets/img/og-*.jpg` with `en_US`/`ko_KR`
 locales, since crawlers need absolute URLs), self-hosted OFL fonts, no
 trackers/forms/CDNs/frameworks, a demo caption on every screenshot, and no
 contract/seed/planning text in shipped files.

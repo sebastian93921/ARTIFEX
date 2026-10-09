@@ -2,12 +2,12 @@ package server
 
 import (
 	"context"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"log"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/mcphttp"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/mcphttp"
 	"github.com/Autumn-27/norma/mcp"
 	actool "github.com/Autumn-27/norma/tool"
 )

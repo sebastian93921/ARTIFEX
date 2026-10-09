@@ -1,4 +1,4 @@
-// Package locale provides ARTEX's backend internationalization: the
+// Package locale provides ARTIFEX's backend internationalization: the
 // supported interface languages, request-safe locale negotiation, and a small
 // message catalog used for human-facing API/report/notification/CLI text.
 //
@@ -29,13 +29,13 @@ const (
 const Default = En
 
 // CookieName is the browser cookie the UI sets to persist the chosen locale.
-const CookieName = "artex_locale"
+const CookieName = "artifex_locale"
 
 // QueryParam is the URL query key used on SSE streams and download links, where
 // a header cannot be attached easily.
 const QueryParam = "lang"
 
-// Supported reports whether l is a language ARTEX ships translations for.
+// Supported reports whether l is a language ARTIFEX ships translations for.
 func Supported(l Lang) bool { return l == En }
 
 // Normalize parses a raw locale token (e.g. "en", "EN", "en-US") into a
@@ -82,12 +82,12 @@ func ServerDefault() Lang {
 	return Default
 }
 
-// FromEnv resolves a server default from the ARTEX_LANGUAGE environment
+// FromEnv resolves a server default from the ARTIFEX_LANGUAGE environment
 // variable. It intentionally does
 // NOT consult the OS LANG/LC_* locale, so a Korean desktop never silently flips
 // the product to Korean. ok is false when neither var names a supported language.
 func FromEnv(getenv func(string) string) (Lang, bool) {
-	for _, key := range []string{"ARTEX_LANGUAGE"} {
+	for _, key := range []string{"ARTIFEX_LANGUAGE"} {
 		if raw := getenv(key); strings.TrimSpace(raw) != "" {
 			if l, ok := Normalize(raw); ok {
 				return l, true
@@ -119,7 +119,7 @@ func FromContext(ctx context.Context) Lang {
 }
 
 // FromRequest negotiates the language for an HTTP request using the agreed
-// precedence: ?lang= query > Accept-Language header > artex_locale cookie >
+// precedence: ?lang= query > Accept-Language header > artifex_locale cookie >
 // server default. It is pure (reads only the request) and so is safe to call from
 // concurrent handlers.
 func FromRequest(r *http.Request) Lang {

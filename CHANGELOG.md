@@ -1,8 +1,22 @@
 # Upstream ARTEX changelog
 
-This is the translated upstream ARTEX history from baseline `160fe13`, preserving its original dates, contributors and technical history. These entries are not ARTEX releases. ARTEX's 2026-10-02 modifications are recorded separately in [provenance](docs/PROVENANCE.md). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). [한국어](CHANGELOG.ko.md).
+This is the translated upstream ARTEX history from baseline `160fe13`, preserving its original dates, contributors and technical history. These entries are not ARTEX releases. ARTEX's 2026-10-02 modifications are recorded separately in [provenance](docs/PROVENANCE.md). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
+
+## [Unreleased]
+
+### Branding
+
+#### Changed
+
+- Rebranded the fork from ARTEX to ARTIFEX: Go module `github.com/sebastian93921/artifex`, entry
+  point `./cmd/artifex`, `ARTIFEX_*` env/config keys, `artifex_locale` cookie, `artifex` database
+  defaults, `ARTIFEX` login username default, executable/archive names and Docker Compose names.
+  Selfupdate now resolves releases from `sebastian93921/ARTIFEX`. Upstream attribution to
+  [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) at commit `160fe13` is retained in
+  [docs/PROVENANCE.md](docs/PROVENANCE.md). Existing databases keep their configured users; the
+  `artex` DB name/role must be renamed when upgrading a deployed instance.
 
 ### Interception
 

@@ -3,14 +3,14 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/sebastian93921/artifex/db"
 )
 
 // maxChatUpload caps a single chat-attachment upload request (memory + spill).

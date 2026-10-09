@@ -33,13 +33,13 @@ Thumbs.db
 .claude/
 
 # Binary with embedded frontend
-/artex
+/artifex
 # Self-update staging, backup, failed binary and marker
-/artex.new
-/artex.new.sha256
-/artex.old
-/artex.failed
-/artex.upgrade.json
+/artifex.new
+/artifex.new.sha256
+/artifex.old
+/artifex.failed
+/artifex.upgrade.json
 /server/webui/dist/
 /dist/
 
@@ -56,10 +56,10 @@ Thumbs.db
 /bench/
 /Dockerfile.bench
 /Dockerfile.bench.v2
-/artex
-/artex.exe
-/artex.new
-/artex.new.sha256
-/artex.old
-/artex.failed
-/artex.upgrade.json
+/artifex
+/artifex.exe
+/artifex.new
+/artifex.new.sha256
+/artifex.old
+/artifex.failed
+/artifex.upgrade.json

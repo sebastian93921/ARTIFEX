@@ -4,7 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"compress/bzip2"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"io"
 	"path"
 	"strings"

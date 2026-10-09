@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"io"
 	"log"
 	"os"
@@ -17,10 +17,10 @@ import (
 
 // smokeEnv makes the smoke-test subprocess skip Bootstrap explicitly.
 //
-// Even without it, the subprocess executable is artex.new, so its derived
+// Even without it, the subprocess executable is artifex.new, so its derived
 // paths have a .new prefix and cannot touch the real update files. Relying on
 // that coincidence is fragile; an explicit bypass is clearer and avoids disk I/O.
-const smokeEnv = "ARTEX_SELFUPDATE_SMOKE"
+const smokeEnv = "ARTIFEX_SELFUPDATE_SMOKE"
 
 // Action is Bootstrap's instruction to main.
 type Action int
@@ -45,7 +45,7 @@ type State struct {
 //
 // Three possible states:
 //
-// 1. artex.new exists: verify and smoke-test, then replace/restart; discard on failure.
+// 1. artifex.new exists: verify and smoke-test, then replace/restart; discard on failure.
 // 2. Only a marker remains: increment the post-replacement attempt count; roll back after repeated failures.
 // 3. Neither exists: start normally.
 func Bootstrap() (Action, State) {

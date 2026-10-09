@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/notify"
+	"github.com/sebastian93921/artifex/notify"
 )
 
 // IM notification channel configuration and event layer. Delivery claiming and transitions are in

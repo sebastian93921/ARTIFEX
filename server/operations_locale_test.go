@@ -14,8 +14,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/locale"
 )
 
 func TestOperationsMCPValidationLanguages(t *testing.T) {
@@ -97,7 +97,7 @@ func TestOperationsSyncParseErrorsUseRequestLanguage(t *testing.T) {
 }
 
 func TestOperationsCustomToolValidationHTTP(t *testing.T) {
-	dsn := os.Getenv("ARTEX_PG_DSN")
+	dsn := os.Getenv("ARTIFEX_PG_DSN")
 	if dsn == "" {
 		t.Skip("explicit isolated database required")
 	}

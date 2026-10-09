@@ -3,7 +3,7 @@ package notify
 import (
 	"context"
 	"encoding/json"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 )
 
 // weComMarkdownLimit is the hard byte limit, not a character limit. It is the tightest of the six

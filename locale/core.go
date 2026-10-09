@@ -1,10 +1,10 @@
 package locale
 
 func init() {
-	Register("environment variable ARTEX_PG_DSN", "environment variable ARTEX_PG_DSN")
+	Register("environment variable ARTIFEX_PG_DSN", "environment variable ARTIFEX_PG_DSN")
 	Register("configuration file ", "configuration file ")
 	Register(" (database fields)", " (database fields)")
-	Register("Database configuration not found: ARTEX_PG_DSN is unset and %s has no database configuration (dsn or host/user/dbname). Create the configuration file or set the environment variable and retry", "Database configuration not found: ARTEX_PG_DSN is unset and %s has no database configuration (dsn or host/user/dbname). Create the configuration file or set the environment variable and retry")
+	Register("Database configuration not found: ARTIFEX_PG_DSN is unset and %s has no database configuration (dsn or host/user/dbname). Create the configuration file or set the environment variable and retry", "Database configuration not found: ARTIFEX_PG_DSN is unset and %s has no database configuration (dsn or host/user/dbname). Create the configuration file or set the environment variable and retry")
 	Register("Evidence body verification failed: %s", "Evidence body verification failed: %s")
 	Register("Incomplete body: expected %d bytes, read %d bytes", "Incomplete body: expected %d bytes, read %d bytes")
 	Register("Raw traffic body hash mismatch", "Raw traffic body hash mismatch")
@@ -13,11 +13,11 @@ func init() {
 	Register("  Autonomous AI penetration-testing system", "  Autonomous AI penetration-testing system")
 	Register("  Version %s  ·  %s/%s  ·  %s  ·  Listening on %s\n\n", "  Version %s  ·  %s/%s  ·  %s  ·  Listening on %s\n\n")
 	Register("[config] Configuration file: %s", "[config] Configuration file: %s")
-	Register("[config] Configuration file: %s (not found; using ARTEX_PG_DSN only)", "[config] Configuration file: %s (not found; using ARTEX_PG_DSN only)")
+	Register("[config] Configuration file: %s (not found; using ARTIFEX_PG_DSN only)", "[config] Configuration file: %s (not found; using ARTIFEX_PG_DSN only)")
 	Register("[config] Skill directory: %s", "[config] Skill directory: %s")
 	Register("Work was cancelled; platform security controls blocked execution", "Work was cancelled; platform security controls blocked execution")
 	Register("Human approval was not granted (denied or timed out)", "Human approval was not granted (denied or timed out)")
-	Register("[ARTEX platform control, not target defense] This call was blocked by the platform. ", "[ARTEX platform control, not target defense] This call was blocked by the platform. ")
+	Register("[ARTIFEX platform control, not target defense] This call was blocked by the platform. ", "[ARTIFEX platform control, not target defense] This call was blocked by the platform. ")
 	Register("Reason: ", "Reason: ")
 	Register(". This operation is prohibited.", ". This operation is prohibited.")
 	Register("[enrich] dnsx initialization failed; DNS resolution disabled: %v", "[enrich] dnsx initialization failed; DNS resolution disabled: %v")

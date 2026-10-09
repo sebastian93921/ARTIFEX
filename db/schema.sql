@@ -1,4 +1,4 @@
--- ARTEX PostgreSQL schema (single source of truth).
+-- ARTIFEX PostgreSQL schema (single source of truth).
 -- Idempotent: safe to rerun (IF NOT EXISTS / OR REPLACE / DROP TRIGGER IF EXISTS).
 
 -- =====================================================================

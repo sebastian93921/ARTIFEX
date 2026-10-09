@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/locale"
 )
 
 // Scheduler drives P3 triggers: on each tick it fires due interval triggers and

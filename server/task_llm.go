@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"iter"
 	"log"
 	"path/filepath"
@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/llmrec"
+	"github.com/sebastian93921/artifex/agent"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/llmrec"
 	"github.com/Autumn-27/norma/llm"
 	"github.com/Autumn-27/norma/transcript"
 )

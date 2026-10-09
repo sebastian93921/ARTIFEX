@@ -2,14 +2,14 @@ package agent
 
 import (
 	"context"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"strings"
 	"time"
 	"unicode/utf8"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/intercept"
-	"github.com/Autumn-27/artex/sidequestion"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/intercept"
+	"github.com/sebastian93921/artifex/sidequestion"
 	"github.com/Autumn-27/norma/agentcore"
 	"github.com/Autumn-27/norma/harness"
 	"github.com/Autumn-27/norma/llm"

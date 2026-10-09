@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { ARTEXClient } from "./src/client.js";
+import { ARTIFEXClient } from "./src/client.js";
 import { createTools, executeTool } from "./src/tools.js";
 
 // Uses Pi's public registerTool contract without depending on a particular Pi package namespace.
-export default function artexExtension(pi) {
-  const client = new ARTEXClient();
+export default function artifexExtension(pi) {
+  const client = new ARTIFEXClient();
   for (const tool of createTools(client)) {
     pi.registerTool({
       name: tool.name, label: tool.title, description: tool.description,

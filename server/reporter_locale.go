@@ -3,7 +3,7 @@ package server
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 )
 
 func init() {

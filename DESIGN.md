@@ -1,16 +1,16 @@
-# ARTEX landing — DESIGN.md
+# ARTIFEX landing — DESIGN.md
 
 <!-- impeccable:design-schema 1 -->
 
-Static GitHub Pages landing page for ARTEX. English is the default
+Static GitHub Pages landing page for ARTIFEX. English is the default
 (`landing/index.html`); Korean is a peer (`landing/ko/index.html`). Plain
 HTML/CSS/JS, no framework, no CDN, no tracker, no backend. Served under the
-project base `/artex/` (and `/artex/ko/`) with relative asset paths.
+project base `/artifex/` (and `/artifex/ko/`) with relative asset paths.
 
 ## Mode
 
 Persuade. The surface is the product's shop window: a developer or security
-researcher should grasp what ARTEX is, see it running, understand how a
+researcher should grasp what ARTIFEX is, see it running, understand how a
 task flows and how a coding agent drives it, trust the limits, and reach the
 release or setup commands.
 
@@ -74,7 +74,7 @@ Single column of hairline-separated sections, varying density deliberately:
    Docker/Windows; npm audit findings; adapter tests use local fixtures and
    live coding-agent-to-provider execution is not independently verified, linked
    to VERIFICATION) beside the deidentified
-   owner-workflow note and the ARTEX/AGPL-3.0 provenance + font/screenshot
+   owner-workflow note and the ARTIFEX/AGPL-3.0 provenance + font/screenshot
    provenance.
 7. **Footer** — brand, resource links, licence and "introduction, not a live
    service" note.
@@ -107,8 +107,8 @@ Up/Down/Home/End; the horizontal agent tablist uses Left/Right.
 Every screenshot is captioned fictional demo data. The owner-workflow paragraph
 is deidentified orchestration evidence only — no targets, findings, messages,
 model usage or credentials. Claims trace to README, the adapter README,
-PROVENANCE, VERIFICATION and the v0.1.0 changelog. ARTEX is a derivative of
-ARTEX under AGPL-3.0; usage is restricted to locally isolated research.
+PROVENANCE, VERIFICATION and the v0.1.0 changelog. ARTIFEX is a derivative of
+ARTIFEX under AGPL-3.0; usage is restricted to locally isolated research.
 
 ## Verification performed (build-time, non-browser)
 

@@ -3,7 +3,7 @@ package notify
 import (
 	"context"
 	"errors"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"net/url"
 )
 

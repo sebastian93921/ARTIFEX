@@ -3,12 +3,12 @@ package server
 import (
 	"sync"
 
-	"github.com/Autumn-27/artex/selfupdate"
+	"github.com/sebastian93921/artifex/selfupdate"
 )
 
 // One-click updates were removed: this build is a customized fork, and an
 // update would overwrite it with an upstream release. The process-restart
-// signaling stays because cmd/artex boot/shutdown wiring depends on it.
+// signaling stays because cmd/artifex boot/shutdown wiring depends on it.
 
 // restartCh closes once an upgrade is ready or rollback completes; main exits with ExitRestart.
 var (

@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/locale"
 )
 
 // companyScopeInputs accepts both the new [{kind,value}] contract and the

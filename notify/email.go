@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"mime"
 	"net"
 	"net/smtp"

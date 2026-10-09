@@ -316,7 +316,7 @@ export default function NotifyPage() {
             <Label htmlFor="n-base">{swt("interface.m1551")}</Label>
             <Input
               id="n-base"
-              placeholder="https://artex.example.com"
+              placeholder="https://artifex.example.com"
               value={baseURL}
               onChange={(e) => setBaseURL(e.target.value)}
             />

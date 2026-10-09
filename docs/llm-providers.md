@@ -1,12 +1,12 @@
 # LLM provider templates
 
-ARTEX uses its existing provider formats and custom base URL fields. A template only fills a **new profile's form**; it does not contact a provider, save credentials, activate a profile, or modify existing profiles.
+ARTIFEX uses its existing provider formats and custom base URL fields. A template only fills a **new profile's form**; it does not contact a provider, save credentials, activate a profile, or modify existing profiles.
 
 ## Z.ai GLM-5.3
 
 No template preview is included; the template only fills the new-profile form.
 
-Open **LLM → New → Configuration template**. Choose **General API (recommended)** for API billing, or **Coding Plan (reference)** only after obtaining Z.ai authorization for ARTEX.
+Open **LLM → New → Configuration template**. Choose **General API (recommended)** for API billing, or **Coding Plan (reference)** only after obtaining Z.ai authorization for ARTIFEX.
 
 | Field | General API | Coding Plan reference |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ The endpoints and billing are distinct: General API usage is separate from Codin
 
 GLM-5.3 accepts text, has a 1M-token context window, and requires reasoning to remain enabled. Supported effort values are `low`, `high`, and `max`; this template uses `max`. The model field remains editable, so review reasoning and context settings when choosing another model. See the [official GLM-5.3 guide](https://docs.z.ai/guides/llm/glm-5.3).
 
-**Coding Plan support boundary:** Z.ai limits Coding Plan to officially supported tools. ARTEX is not on that list; an endpoint template does not establish permission or support. Obtain Z.ai authorization before using it here. See [tool integration](https://docs.z.ai/devpack/tool/others) and [usage policy](https://docs.z.ai/devpack/usage-policy). ARTEX does not impersonate supported tools or switch billing endpoints automatically.
+**Coding Plan support boundary:** Z.ai limits Coding Plan to officially supported tools. ARTIFEX is not on that list; an endpoint template does not establish permission or support. Obtain Z.ai authorization before using it here. See [tool integration](https://docs.z.ai/devpack/tool/others) and [usage policy](https://docs.z.ai/devpack/usage-policy). ARTIFEX does not impersonate supported tools or switch billing endpoints automatically.
 
 Enter a profile name and your own API key. Applying either template preserves any name, key, proxy, session-header setting, and other unrelated preferences already entered. Save when ready; a new profile must be activated separately. The existing **Test connection** and **Load models** controls make real provider requests only when clicked; this change does not perform a live provider test.
 
@@ -44,9 +44,9 @@ Anthropic-format local proxies work the same way with Format `Anthropic`.
 Environment bootstrap (when no profile is saved yet) follows the same rule — a custom base URL makes the key optional:
 
 ```sh
-ARTEX_LLM_PROVIDER=openai
-ARTEX_LLM_BASE_URL=http://127.0.0.1:11434/v1
-ARTEX_LLM_MODEL=qwen3:8b
+ARTIFEX_LLM_PROVIDER=openai
+ARTIFEX_LLM_BASE_URL=http://127.0.0.1:11434/v1
+ARTIFEX_LLM_MODEL=qwen3:8b
 # OPENAI_API_KEY unset — accepted because a base URL is configured
 ```
 

@@ -2,8 +2,8 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/locale"
 	"go/ast"
 	"go/parser"
 	"go/token"

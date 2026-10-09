@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/notify"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/notify"
 )
 
 // These tests cover finding persistence, event creation, dispatch, and actual HTTP delivery. Never
@@ -639,14 +639,14 @@ func TestNotifyMetaAndSettingsRoundTrip(t *testing.T) {
 
 	// Round-trip all three global settings. Normalize trailing slashes to avoid double slashes in finding
 	// links.
-	if r := f.request("PUT", "/api/settings", `{"notify_public_base_url":"https://artex.example.com/","notify_digest_interval_min":15,"notify_enabled":true}`); r.Code != 200 {
+	if r := f.request("PUT", "/api/settings", `{"notify_public_base_url":"https://artifex.example.com/","notify_digest_interval_min":15,"notify_enabled":true}`); r.Code != 200 {
 		t.Fatalf("Settings update failed %d: %s", r.Code, r.Body)
 	}
 	t.Cleanup(func() {
 		f.pg.Exec(`DELETE FROM settings WHERE key IN ($1,$2)`, settingNotifyPublicBaseURL, settingNotifyDigestMinutes)
 	})
 	payload := f.s.settingsPayload()
-	if payload["notify_public_base_url"] != "https://artex.example.com" {
+	if payload["notify_public_base_url"] != "https://artifex.example.com" {
 		t.Fatalf("Return-link URL was not normalized: %v", payload["notify_public_base_url"])
 	}
 	if payload["notify_digest_interval_min"] != 15 {
@@ -676,14 +676,14 @@ func TestNotifyDeepLinkUsesPublicBaseURL(t *testing.T) {
 		"config": map[string]any{"webhook": hook.URL},
 	})
 	finding := f.record(t, "带回链的漏洞", "high")
-	f.deliver(t, chID, "https://artex.example.com")
+	f.deliver(t, chID, "https://artifex.example.com")
 
 	body := hook.last(t)
 	card, _ := body["actionCard"].(map[string]any)
 	if card == nil {
 		t.Fatalf("Linked finding must use ActionCard, got msgtype=%v", body["msgtype"])
 	}
-	want := fmt.Sprintf("https://artex.example.com/function/findings/detail?id=%d", finding)
+	want := fmt.Sprintf("https://artifex.example.com/function/findings/detail?id=%d", finding)
 	if card["singleURL"] != want {
 		t.Fatalf("Incorrect return link\nWant %s\nGot %v", want, card["singleURL"])
 	}

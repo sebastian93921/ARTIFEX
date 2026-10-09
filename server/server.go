@@ -19,25 +19,25 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/intercept"
-	"github.com/Autumn-27/artex/llmpool"
-	"github.com/Autumn-27/artex/llmrec"
-	"github.com/Autumn-27/artex/locale"
-	"github.com/Autumn-27/artex/report"
-	"github.com/Autumn-27/artex/traffic"
+	"github.com/sebastian93921/artifex/agent"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/intercept"
+	"github.com/sebastian93921/artifex/llmpool"
+	"github.com/sebastian93921/artifex/llmrec"
+	"github.com/sebastian93921/artifex/locale"
+	"github.com/sebastian93921/artifex/report"
+	"github.com/sebastian93921/artifex/traffic"
 	"github.com/Autumn-27/norma/llm"
 	actool "github.com/Autumn-27/norma/tool"
 	"github.com/Autumn-27/norma/transcript"
 )
 
-// BuildVersion is the backend application version, injected from cmd/artex at
+// BuildVersion is the backend application version, injected from cmd/artifex at
 // startup (which in turn gets it from -ldflags "-X main.version=<tag>").
 // Defaults to "dev" for local builds. Exposed to the frontend via GET /api/health.
 var BuildVersion = "dev"
 
-// Server exposes the ARTEX backend over a JSON HTTP API for the shadcn/ui
+// Server exposes the ARTIFEX backend over a JSON HTTP API for the shadcn/ui
 // frontend.
 type Server struct {
 	m      *Manager
@@ -452,7 +452,7 @@ func (s *Server) applyLLM(cfg agent.Config) error {
 		s.cfgMu.Unlock()
 		prov = llmrec.Wrap(prov, s.m.PG(), cfg.Model, profName, cfg.ThinkingType, cfg.ReasoningEffort, s.m.LLMRecordEnabled)
 		prov = bindSideProvider(prov, cfg, 0, profName)
-		// Env-configured concurrency cap (ARTEX_LLM_MAX_CONCURRENT); no-op when unset.
+		// Env-configured concurrency cap (ARTIFEX_LLM_MAX_CONCURRENT); no-op when unset.
 		prov = llmpool.NewLimiter(prov, profName, cfg.MaxConcurrent)
 	}
 	s.cfgMu.Lock()
@@ -953,7 +953,7 @@ func (s *Server) Handler() http.Handler {
 // --- handlers ---
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, 200, map[string]any{"ok": true, "service": "artex", "version": BuildVersion})
+	writeJSON(w, 200, map[string]any{"ok": true, "service": "artifex", "version": BuildVersion})
 }
 
 func (s *Server) stats(w http.ResponseWriter, r *http.Request) {
@@ -2151,7 +2151,7 @@ func (s *Server) findingsExport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stage, err := os.MkdirTemp("", "artex-finding-export-")
+	stage, err := os.MkdirTemp("", "artifex-finding-export-")
 	if err != nil {
 		writeError(w, 500, err)
 		return

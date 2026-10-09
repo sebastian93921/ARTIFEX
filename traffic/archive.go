@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"os"
 	"path/filepath"
 	"sort"

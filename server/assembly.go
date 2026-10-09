@@ -3,15 +3,15 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"io"
 	"log"
 	"path/filepath"
 	"strings"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/traffic"
+	"github.com/sebastian93921/artifex/agent"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/traffic"
 	"github.com/Autumn-27/norma/skill"
 	actool "github.com/Autumn-27/norma/tool"
 )

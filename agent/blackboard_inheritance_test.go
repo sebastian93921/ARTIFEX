@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/sebastian93921/artifex/db"
 	actool "github.com/Autumn-27/norma/tool"
 )
 

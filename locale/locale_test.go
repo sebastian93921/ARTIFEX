@@ -68,13 +68,13 @@ func TestAcceptLanguageQWeights(t *testing.T) {
 	}
 }
 
-func TestFromEnvPrefersARTEX(t *testing.T) {
-	env := map[string]string{"ARTEX_LANGUAGE": "en"}
+func TestFromEnvPrefersARTIFEX(t *testing.T) {
+	env := map[string]string{"ARTIFEX_LANGUAGE": "en"}
 	if l, ok := FromEnv(func(k string) string { return env[k] }); !ok || l != En {
-		t.Errorf("ARTEX_LANGUAGE should resolve: got %q,%v", l, ok)
+		t.Errorf("ARTIFEX_LANGUAGE should resolve: got %q,%v", l, ok)
 	}
 	// A removed language no longer resolves.
-	env = map[string]string{"ARTEX_LANGUAGE": "ko"}
+	env = map[string]string{"ARTIFEX_LANGUAGE": "ko"}
 	if _, ok := FromEnv(func(k string) string { return env[k] }); ok {
 		t.Errorf("removed language should not resolve")
 	}

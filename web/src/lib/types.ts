@@ -1,4 +1,4 @@
-// ARTEX domain model — types used across the UI.
+// ARTIFEX domain model — types used across the UI.
 // Derived from functional specification section 7, key data shapes.
 
 export type TaskStatus = "created" | "queued" | "running" | "paused" | "done" | "failed" | "timeout";

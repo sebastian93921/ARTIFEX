@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"io"
 	"io/fs"
 	"log"
@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"strings"
 
-	pgdb "github.com/Autumn-27/artex/db"
+	pgdb "github.com/sebastian93921/artifex/db"
 	"github.com/klauspost/compress/zstd"
 )
 

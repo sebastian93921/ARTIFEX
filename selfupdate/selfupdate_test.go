@@ -17,11 +17,11 @@ func testPaths(t *testing.T) Paths {
 	dir := t.TempDir()
 	return Paths{
 		Dir:     dir,
-		Current: filepath.Join(dir, "artex"),
-		New:     filepath.Join(dir, "artex.new"),
-		Sum:     filepath.Join(dir, "artex.new.sha256"),
-		Old:     filepath.Join(dir, "artex.old"),
-		Marker:  filepath.Join(dir, "artex.upgrade.json"),
+		Current: filepath.Join(dir, "artifex"),
+		New:     filepath.Join(dir, "artifex.new"),
+		Sum:     filepath.Join(dir, "artifex.new.sha256"),
+		Old:     filepath.Join(dir, "artifex.old"),
+		Marker:  filepath.Join(dir, "artifex.upgrade.json"),
 	}
 }
 
@@ -42,7 +42,7 @@ func itoa(n int) string {
 	return string(rune('0' + n))
 }
 
-// stage writes artex.new and its checksum to simulate a staged update.
+// stage writes artifex.new and its checksum to simulate a staged update.
 func stage(t *testing.T, p Paths, marker string, exitCode int) {
 	t.Helper()
 	fakeBin(t, p.New, marker, exitCode)
@@ -162,13 +162,13 @@ func TestApplyStagedHappyPath(t *testing.T) {
 		t.Error("State must be Pending after replacement")
 	}
 	if !strings.Contains(readAll(t, p.Current), "new") {
-		t.Error("artex must be replaced with the new version")
+		t.Error("artifex must be replaced with the new version")
 	}
 	if !strings.Contains(readAll(t, p.Old), "old") {
-		t.Error("Previous version must be backed up to artex.old")
+		t.Error("Previous version must be backed up to artifex.old")
 	}
 	if _, err := os.Stat(p.New); !os.IsNotExist(err) {
-		t.Error("artex.new must be absent after replacement")
+		t.Error("artifex.new must be absent after replacement")
 	}
 	if _, err := os.Stat(p.Sum); !os.IsNotExist(err) {
 		t.Error("Checksum file must be removed after replacement")
@@ -293,18 +293,18 @@ func TestParseSums(t *testing.T) {
 		winSum   = "ABCDEF0000000000000000000000000000000000000000000000000000000000"
 	)
 	// sha256sum separates with two spaces; shasum -a 256 binary mode prefixes filenames with *.
-	raw := linuxSum + "  artex-0.3.8-linux-amd64.zip\n" +
-		winSum + " *artex-0.3.8-windows-amd64.zip\n" +
+	raw := linuxSum + "  artifex-0.3.8-linux-amd64.zip\n" +
+		winSum + " *artifex-0.3.8-windows-amd64.zip\n" +
 		"\n" +
 		"garbage line\n" + // Exactly two fields, but the first is not a digest.
-		"deadbeef  artex-0.3.8-darwin-arm64.zip\n" // Incorrect digest length.
+		"deadbeef  artifex-0.3.8-darwin-arm64.zip\n" // Incorrect digest length.
 
 	out := parseSums(raw)
-	if out["artex-0.3.8-linux-amd64.zip"] != linuxSum {
+	if out["artifex-0.3.8-linux-amd64.zip"] != linuxSum {
 		t.Errorf("Incorrect Linux entry parsing: %v", out)
 	}
 	// Normalize digests to lowercase to avoid false mismatches caused by casing.
-	if got := out["artex-0.3.8-windows-amd64.zip"]; got != strings.ToLower(winSum) {
+	if got := out["artifex-0.3.8-windows-amd64.zip"]; got != strings.ToLower(winSum) {
 		t.Errorf("Incorrect Windows entry (strip * prefix and lowercase digest): %q", got)
 	}
 	if len(out) != 2 {
@@ -314,7 +314,7 @@ func TestParseSums(t *testing.T) {
 
 func TestExtractBinaryFindsNestedEntry(t *testing.T) {
 	if runtime.GOOS == "windows" {
-		t.Skip("Windows package basename is artex.exe; this fixture uses Unix naming")
+		t.Skip("Windows package basename is artifex.exe; this fixture uses Unix naming")
 	}
 	dir := t.TempDir()
 	zipPath := filepath.Join(dir, "release.zip")
@@ -324,12 +324,12 @@ func TestExtractBinaryFindsNestedEntry(t *testing.T) {
 		t.Fatal(err)
 	}
 	zw := zip.NewWriter(f)
-	// Real package layout: artex-<version>-<os>-<arch>/artex, plus unrelated files.
+	// Real package layout: artifex-<version>-<os>-<arch>/artifex, plus unrelated files.
 	for name, body := range map[string]string{
-		"artex-0.3.8-linux-amd64/README.md":           "readme",
-		"artex-0.3.8-linux-amd64/skills/a.md":         "skill",
-		"artex-0.3.8-linux-amd64/artex":         "#!/bin/sh\nexit 0\n",
-		"artex-0.3.8-linux-amd64/config.example.json": "{}",
+		"artifex-0.3.8-linux-amd64/README.md":           "readme",
+		"artifex-0.3.8-linux-amd64/skills/a.md":         "skill",
+		"artifex-0.3.8-linux-amd64/artifex":         "#!/bin/sh\nexit 0\n",
+		"artifex-0.3.8-linux-amd64/config.example.json": "{}",
 	} {
 		w, err := zw.Create(name)
 		if err != nil {
@@ -349,7 +349,7 @@ func TestExtractBinaryFindsNestedEntry(t *testing.T) {
 		t.Fatalf("extractBinary: %v", err)
 	}
 	if got := readAll(t, dst); !strings.Contains(got, "exit 0") {
-		t.Errorf("Extracted file is not the artex executable: %q", got)
+		t.Errorf("Extracted file is not the artifex executable: %q", got)
 	}
 	info, err := os.Stat(dst)
 	if err != nil {
@@ -368,7 +368,7 @@ func TestExtractBinaryMissingEntry(t *testing.T) {
 		t.Fatal(err)
 	}
 	zw := zip.NewWriter(f)
-	w, _ := zw.Create("artex-0.3.8-linux-amd64/README.md")
+	w, _ := zw.Create("artifex-0.3.8-linux-amd64/README.md")
 	_, _ = w.Write([]byte("readme"))
 	_ = zw.Close()
 	f.Close()
@@ -381,7 +381,7 @@ func TestExtractBinaryMissingEntry(t *testing.T) {
 func TestCheckURLRejectsNonGitHub(t *testing.T) {
 	bad := []string{
 		"http://github.com/x",           // Non-HTTPS.
-		"https://evil.com/artex.zip",    // Host not on the allowlist.
+		"https://evil.com/artifex.zip",    // Host not on the allowlist.
 		"https://github.com.evil.com/x", // Deceptive hostname suffix.
 		"https://raw.githubusercontent.com.evil.com/x",
 	}
@@ -405,12 +405,12 @@ func TestCheckURLRejectsNonGitHub(t *testing.T) {
 }
 
 func TestAssetNameMatchesBuildScript(t *testing.T) {
-	// build.sh package_binary uses artex-<version>-<os>-<arch>.zip, stripping
+	// build.sh package_binary uses artifex-<version>-<os>-<arch>.zip, stripping
 	// the leading v. A single character mismatch breaks updates on every platform.
-	if got := AssetName("v0.3.8", "linux", "amd64"); got != "artex-0.3.8-linux-amd64.zip" {
+	if got := AssetName("v0.3.8", "linux", "amd64"); got != "artifex-0.3.8-linux-amd64.zip" {
 		t.Errorf("AssetName = %q", got)
 	}
-	if got := AssetName("0.3.8", "windows", "amd64"); got != "artex-0.3.8-windows-amd64.zip" {
+	if got := AssetName("0.3.8", "windows", "amd64"); got != "artifex-0.3.8-windows-amd64.zip" {
 		t.Errorf("AssetName = %q", got)
 	}
 }

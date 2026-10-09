@@ -69,8 +69,8 @@ export default function SetupPage() {
           <div className="absolute size-40 rounded-full border border-primary-foreground/20" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/artex.svg"
-            alt="ARTEX"
+            src="/artifex.svg"
+            alt="ARTIFEX"
             width={160}
             height={160}
             className="relative"

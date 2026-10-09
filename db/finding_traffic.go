@@ -8,11 +8,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/notify"
+	"github.com/sebastian93921/artifex/notify"
 )
 
 var (

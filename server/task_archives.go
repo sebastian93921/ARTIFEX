@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"log"
 	"net/http"
 	"os"
@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	pgdb "github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/traffic"
+	"github.com/sebastian93921/artifex/agent"
+	pgdb "github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/traffic"
 )
 
 const taskArchivePollInterval = 2 * time.Second

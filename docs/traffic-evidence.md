@@ -84,10 +84,10 @@ Archive v3 collects snapshots and bodies by finding bindings, independently of o
 
 ## Verification and boundaries
 
-Use a separate, freshly created PostgreSQL test database for each package through `ARTEX_PG_DSN`, so leftover task/model fixtures do not start background work. Run complete relevant packages and confirm missing configuration did not cause skips:
+Use a separate, freshly created PostgreSQL test database for each package through `ARTIFEX_PG_DSN`, so leftover task/model fixtures do not start background work. Run complete relevant packages and confirm missing configuration did not cause skips:
 
 ```sh
-# Set ARTEX_PG_DSN to the package's isolated database before each run.
+# Set ARTIFEX_PG_DSN to the package's isolated database before each run.
 # Explicit configuration failures must fail the test.
 go test ./<package> -count=1
 go test -race -p 1 ./evidence ./db ./agent ./server -run 'TestEvidence|TestFindingTraffic|TestFindingEvidence|TestReportFindingAtomicContract|TestTaskArchive'

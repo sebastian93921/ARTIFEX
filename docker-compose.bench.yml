@@ -3,16 +3,16 @@
 # Host networking exposes ports 8787, 8788 and 5432; they must be available.
 
 services:
-  artex-bench:
+  artifex-bench:
     build:
       context: .
       dockerfile: Dockerfile.bench
-    image: artex-bench:latest
-    container_name: artex-bench
+    image: artifex-bench:latest
+    container_name: artifex-bench
     env_file:
       - bench/.env
     network_mode: host
     restart: "no"
 
 volumes:
-  artex_bench_data:
+  artifex_bench_data:

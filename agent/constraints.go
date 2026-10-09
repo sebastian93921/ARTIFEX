@@ -1,10 +1,10 @@
 package agent
 
 import (
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"strings"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/sebastian93921/artifex/db"
 )
 
 // constraintBlock renders this task's operation constraints (task_constraints) as a

@@ -33,7 +33,7 @@ func init() {
 	Register("Channel name cannot be empty", "Channel name cannot be empty")
 	Register("Test message · Channel configured successfully", "Test message · Channel configured successfully")
 	Register("Connectivity test", "Connectivity test")
-	Register("This is a ARTEX notification-channel test. Receiving it confirms the channel configuration works.", "This is a ARTEX notification-channel test. Receiving it confirms the channel configuration works.")
+	Register("This is an ARTIFEX notification-channel test. Receiving it confirms the channel configuration works.", "This is an ARTIFEX notification-channel test. Receiving it confirms the channel configuration works.")
 	Register("Invalid delivery ID", "Invalid delivery ID")
 	Register("Notification channel not found", "Notification channel not found")
 }

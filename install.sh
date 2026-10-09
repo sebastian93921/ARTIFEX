@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# ARTEX install script: ① all-in-Docker  ② build and run locally
+# ARTIFEX install script: ① all-in-Docker  ② build and run locally
 #
-# Messages are English by default. For Korean, set ARTEX_LANGUAGE=ko
-# (ARTEX_LANGUAGE=ko also works) before running, e.g. ARTEX_LANGUAGE=ko ./install.sh
+# Messages are English by default. For Korean, set ARTIFEX_LANGUAGE=ko
+# (ARTIFEX_LANGUAGE=ko also works) before running, e.g. ARTIFEX_LANGUAGE=ko ./install.sh
 set -euo pipefail
 cd "$(cd "$(dirname "$0")" && pwd)"
 
-LANG_SEL="${ARTEX_LANGUAGE:-${ARTEX_LANGUAGE:-en}}"
+LANG_SEL="${ARTIFEX_LANGUAGE:-${ARTIFEX_LANGUAGE:-en}}"
 case "$LANG_SEL" in ko|ko_*|ko-*|KO) LANG_SEL=ko ;; *) LANG_SEL=en ;; esac
 # msg EN KO → print the string for the selected language.
 msg(){ if [ "$LANG_SEL" = ko ]; then printf '%s' "$2"; else printf '%s' "$1"; fi; }
@@ -53,11 +53,11 @@ install_docker(){
   else
     info "$(msg 'Reusing existing .env' '기존 .env를 그대로 사용합니다')"
   fi
-  info "$(msg 'Building ARTEX from this checkout…' '현재 소스로 ARTEX를 빌드합니다…')"
-  docker compose build artex
+  info "$(msg 'Building ARTIFEX from this checkout…' '현재 소스로 ARTIFEX를 빌드합니다…')"
+  docker compose build artifex
   docker compose up -d
   ok "$(msg 'Started → http://localhost:8787' '시작 완료 → http://localhost:8787')"
-  info "$(msg 'View logs: docker compose logs -f artex' '로그 보기: docker compose logs -f artex')"
+  info "$(msg 'View logs: docker compose logs -f artifex' '로그 보기: docker compose logs -f artifex')"
 }
 
 # ── ② build and run locally ─────────────────────────────────
@@ -69,16 +69,16 @@ install_local(){
     2)
       ensure_docker
       local pw; pw="$(ask "$(msg 'Postgres password (Enter for a random one)' 'Postgres 비밀번호 (Enter 시 무작위 생성)')" "$(rand)")"
-      docker run -d --name artex-pg -p 5432:5432 \
-        -e POSTGRES_USER=artex -e POSTGRES_PASSWORD="$pw" -e POSTGRES_DB=artex \
-        -v artex-pg:/var/lib/postgresql/data postgres:16-alpine
-      DB_HOST=127.0.0.1 DB_PORT=5432 DB_USER=artex DB_PASS="$pw" DB_NAME=artex DB_SSL=disable ;;
+      docker run -d --name artifex-pg -p 5432:5432 \
+        -e POSTGRES_USER=artifex -e POSTGRES_PASSWORD="$pw" -e POSTGRES_DB=artifex \
+        -v artifex-pg:/var/lib/postgresql/data postgres:16-alpine
+      DB_HOST=127.0.0.1 DB_PORT=5432 DB_USER=artifex DB_PASS="$pw" DB_NAME=artifex DB_SSL=disable ;;
     *)
       DB_HOST="$(ask "$(msg 'Database host' '데이터베이스 주소')" 127.0.0.1)"
       DB_PORT="$(ask "$(msg 'Port' '포트')" 5432)"
-      DB_USER="$(ask "$(msg 'User' '계정')" artex)"
+      DB_USER="$(ask "$(msg 'User' '계정')" artifex)"
       DB_PASS="$(ask "$(msg 'Password' '비밀번호')" '')"
-      DB_NAME="$(ask "$(msg 'Database name' '데이터베이스 이름')" artex)"
+      DB_NAME="$(ask "$(msg 'Database name' '데이터베이스 이름')" artifex)"
       DB_SSL="$(ask "$(msg 'sslmode (disable/require)' 'sslmode (disable/require)')" disable)" ;;
   esac
 
@@ -107,19 +107,19 @@ JSON
     ( cd web && npm ci && npm run build:static )
     rm -rf server/webui/dist && cp -r web/out server/webui/dist
     info "$(msg 'Compiling the single binary with the frontend embedded…' '프런트엔드가 내장된 단일 바이너리를 컴파일합니다…')"
-    CGO_ENABLED=0 go build -tags embedui -trimpath -o artex ./cmd/artex
+    CGO_ENABLED=0 go build -tags embedui -trimpath -o artifex ./cmd/artifex
   else
     warn "$(msg 'npm not found: building the backend WITHOUT the embedded frontend (run npm run dev for the frontend)' 'npm을 찾지 못함: 프런트엔드 미내장 백엔드를 빌드합니다 (프런트엔드는 따로 npm run dev)')"
-    CGO_ENABLED=0 go build -o artex ./cmd/artex
+    CGO_ENABLED=0 go build -o artifex ./cmd/artifex
   fi
-  ok "$(msg 'Build complete → ./artex' '컴파일 완료 → ./artex')"
+  ok "$(msg 'Build complete → ./artifex' '컴파일 완료 → ./artifex')"
 
   info "$(msg 'Starting… (Ctrl-C to quit)' '시작합니다… (Ctrl-C로 종료)')"
   ./start.sh
 }
 
 echo "=============================="
-echo "  $(msg 'ARTEX install' 'ARTEX 설치')"
+echo "  $(msg 'ARTIFEX install' 'ARTIFEX 설치')"
 echo "  1) $(msg 'All-in-Docker install' '전부 Docker로 설치')"
 echo "  2) $(msg 'Local run (go build)' '로컬 실행 (go 컴파일)')"
 echo "=============================="

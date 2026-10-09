@@ -13,7 +13,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"io"
 	"io/fs"
 	"log"
@@ -31,7 +31,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/sebastian93921/artifex/db"
 	"github.com/Autumn-27/norma/permission"
 	actool "github.com/Autumn-27/norma/tool"
 	mproxy "github.com/lqqyt2423/go-mitmproxy/proxy"

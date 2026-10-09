@@ -1,6 +1,6 @@
 package db
 
-import "github.com/Autumn-27/artex/locale"
+import "github.com/sebastian93921/artifex/locale"
 
 // DiscardOpenIntent compensates a follow-up creation when task admission fails.
 // The task execution gate must still be held by the caller, so the intent cannot

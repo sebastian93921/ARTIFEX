@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/notify"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/notify"
 )
 
 // Notification HTTP endpoints are all behind requireAuth in Handler, matching
@@ -450,8 +450,8 @@ func notifyTestMessage(baseURL string, langs ...locale.Lang) notify.Message {
 			Name:      locale.Text(locale.First(langs), "Test message · Channel configured successfully"),
 			VulnClass: locale.Text(locale.First(langs), "Connectivity test"),
 			Severity:  "low",
-			Summary:   locale.Text(locale.First(langs), "This is a ARTEX notification-channel test. Receiving it confirms the channel configuration works."),
-			Assets:    []string{"artex.example.com"},
+			Summary:   locale.Text(locale.First(langs), "This is an ARTIFEX notification-channel test. Receiving it confirms the channel configuration works."),
+			Assets:    []string{"artifex.example.com"},
 			DetailURL: baseURL,
 		}},
 		HomeURL: baseURL,

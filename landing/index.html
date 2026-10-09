@@ -3,28 +3,28 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ARTEX — self-hosted console for multi-agent security research</title>
+    <title>ARTIFEX — self-hosted console for multi-agent security research</title>
     <meta
       name="description"
-      content="ARTEX is a self-hosted console that coordinates goal planning, autonomous agents, asset scope, coverage and recorded findings for locally isolated security research. Go backend, embedded Next.js, PostgreSQL. Derived from ARTEX, AGPL-3.0."
+      content="ARTIFEX is a self-hosted console that coordinates goal planning, autonomous agents, asset scope, coverage and recorded findings for locally isolated security research. Go backend, embedded Next.js, PostgreSQL. Derived from ARTIFEX, AGPL-3.0."
     />
-    <link rel="canonical" href="https://github.com/Autumn-27/ARTEX/" />
-    <link rel="alternate" hreflang="en" href="https://github.com/Autumn-27/ARTEX/" />
-    <link rel="alternate" hreflang="x-default" href="https://github.com/Autumn-27/ARTEX/" />
+    <link rel="canonical" href="https://github.com/sebastian93921/ARTIFEX/" />
+    <link rel="alternate" hreflang="en" href="https://github.com/sebastian93921/ARTIFEX/" />
+    <link rel="alternate" hreflang="x-default" href="https://github.com/sebastian93921/ARTIFEX/" />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="ARTEX" />
+    <meta property="og:site_name" content="ARTIFEX" />
     <meta
       property="og:title"
-      content="ARTEX — self-hosted console for multi-agent security research"
+      content="ARTIFEX — self-hosted console for multi-agent security research"
     />
     <meta
       property="og:description"
       content="Coordinate goal planning, autonomous agents, asset scope, coverage and recorded findings in one self-hosted console for locally isolated research."
     />
-    <meta property="og:url" content="https://github.com/Autumn-27/ARTEX/" />
-    <meta property="og:image" content="https://github.com/Autumn-27/ARTEX/assets/img/og-en.jpg" />
+    <meta property="og:url" content="https://github.com/sebastian93921/ARTIFEX/" />
+    <meta property="og:image" content="https://github.com/sebastian93921/ARTIFEX/assets/img/og-en.jpg" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:locale:alternate" content="ko_KR" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -43,9 +43,9 @@
 
     <header class="site-header">
       <div class="wrap site-header__inner">
-        <a class="brand" href="./" aria-label="ARTEX home">
-          <img src="assets/img/artex.svg" alt="" width="30" height="30" />
-          ARTEX
+        <a class="brand" href="./" aria-label="ARTIFEX home">
+          <img src="assets/img/artifex.svg" alt="" width="30" height="30" />
+          ARTIFEX
         </a>
 
         <button
@@ -74,7 +74,7 @@
           </div>
           <a
             class="ghlink"
-            href="https://github.com/Autumn-27/ARTEX"
+            href="https://github.com/sebastian93921/ARTIFEX"
             rel="noopener"
           >
             <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -96,7 +96,7 @@
               <span class="accent">multi-agent security exploration</span>.
             </h1>
             <p class="hero__offer">
-              ARTEX coordinates goal planning, autonomous agents, asset
+              ARTIFEX coordinates goal planning, autonomous agents, asset
               scope, coverage and recorded findings behind one review surface —
               built to run on your own machine against locally isolated lab
               targets.
@@ -104,13 +104,13 @@
             <div class="hero__actions">
               <a
                 class="btn btn--primary"
-                href="https://github.com/Autumn-27/ARTEX/releases/tag/v0.1.0"
+                href="https://github.com/sebastian93921/ARTIFEX/releases/latest"
                 rel="noopener"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
                 </svg>
-                Download v0.1.0
+                Download
               </a>
               <a class="btn btn--ghost" href="#install">Setup guide</a>
             </div>
@@ -138,7 +138,7 @@
                     src="assets/img/en-dashboard-960.webp"
                     width="1440"
                     height="1000"
-                    alt="ARTEX dashboard showing active tasks, agent activity and coverage summaries in the English interface."
+                    alt="ARTIFEX dashboard showing active tasks, agent activity and coverage summaries in the English interface."
                     fetchpriority="high"
                   />
                 </picture>
@@ -157,7 +157,7 @@
           <div class="section__head">
             <h2 id="walk-h">Walk one task across the real screens</h2>
             <p>
-              ARTEX splits <em>what the target is</em> from
+              ARTIFEX splits <em>what the target is</em> from
               <em>how far it has been tested</em> into two linked graphs: a
               shared asset graph and a per-task exploration graph. Select a
               screen to see where each stage lives.
@@ -255,7 +255,7 @@
             <h2 id="bridge-h">Drive it from your coding agent</h2>
             <p>
               A local adapter lets Claude Code, Codex and Pi create tasks and
-              read progress, coverage and findings through ARTEX’s own
+              read progress, coverage and findings through ARTIFEX’s own
               authenticated API.
             </p>
           </div>
@@ -264,11 +264,11 @@
             <div class="bridge__body">
               <p class="agent-line">
                 <strong>It is a control interface, not a replacement.</strong>
-                The adapter keeps ARTEX’s internal planner, workers and
+                The adapter keeps ARTIFEX’s internal planner, workers and
                 model configuration intact, and it does not turn a coding-agent
                 subscription into a model API key. Reads are on by default; task
                 creation and pause/resume are opt-in with
-                <code>ARTEX_ALLOW_WRITES=true</code>.
+                <code>ARTIFEX_ALLOW_WRITES=true</code>.
               </p>
 
               <div class="agent-tabs" role="tablist" aria-label="Coding agent">
@@ -283,8 +283,8 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 012-2h10" /></svg>
                     <span class="copy-btn__text">Copy</span>
                   </button>
-                  <code id="code-claude"><span class="tok-cmd">claude</span> mcp add <span class="tok-flag">--transport</span> stdio artex \
-  -- node /absolute/path/artex/adapters/agent/src/mcp.js</code>
+                  <code id="code-claude"><span class="tok-cmd">claude</span> mcp add <span class="tok-flag">--transport</span> stdio artifex \
+  -- node /absolute/path/artifex/adapters/agent/src/mcp.js</code>
                 </div>
               </div>
 
@@ -294,8 +294,8 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 012-2h10" /></svg>
                     <span class="copy-btn__text">Copy</span>
                   </button>
-                  <code id="code-codex"><span class="tok-cmd">codex</span> mcp add artex \
-  -- node /absolute/path/artex/adapters/agent/src/mcp.js</code>
+                  <code id="code-codex"><span class="tok-cmd">codex</span> mcp add artifex \
+  -- node /absolute/path/artifex/adapters/agent/src/mcp.js</code>
                 </div>
               </div>
 
@@ -305,7 +305,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 012-2h10" /></svg>
                     <span class="copy-btn__text">Copy</span>
                   </button>
-                  <code id="code-pi"><span class="tok-cmd">pi</span> <span class="tok-flag">-e</span> /absolute/path/artex/adapters/agent/pi-extension.js</code>
+                  <code id="code-pi"><span class="tok-cmd">pi</span> <span class="tok-flag">-e</span> /absolute/path/artifex/adapters/agent/pi-extension.js</code>
                 </div>
               </div>
 
@@ -335,7 +335,7 @@
                     src="assets/img/en-mobile-390.webp"
                     width="390"
                     height="844"
-                    alt="ARTEX running in a mobile browser, showing the task overview at a narrow width."
+                    alt="ARTIFEX running in a mobile browser, showing the task overview at a narrow width."
                     loading="lazy"
                   />
                 </div>
@@ -352,7 +352,7 @@
           <div class="section__head">
             <h2 id="install-h">Install and run locally</h2>
             <p>
-              ARTEX is self-hosted and runs on your own machine. Pick a
+              ARTIFEX is self-hosted and runs on your own machine. Pick a
               path, then open <code>http://localhost:8787</code> — the first
               visit lands on <code>/setup</code> to set the admin password.
             </p>
@@ -368,8 +368,8 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 012-2h10" /></svg>
                   <span class="copy-btn__text">Copy</span>
                 </button>
-                <code id="inst-script"><span class="tok-cmd">git</span> clone https://github.com/Autumn-27/ARTEX.git
-<span class="tok-cmd">cd</span> artex
+                <code id="inst-script"><span class="tok-cmd">git</span> clone https://github.com/sebastian93921/ARTIFEX.git
+<span class="tok-cmd">cd</span> artifex
 <span class="tok-cmd">./install.sh</span></code>
               </div>
             </article>
@@ -414,7 +414,7 @@
           <p class="hero__stack" style="margin-top:1.75rem">
             Every archive bundles the embedded web interface, supervisor,
             skills, a config example and the agent adapter.
-            <a href="https://github.com/Autumn-27/ARTEX/releases/tag/v0.1.0" rel="noopener">See release v0.1.0 and SHA256SUMS →</a>
+            <a href="https://github.com/sebastian93921/ARTIFEX/releases" rel="noopener">See releases and SHA256SUMS →</a>
           </p>
         </div>
       </section>
@@ -424,7 +424,7 @@
         <div class="wrap">
           <div class="section__head">
             <h2 id="req-h">What you need first</h2>
-            <p>ARTEX carries the application; you supply the database and a model provider.</p>
+            <p>ARTIFEX carries the application; you supply the database and a model provider.</p>
           </div>
           <div class="req-grid">
             <div class="req">
@@ -453,7 +453,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2" /><path d="M8 20h8M12 18v2" /></svg>
                 A local lab target
               </h3>
-              <p>Use only against systems you own or run in isolation. ARTEX is for locally isolated research, not online testing.</p>
+              <p>Use only against systems you own or run in isolation. ARTIFEX is for locally isolated research, not online testing.</p>
             </div>
           </div>
         </div>
@@ -470,7 +470,7 @@
           <div class="limits-layout">
             <ul class="limit-list">
               <li><strong>Locally isolated research only.</strong> The inherited usage restrictions prohibit scanning, probing or attacking any online service — authorized or not. Use it against systems you own, in isolation.</li>
-              <li><strong>Backend CI is red.</strong> One inherited test, <code>TestGraphOverviewExpandsAssociatedCompanyScope</code>, still fails with <code>task scope missing</code>. It was not disabled or marked passing; the full backend suite stays red until it is fixed.</li>
+              <li><strong>Backend suite green as of the ARTIFEX rebrand.</strong> Every Go package passes against its own disposable database; the previously inherited red test (<code>TestGraphOverviewExpandsAssociatedCompanyScope</code>) was fixed upstream-side and stays fixed here. CI runs the same per-package recipe on every push.</li>
               <li><strong>No production or effectiveness claims.</strong> This does not assert production penetration-testing readiness or independently validated security results.</li>
               <li><strong>Unverified runtimes.</strong> Docker image execution and Windows batch execution were not verified. Packaging fixtures do not claim a real Windows runtime test.</li>
               <li><strong>Dependencies need work.</strong> The unchanged npm set reports 14 audit findings (1 critical, 9 high, 4 moderate). Upgrades are separate work.</li>
@@ -495,8 +495,8 @@
               <div class="aside-card">
                 <h3>Provenance &amp; credits</h3>
                 <p>
-                  ARTEX is a standalone derivative of
-                  <a href="https://github.com/Autumn-27/ARTEX" rel="noopener">ARTEX</a>
+                  ARTIFEX is a standalone derivative of
+                  <a href="https://github.com/Autumn-27/ARTEX" rel="noopener">ARTEX</a>,
                   at upstream commit <code>160fe13</code>, licensed AGPL-3.0.
                   Agent capabilities use the
                   <a href="https://github.com/Autumn-27/norma" rel="noopener">norma</a>
@@ -519,22 +519,22 @@
     <footer class="site-footer">
       <div class="wrap">
         <div class="footer-top">
-          <a class="brand" href="./" aria-label="ARTEX home">
-            <img src="assets/img/artex.svg" alt="" width="30" height="30" />
-            ARTEX
+          <a class="brand" href="./" aria-label="ARTIFEX home">
+            <img src="assets/img/artifex.svg" alt="" width="30" height="30" />
+            ARTIFEX
           </a>
           <nav class="footer-links" aria-label="Footer">
-            <a href="https://github.com/Autumn-27/ARTEX" rel="noopener">GitHub</a>
-            <a href="https://github.com/Autumn-27/ARTEX/releases/tag/v0.1.0" rel="noopener">Release v0.1.0</a>
-            <a href="https://github.com/Autumn-27/ARTEX/tree/main/docs" rel="noopener">Docs</a>
-            <a href="https://github.com/Autumn-27/ARTEX/blob/main/adapters/agent/README.md" rel="noopener">Agent adapter</a>
-            <a href="https://github.com/Autumn-27/ARTEX/blob/main/docs/PROVENANCE.md" rel="noopener">Provenance</a>
-            <a href="https://github.com/Autumn-27/ARTEX/blob/main/docs/VERIFICATION.md" rel="noopener">Verification</a>
+            <a href="https://github.com/sebastian93921/ARTIFEX" rel="noopener">GitHub</a>
+            <a href="https://github.com/sebastian93921/ARTIFEX/releases" rel="noopener">Releases</a>
+            <a href="https://github.com/sebastian93921/ARTIFEX/tree/main/docs" rel="noopener">Docs</a>
+            <a href="https://github.com/sebastian93921/ARTIFEX/blob/main/adapters/agent/README.md" rel="noopener">Agent adapter</a>
+            <a href="https://github.com/sebastian93921/ARTIFEX/blob/main/docs/PROVENANCE.md" rel="noopener">Provenance</a>
+            <a href="https://github.com/sebastian93921/ARTIFEX/blob/main/docs/VERIFICATION.md" rel="noopener">Verification</a>
           </nav>
         </div>
         <div class="footer-bottom">
           <p>
-            ARTEX is a derivative of ARTEX, licensed under AGPL-3.0.
+            ARTIFEX is a derivative of ARTIFEX, licensed under AGPL-3.0.
             Network-hosted modifications must publish their source. Use only for
             locally isolated study and validation.
           </p>

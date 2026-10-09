@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/guard"
-	"github.com/Autumn-27/artex/intercept"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/guard"
+	"github.com/sebastian93921/artifex/intercept"
 	"github.com/Autumn-27/norma/agentcore"
 	"github.com/Autumn-27/norma/llm"
 	"github.com/Autumn-27/norma/permission"

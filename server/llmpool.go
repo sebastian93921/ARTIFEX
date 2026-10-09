@@ -1,13 +1,13 @@
 package server
 
 import (
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"log"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/llmpool"
+	"github.com/sebastian93921/artifex/agent"
+	"github.com/sebastian93921/artifex/db"
+	"github.com/sebastian93921/artifex/llmpool"
 	"github.com/Autumn-27/norma/llm"
 )
 

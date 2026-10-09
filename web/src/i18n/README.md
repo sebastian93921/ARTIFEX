@@ -1,6 +1,6 @@
 # Interface localization
 
-English is the only interface language. The React locale provider restores an explicit English preference after hydration, keeping the static English export and first client render consistent. The selection persists in `artex.locale` localStorage and the `artex_locale` cookie. API transport reads the stored preference even before hydration finishes.
+English is the only interface language. The React locale provider restores an explicit English preference after hydration, keeping the static English export and first client render consistent. The selection persists in `artifex.locale` localStorage and the `artifex_locale` cookie. API transport reads the stored preference even before hydration finishes.
 
 Use `useI18n().t` in components and `translate` in non-React helpers. Keep placeholders identical and pass user values as interpolation parameters. Never translate user-entered text, persisted reports, identifiers, API field names, credentials, or protocol values. Existing Chinese mention wire labels and historical parser aliases remain compatible with the backend; visible labels are localized independently.
 

@@ -1,6 +1,6 @@
 <div align="center">
 
-# ARTEX
+# ARTIFEX
 
 An LLM multi-agent autonomous penetration-testing system (Go backend + Next.js frontend)
 
@@ -10,14 +10,15 @@ English
 
 ---
 
-> **About this project.** ARTEX — an LLM multi-agent autonomous penetration-testing system by
+> **About this project.** ARTIFEX — an LLM multi-agent autonomous penetration-testing system by
 > [Autumn-27](https://github.com/Autumn-27/ARTEX) (Baidu "Agent+" attack-defense challenge champion
-> project). Built from upstream commit `160fe13`; the original product name has been restored.
+> project). Built from upstream commit `160fe13`; this tree rebrands the product as **ARTIFEX**
+> with attribution retained.
 
 [Verification status and known limitations](docs/VERIFICATION.md).
 
-> The code and architecture originate in ARTEX. This tree restores the original ARTEX product
-> name across the interface, documentation, and distribution targets. See [License and disclaimer](#license-and-disclaimer)
+> The code and architecture originate in ARTEX. This tree rebrands the product as ARTIFEX
+> across the interface, documentation, and distribution targets. See [License and disclaimer](#license-and-disclaimer)
 > for the terms (AGPL-3.0).
 >
 > **Authorization.** This is a security-testing tool. Use it only against systems you own or are
@@ -28,10 +29,10 @@ English
 ## Language
 
 English is the only interface language. The server's durable default is
-`language` in system settings; `ARTEX_LANGUAGE` supplies the environment fallback. Operating-system
+`language` in system settings; `ARTIFEX_LANGUAGE` supplies the environment fallback. Operating-system
 `LANG` does not select the application language.
 
-Requests prefer `lang`, then supported `Accept-Language` preferences, then the `artex_locale`
+Requests prefer `lang`, then supported `Accept-Language` preferences, then the `artifex_locale`
 cookie, then the server default. New HTTP-created tasks retain their language across queues and
 restarts; older tasks without saved language use the server default. Built-in agent guidance and
 output instructions use the run language; user-edited templates and stored evidence remain intact.
@@ -78,7 +79,7 @@ which saves you from collecting the same data twice:
 The **LLM → New** form includes GLM-5.3 configuration templates for Z.ai's General API and a
 separately labeled Coding Plan reference. Add your own API key; template selection does not save,
 activate, or contact a provider. Coding Plan use is restricted to officially supported tools, and
-ARTEX is not listed. See [provider setup and support limits](docs/llm-providers.md).
+ARTIFEX is not listed. See [provider setup and support limits](docs/llm-providers.md).
 
 > Requires a **PostgreSQL** database. Exploration needs an **LLM** configured
 > (`ANTHROPIC_API_KEY` or `OPENAI_API_KEY`, or set it in the UI).
@@ -86,8 +87,8 @@ ARTEX is not listed. See [provider setup and support limits](docs/llm-providers.
 ### Option 1: one-click install script (recommended)
 
 ```bash
-git clone https://github.com/Autumn-27/ARTEX.git
-cd artex
+git clone https://github.com/sebastian93921/ARTIFEX.git
+cd artifex
 ./install.sh
 ```
 
@@ -107,15 +108,15 @@ password).
 ### Option 2: Docker Compose (manual)
 
 ```bash
-git clone https://github.com/Autumn-27/ARTEX.git
-cd artex
+git clone https://github.com/sebastian93921/ARTIFEX.git
+cd artifex
 cp .env.example .env          # set POSTGRES_PASSWORD, optionally ANTHROPIC_API_KEY
-docker compose up -d --build  # builds the artex image locally + postgres
+docker compose up -d --build  # builds the artifex image locally + postgres
 # → http://localhost:8787
 ```
 
 > The default compose file **builds the image locally** from this source. To use a published
-> release image from `ghcr.io/autumn-27/artex`, explicitly select its version in compose.
+> release image from `ghcr.io/autumn-27/artifex`, explicitly select its version in compose.
 
 The image bundles common tools (ripgrep/curl/vim/npm/nmap…); `./skills` and `./data` are
 bind-mounted so they persist.
@@ -127,9 +128,9 @@ servers usually open the event stream with `GET /sse` and then receive JSON-RPC 
 
 ### Option 3: download a prebuilt binary (Releases)
 
-> Download a platform archive from [Releases](https://github.com/Autumn-27/ARTEX/releases).
+> Download a platform archive from [Releases](https://github.com/sebastian93921/ARTIFEX/releases).
 > The archive for each platform is
-> `artex-<version>-<os>-<arch>.zip`, unpacking to `artex` + `start.sh`
+> `artifex-<version>-<os>-<arch>.zip`, unpacking to `artifex` + `start.sh`
 > (`start.bat` on Windows) + `skills/` + `config.example.json`:
 
 The archive also includes `adapters/agent/`; see the [agent setup instructions](adapters/agent/README.md).
@@ -139,11 +140,11 @@ cp config.example.json config.json   # fill in the database connection
 ./start.sh                            # → http://localhost:8787
 ```
 
-> Start with `start.sh` / `start.bat`, not `./artex` directly. It is a supervisor: after the
+> Start with `start.sh` / `start.bat`, not `./artifex` directly. It is a supervisor: after the
 > program exits it decides, from the exit code, whether to relaunch, and the
 > [in-app one-click update](#option-1-in-app-one-click-update-recommended) relies on it to swap in
-> the new build. Running `./artex` directly means an update will not be relaunched.
-> To run in the background: `nohup ./start.sh >artex.log 2>&1 &`.
+> the new build. Running `./artifex` directly means an update will not be relaunched.
+> To run in the background: `nohup ./start.sh >artifex.log 2>&1 &`.
 
 ### Option 4: build a single binary from source
 
@@ -154,12 +155,12 @@ cd web && npm ci && npm run build:static && cd ..
 mkdir -p server/webui/dist
 cp -R web/out/. server/webui/dist/
 # 3) build (the embedui tag embeds the frontend)
-CGO_ENABLED=0 go build -tags embedui -o artex ./cmd/artex
+CGO_ENABLED=0 go build -tags embedui -o artifex ./cmd/artifex
 ./start.sh
 ```
 
-> The build source path stays `./cmd/artex` and the Go module stays `github.com/Autumn-27/artex`
-> for compatibility with upstream. Only the output binary is named `artex`.
+> The build source path stays `./cmd/artifex` and the Go module stays `github.com/sebastian93921/artifex`
+> for compatibility with upstream. Only the output binary is named `artifex`.
 
 ### Option 5: build cross-platform release archives
 
@@ -168,14 +169,14 @@ release. Release mode builds Linux amd64/arm64, macOS amd64/arm64, and Windows a
 
 ```bash
 ./build.sh --release
-# output: dist/artex-0.3.3-*.zip
+# output: dist/artifex-0.3.3-*.zip
 ```
 
 UPX-packed self-extracting binaries can clash with some Linux kernels, virtualization, or security
-policies, so UPX is off by default. Set custom targets with `ARTEX_TARGETS`, and pass `--upx` explicitly when you have confirmed the target is compatible:
+policies, so UPX is off by default. Set custom targets with `ARTIFEX_TARGETS`, and pass `--upx` explicitly when you have confirmed the target is compatible:
 
 ```bash
-ARTEX_TARGETS=linux/amd64,windows/amd64 ./build.sh --release
+ARTIFEX_TARGETS=linux/amd64,windows/amd64 ./build.sh --release
 ./build.sh --target linux/amd64 --upx
 ```
 
@@ -185,7 +186,7 @@ ARTEX_TARGETS=linux/amd64,windows/amd64 ./build.sh --release
 
 > Updates swap the program only; your data stays put. The Postgres volume `pgdata`, `./data`
 > (jwt.key / SQLite / …), and `./skills` are all preserved. **Database migrations run on their
-> own** — `artex` re-runs `schema.sql` idempotently on every start (including `ADD COLUMN` /
+> own** — `artifex` re-runs `schema.sql` idempotently on every start (including `ADD COLUMN` /
 > `CREATE INDEX IF NOT EXISTS`), so "restart is migrate." Still, back up `./data` and the database
 > before upgrading.
 
@@ -195,15 +196,15 @@ On the **System configuration** page (sidebar "System configuration" → `/syste
 **Version and updates** card checks for and installs new versions without logging into the server.
 
 After you click "Update": it downloads the release for your platform → checks it against the
-release's `SHA256SUMS` → smoke-tests the new binary with `-h` → stages it as `artex.new` →
+release's `SHA256SUMS` → smoke-tests the new binary with `-h` → stages it as `artifex.new` →
 the program exits and `start.sh` / `start.bat` relaunches it to finish the swap. The page waits for
 the new version to come up and refreshes.
 
 - **A failed update leaves no broken program**: if verification or the smoke test fails, the staged
   file is discarded and the current version keeps running. If a swapped-in version fails to start
-  three times in a row, it rolls back to `artex.old` automatically (the failed one is kept as
-  `artex.failed` for inspection).
-- **Roll back anytime**: the previous version is kept as `artex.old`, and the card has a
+  three times in a row, it rolls back to `artifex.old` automatically (the failed one is kept as
+  `artifex.failed` for inspection).
+- **Roll back anytime**: the previous version is kept as `artifex.old`, and the card has a
   "Roll back to previous version" button. Note that the database schema does not roll back.
 - **Updating interrupts running tasks** — an update is a restart, so do it when idle.
 - **Development builds get no updates**: this is disabled when the version is `dev` or a
@@ -211,46 +212,46 @@ the new version to come up and refreshes.
 - **Under Docker, only the program changes, not the image**: the playwright / nmap toolchains in the
   image do not upgrade along with it, and rebuilding the container with `docker compose up -d` reverts
   to the versions baked into the image. To upgrade the image too, use
-  `docker compose pull artex && docker compose up -d artex` (once a published image exists;
-  otherwise `docker compose up -d --build artex`).
+  `docker compose pull artifex && docker compose up -d artifex` (once a published image exists;
+  otherwise `docker compose up -d --build artifex`).
 - If reaching GitHub needs a proxy, configure the **global proxy** on the same page and the update
   path uses it. Updates download only from GitHub domains and force HTTPS.
 
 ### Option 2: one-click update script
 
 ```bash
-cd artex
+cd artifex
 ./update.sh
 ```
 
 The script optionally runs `git pull` first, then lets you choose **① Docker update** or
 **② local build update** (matching `install.sh`):
 
-- **① Docker**: rebuild the current checkout with `docker compose build artex`, then
-  recreate the service with `docker compose up -d artex`.
-- **② Local**: rebuild the frontend static output → recompile `./artex` (restart the process
+- **① Docker**: rebuild the current checkout with `docker compose build artifex`, then
+  recreate the service with `docker compose up -d artifex`.
+- **② Local**: rebuild the frontend static output → recompile `./artifex` (restart the process
   to apply).
 
 ### Option 3: Docker Compose (manual)
 
 ```bash
-cd artex
+cd artifex
 git pull                       # update compose / scripts (optional)
 # To pin a source version, check out a reviewed tag or commit before building.
-docker compose up -d --build artex   # rebuild from source and restart → auto-migrate schema
+docker compose up -d --build artifex   # rebuild from source and restart → auto-migrate schema
 docker image prune -f          # clean up old images (optional)
 ```
 
 > Once a published image exists and compose explicitly selects it, replace the build step with
-> `docker compose pull artex && docker compose up -d artex`.
+> `docker compose pull artifex && docker compose up -d artifex`.
 
 ### Option 4: prebuilt binary (Releases)
 
-Download the new `artex-<version>-<os>-<arch>.zip`, stop the old process,
-overwrite `artex` and `skills/` (keep your `config.json` and `data/`), and restart:
+Download the new `artifex-<version>-<os>-<arch>.zip`, stop the old process,
+overwrite `artifex` and `skills/` (keep your `config.json` and `data/`), and restart:
 
 ```bash
-cp -r <unpacked>/skills ./ && cp <unpacked>/artex ./
+cp -r <unpacked>/skills ./ && cp <unpacked>/artifex ./
 ./start.sh
 ```
 
@@ -260,7 +261,7 @@ cp -r <unpacked>/skills ./ && cp <unpacked>/artex ./
 git pull
 cd web && npm ci && npm run build:static && cd ..
 cp -r web/out server/webui/dist
-CGO_ENABLED=0 go build -tags embedui -o artex ./cmd/artex
+CGO_ENABLED=0 go build -tags embedui -o artifex ./cmd/artifex
 # restart ./start.sh
 ```
 
@@ -273,32 +274,32 @@ CGO_ENABLED=0 go build -tags embedui -o artex ./cmd/artex
 Claude Code, Codex and Pi can create tasks, read progress, coverage and findings through the
 [agent adapter](adapters/agent/README.md). Claude Code/Codex use local stdio MCP; Pi uses a native
 extension. Reads are enabled by default, with task creation and pause/resume explicitly enabled
-through configuration. The adapter uses the existing authenticated API and keeps ARTEX's
+through configuration. The adapter uses the existing authenticated API and keeps ARTIFEX's
 internal agents and model configuration intact.
 
-**Database** (`config.json`, or override with the environment variable `ARTEX_PG_DSN`):
+**Database** (`config.json`, or override with the environment variable `ARTIFEX_PG_DSN`):
 
 ```json
 {
   "database": {
     "host": "127.0.0.1", "port": 5432,
-    "user": "artex", "password": "yourpass",
-    "dbname": "artex", "sslmode": "disable"
+    "user": "artifex", "password": "yourpass",
+    "dbname": "artifex", "sslmode": "disable"
   }
 }
 ```
 
-> The configuration and environment keys keep the `ARTEX_*` prefix and the `artex` database defaults
-> for compatibility with upstream. Scripts also accept the `ARTEX_*` aliases where noted.
+> The configuration and environment keys keep the `ARTIFEX_*` prefix and the `artifex` database defaults
+> for compatibility with upstream. Scripts also accept the `ARTIFEX_*` aliases where noted.
 
 **LLM**: `export ANTHROPIC_API_KEY=sk-...` (or `OPENAI_API_KEY`), or set it on the UI's "LLM
-configuration" page. Optional: `ARTEX_LLM_PROVIDER` / `ARTEX_LLM_MODEL` / `ARTEX_LLM_BASE_URL` /
-`ARTEX_LLM_PROXY`.
+configuration" page. Optional: `ARTIFEX_LLM_PROVIDER` / `ARTIFEX_LLM_MODEL` / `ARTIFEX_LLM_BASE_URL` /
+`ARTIFEX_LLM_PROXY`.
 
 **Concurrency**: the number of work agents per task is set in "System settings" (default 3).
 
 **Common flags**: `./start.sh -addr :8787 -proxy :8788` (`-addr` is frontend + API, `-proxy` is the
-traffic-capture proxy). The start script passes flags straight through to `artex`.
+traffic-capture proxy). The start script passes flags straight through to `artifex`.
 
 ---
 
@@ -335,7 +336,7 @@ Demo mode only produces clearly labeled simulated records and does not touch rea
 ./dev.sh    # backend(:8787) + traffic proxy(:8788) + frontend next dev(:5173) → http://localhost:5173
 ```
 
-- Backend: `go run ./cmd/artex` (without `-tags embedui` the frontend is not embedded)
+- Backend: `go run ./cmd/artifex` (without `-tags embedui` the frontend is not embedded)
 - Frontend: `cd web && npm run dev` (`/api` is reverse-proxied to the backend, with hot reload)
 - Tests: `go test ./...`
 - Mock preview (no backend): `cd web && NEXT_PUBLIC_MOCK=1 npm run dev`
@@ -344,7 +345,7 @@ Demo mode only produces clearly labeled simulated records and does not touch rea
 
 ## Architecture
 
-ARTEX (ARTEX under the hood) is an **LLM multi-agent autonomous penetration system**: a single
+ARTIFEX (ARTIFEX under the hood) is an **LLM multi-agent autonomous penetration system**: a single
 Go backend (with the Next.js frontend embedded) plus PostgreSQL. Agent capabilities come from the
 [`norma`](https://github.com/Autumn-27/norma) SDK (`agentcore` / `tool` / `permission` / `harness` /
 `memory` / `transcript`). The core is a **two-graph architecture**, with two autonomy mechanisms
@@ -551,12 +552,12 @@ own.
 
 ## Provenance
 
-ARTEX is [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) at upstream commit `160fe13`, with
-the original product name restored (an intermediate rebrand was reverted). The Go module
-(`github.com/Autumn-27/artex`), the build source path (`./cmd/artex`), the `ARTEX_*` config/env
-keys, and the `artex` database defaults are original. The executable is `artex`; release archives
-follow `artex-<version>-<os>-<arch>.zip`. An intermediate Korean localization was removed; English
-is the only interface language, and unsupported `ARTEX_LANGUAGE`/`?lang=ko` values negotiate back
+ARTIFEX is [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) at upstream commit `160fe13`, rebranded as ARTIFEX in this tree (an intermediate ScopeWeaver rebrand was reverted
+before this rename). The Go module
+(`github.com/sebastian93921/artifex`), the build source path (`./cmd/artifex`), the `ARTIFEX_*` config/env
+keys, and the `artifex` database defaults are original. The executable is `artifex`; release archives
+follow `artifex-<version>-<os>-<arch>.zip`. An intermediate Korean localization was removed; English
+is the only interface language, and unsupported `ARTIFEX_LANGUAGE`/`?lang=ko` values negotiate back
 to English. See [docs/PROVENANCE.md](docs/PROVENANCE.md).
 
 ### Screenshots
@@ -576,14 +577,14 @@ unchanged and credited to upstream.
 - **Reference**: [Cairn](https://github.com/oritera/Cairn).
 - **Upstream community**: the ARTEX authors run the WeChat public account **SecSentry**
   (`screenshots/wx.png` is their QR code, kept as an upstream asset). This is the upstream project's
-  channel, not a ARTEX channel.
+  channel, not an ARTIFEX channel.
 
 ---
 
 ## License and disclaimer
 
 > This section preserves the upstream license and the authors' usage restrictions and disclaimer,
-> translated faithfully from ARTEX. The terms are unchanged.
+> translated faithfully from ARTIFEX. The terms are unchanged.
 
 ### Open-source license
 
@@ -599,7 +600,7 @@ complete source code available to those users.**
 > The "usage restrictions" and "disclaimer" below are additional conditions and a serious statement
 > from the authors to users. Please observe them.
 
-**ARTEX is intended only for personal study, source-code research, and local technical validation. It
+**ARTIFEX is intended only for personal study, source-code research, and local technical validation. It
 must not be used to launch real tests against any online system or website.**
 
 ### Permitted use

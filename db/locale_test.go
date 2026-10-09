@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 )
 
 func literalTemplate(expr ast.Expr) (string, bool) {
@@ -148,7 +148,7 @@ func TestRetestInitialMessageLanguagePreservesNotes(t *testing.T) {
 
 func TestSeedLocalizationPreservesCustomization(t *testing.T) {
 	// This integration test uses only the explicitly supplied test database.
-	if os.Getenv("ARTEX_PG_DSN") == "" {
+	if os.Getenv("ARTIFEX_PG_DSN") == "" {
 		t.Skip("explicit isolated database required")
 	}
 	d, err := Open(testDSN(t))

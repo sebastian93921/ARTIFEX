@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/sebastian93921/artifex/db"
 )
 
 // Manual constraint CRUD from overview management, plus injection-scope settings. These allow/deny constraints

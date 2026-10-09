@@ -1,6 +1,6 @@
 package intercept
 
-import "github.com/Autumn-27/artex/locale"
+import "github.com/sebastian93921/artifex/locale"
 
 func init() {
 	locale.Register(JudgeContextBoundary, JudgeContextBoundary)

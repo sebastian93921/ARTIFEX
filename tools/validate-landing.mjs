@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-/* Integrity check for the ARTEX landing page.
+/* Integrity check for the ARTIFEX landing page.
    Lives outside landing/ so it is never published. Verifies that every
-   referenced asset exists, that relative paths resolve under /artex/,
+   referenced asset exists, that relative paths resolve under /artifex/,
    that the site stays English-only (no stale /ko/ links), and that no
    planning/seed/contract metadata leaked into the shipped folder. */
 
@@ -62,7 +62,7 @@ for (const { file, base, lang } of pages) {
   }
   ok(`${lang}: ${refs.size} references scanned, all local assets present`);
 
-  // no absolute-root asset paths (would break under /artex/ base)
+  // no absolute-root asset paths (would break under /artifex/ base)
   if (/(?:src|href)="\/(?!\/)/.test(html))
     fail(`${lang}: absolute root path found (breaks project-pages base)`);
   else ok(`${lang}: no absolute root asset paths`);

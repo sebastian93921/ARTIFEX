@@ -2,7 +2,7 @@ package agent
 
 import (
 	"bytes"
-	"github.com/Autumn-27/artex/locale"
+	"github.com/sebastian93921/artifex/locale"
 	"text/template"
 	"time"
 )
