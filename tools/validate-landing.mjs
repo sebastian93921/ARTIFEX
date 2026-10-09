@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /* Integrity check for the ARTEX landing page.
    Lives outside landing/ so it is never published. Verifies that every
-   referenced asset exists, that relative paths resolve under /artex/
-   and /artex/ko/, that EN/KO structural parity holds, and that no
+   referenced asset exists, that relative paths resolve under /artex/,
+   that the site stays English-only (no stale /ko/ links), and that no
    planning/seed/contract metadata leaked into the shipped folder. */
 
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
@@ -26,7 +26,6 @@ const ok = (m) => {
 /* --- 1. Referenced assets resolve relative to each HTML file --- */
 const pages = [
   { file: join(landing, "index.html"), base: landing, lang: "en" },
-  { file: join(landing, "ko", "index.html"), base: join(landing, "ko"), lang: "ko" },
 ];
 
 const attrRe = /(?:src|href)="([^"#?][^"]*)"|srcset="([^"]+)"/g;
@@ -67,51 +66,21 @@ for (const { file, base, lang } of pages) {
   if (/(?:src|href)="\/(?!\/)/.test(html))
     fail(`${lang}: absolute root path found (breaks project-pages base)`);
   else ok(`${lang}: no absolute root asset paths`);
+
+  // English-only: no links back to the removed /ko/ tree
+  if (/href="ko\/"/.test(html) || /href="\.\.\/ko\/"/.test(html))
+    fail(`${lang}: stale link to removed ko/ page`);
+  else ok(`${lang}: no links to ko/`);
 }
 
-/* --- 2. EN/KO parity on structural anchors and controls --- */
+/* --- 2. Every screenshot figure carries a demo caption --- */
 const en = readFileSync(join(landing, "index.html"), "utf8");
-const ko = readFileSync(join(landing, "ko", "index.html"), "utf8");
+const figs = (en.match(/<figure/g) || []).length;
+const caps = (en.match(/figcaption class="demo"/g) || []).length;
+if (caps < figs) fail(`en: ${figs} figures but only ${caps} demo captions`);
+else ok(`en: ${caps} demo captions for ${figs} figures`);
 
-const ids = (s) =>
-  [...s.matchAll(/\bid="([^"]+)"/g)].map((x) => x[1]).sort();
-const enIds = ids(en);
-const koIds = ids(ko);
-const missingInKo = enIds.filter((i) => !koIds.includes(i));
-const missingInEn = koIds.filter((i) => !enIds.includes(i));
-if (missingInKo.length || missingInEn.length) {
-  fail(`id parity mismatch: ko-missing=[${missingInKo}] en-missing=[${missingInEn}]`);
-} else ok(`EN/KO id parity (${enIds.length} ids each)`);
-
-const countRole = (s, role) =>
-  (s.match(new RegExp(`role="${role}"`, "g")) || []).length;
-for (const role of ["tab", "tabpanel", "tablist"]) {
-  if (countRole(en, role) !== countRole(ko, role))
-    fail(`${role} count differs EN(${countRole(en, role)}) KO(${countRole(ko, role)})`);
-  else ok(`EN/KO ${role} count matches (${countRole(en, role)})`);
-}
-
-const copyEn = (en.match(/class="copy-btn"/g) || []).length;
-const copyKo = (ko.match(/class="copy-btn"/g) || []).length;
-if (copyEn !== copyKo) fail(`copy-btn count differs EN(${copyEn}) KO(${copyKo})`);
-else ok(`EN/KO copy-btn count matches (${copyEn})`);
-
-// language cross-links
-if (!/href="ko\/"/.test(en)) fail("EN page missing link to ko/");
-else ok("EN links to ko/");
-if (!/href="\.\.\/"/.test(ko)) fail("KO page missing link to ../ (EN)");
-else ok("KO links to ../ (EN)");
-
-/* --- 3. Every screenshot figure carries a demo caption --- */
-for (const [name, s] of [["en", en], ["ko", ko]]) {
-  const figs = (s.match(/<figure/g) || []).length;
-  const caps = (s.match(/figcaption class="demo"/g) || []).length;
-  if (caps < figs)
-    fail(`${name}: ${figs} figures but only ${caps} demo captions`);
-  else ok(`${name}: ${caps} demo captions for ${figs} figures`);
-}
-
-/* --- 4. No planning/seed/contract metadata shipped in landing/ --- */
+/* --- 3. No planning/seed/contract metadata shipped in landing/ --- */
 const banned = [/THESIS:/, /OWN-WORLD:/, /surface seed/i, /Direction contract/i, /impeccable:product-schema/];
 const walk = (dir) => {
   for (const entry of readdirSync(dir)) {
@@ -128,7 +97,7 @@ const walk = (dir) => {
 walk(landing);
 ok("no planning/seed/contract metadata found in landing/");
 
-/* --- 5. .nojekyll present --- */
+/* --- 4. .nojekyll present --- */
 if (!existsSync(join(landing, ".nojekyll"))) fail(".nojekyll missing");
 else ok(".nojekyll present");
 
