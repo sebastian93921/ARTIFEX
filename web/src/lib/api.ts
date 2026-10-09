@@ -950,6 +950,7 @@ export const api = {
     max_tokens?: number; // Per-response output limit; 0 omits the field and uses the server default.
     max_tokens_field?: string; // Empty string defaults to max_tokens; max_completion_tokens applies only to OpenAI format.
     session_header_key?: string; // Nonempty header names send the current session ID on each request; empty omits the header.
+    max_concurrent?: number; // In-flight request cap; 0/unset = unlimited. Queues excess calls at the endpoint's budget.
     retry?: LLMRetryOverride; // Per-profile retry overrides; zeros inherit global retry policy.
   }) => post<{ id: number }>("/llm/profiles", p),
   deleteLLMProfile: (id: string) => del<{ deleted: number }>(`/llm/profiles/${id}`),

@@ -395,6 +395,9 @@ CREATE TABLE IF NOT EXISTS llm_profiles (
     -- Custom session header: when nonempty, send this HTTP header with the current run's session ID
     -- (chat conversation/worker intent), for gateway prompt caching or sticky routing. Empty omits it.
     session_header_key TEXT NOT NULL DEFAULT '',
+    -- Max in-flight requests to this profile; 0=unlimited. Excess calls queue for a free slot
+    -- (llmpool.Limiter) so a busy task cannot monopolize an endpoint with a small concurrency budget.
+    max_concurrent    INTEGER NOT NULL DEFAULT 0 CHECK (max_concurrent >= 0),
     -- Retry overrides: attempts 0=global default/-1=disabled/>0=explicit; interval 0=default backoff/>0=fixed milliseconds.
     -- The groups cover connection, empty-response, and same-provider safety-window retries; see ALTER comments below.
     retry_connect_attempts    INTEGER NOT NULL DEFAULT 0,
@@ -434,6 +437,11 @@ ALTER TABLE llm_profiles ADD  CONSTRAINT llm_profiles_max_tokens_check
     CHECK (max_tokens >= 0);
 -- Add custom session header name to older databases; default '' omits it and preserves behavior.
 ALTER TABLE llm_profiles ADD COLUMN IF NOT EXISTS session_header_key TEXT NOT NULL DEFAULT '';
+-- Add the per-profile request-concurrency cap; default 0 (unlimited) preserves existing behavior.
+ALTER TABLE llm_profiles ADD COLUMN IF NOT EXISTS max_concurrent INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE llm_profiles DROP CONSTRAINT IF EXISTS llm_profiles_max_concurrent_check;
+ALTER TABLE llm_profiles ADD  CONSTRAINT llm_profiles_max_concurrent_check
+    CHECK (max_concurrent >= 0);
 
 -- Per-profile retry overrides (see LLM retry design): three attempt/fixed-interval pairs.
 -- Attempts: 0=global default, -1=disable this layer, >0=explicit count. Interval: 0=the layer's

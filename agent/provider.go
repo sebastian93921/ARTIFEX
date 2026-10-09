@@ -18,6 +18,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -75,6 +76,11 @@ type Config struct {
 	// Empty omits it. transcript.WithSessionID attaches the value to context, and
 	// RoundTripper reads it, so a shared provider can send different session values.
 	SessionHeaderKey string
+	// MaxConcurrent caps in-flight requests to this provider (llmpool.Limiter).
+	// 0 = unlimited. The server applies it per profile (or from
+	// ARTEX_LLM_MAX_CONCURRENT for env configs) so a busy task cannot occupy
+	// more than the endpoint's own concurrency budget.
+	MaxConcurrent int
 	// Retry holds resolved profile -> global -> built-in retry parameters, resolved
 	// by the server. See RetryConfig for layers; zero values use built-in defaults.
 	Retry RetryConfig
@@ -146,6 +152,9 @@ func compactionConfig(windowTokens int) *compaction.Config {
 //	                     API key optional — Ollama, vLLM, LM Studio, llama.cpp
 //	                     typically need none)
 //	ARTEX_LLM_PROXY    = proxy URL        (optional; http/https/socks5)
+//	ARTEX_LLM_MAX_CONCURRENT = max in-flight requests (optional; 0/unset = unlimited;
+//	                     queue excess calls — useful when the endpoint serves a
+//	                     fixed number of concurrent sessions, e.g. a shared vLLM)
 //	ANTHROPIC_API_KEY / OPENAI_API_KEY         = credentials
 func FromEnv() (Config, bool) {
 	prov := os.Getenv("ARTEX_LLM_PROVIDER")
@@ -174,6 +183,10 @@ func FromEnv() (Config, bool) {
 		Proxy:   strings.TrimSpace(os.Getenv("ARTEX_LLM_PROXY")),
 		// Streaming defaults on; ARTEX_LLM_STREAM=false/0/off explicitly disables it.
 		Stream: !isFalsy(os.Getenv("ARTEX_LLM_STREAM")),
+	}
+	// Optional in-flight request cap; invalid values mean unlimited.
+	if n, err := strconv.Atoi(strings.TrimSpace(os.Getenv("ARTEX_LLM_MAX_CONCURRENT"))); err == nil && n > 0 {
+		c.MaxConcurrent = n
 	}
 	switch prov {
 	case "openai":

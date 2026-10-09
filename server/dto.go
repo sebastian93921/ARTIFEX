@@ -618,6 +618,10 @@ type LLMProfileDTO struct {
 	// Optional custom HTTP header sent with the current conversation/intent session ID on each request.
 	// Empty omits the header. Supports gateways using session IDs for prompt caching/sticky routing.
 	SessionHeaderKey string `json:"session_header_key"`
+	// Max in-flight requests to this profile; 0=unlimited. Excess calls queue for a free
+	// slot so a busy task cannot monopolize an endpoint with a small concurrency budget
+	// (e.g. a shared vLLM serve with 4 concurrent session slots).
+	MaxConcurrent int `json:"max_concurrent"`
 	// Per-profile retry overrides for connection, empty response, and same-provider safe-window retries.
 	// attempts: 0=inherit, -1=disable this layer, positive=attempt count. interval_ms: 0=default exponential backoff;
 	// positive=fixed interval in milliseconds. All zeros fully inherit the historical global behavior.
@@ -645,6 +649,7 @@ func llmProfileDTO(p *db.LLMProfile) LLMProfileDTO {
 		MaxTokens:        p.MaxTokens,
 		MaxTokensField:   p.MaxTokensField,
 		SessionHeaderKey: p.SessionHeaderKey,
+		MaxConcurrent:    p.MaxConcurrent,
 		Retry:            p.Retry,
 	}
 }

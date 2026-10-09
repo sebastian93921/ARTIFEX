@@ -325,6 +325,7 @@ function ProfileSheet({
   const [maxTokens, setMaxTokens] = React.useState("0"); // Per-response output limit; 0 omits the field.
   const [maxTokensField, setMaxTokensField] = React.useState(NONE); // Output-limit field name; NONE means max_tokens.
   const [sessionHeaderKey, setSessionHeaderKey] = React.useState(""); // Custom session header name; blank omits it.
+  const [maxConcurrent, setMaxConcurrent] = React.useState("0"); // In-flight request cap; 0 = unlimited.
   const [retry, setRetry] = React.useState<LLMRetryOverride>(ZERO_OVERRIDE); // Profile retry overrides; all zeros follow global settings.
   const [testing, setTesting] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
@@ -353,6 +354,7 @@ function ProfileSheet({
     setMaxTokens(String(profile?.max_tokens ?? 0));
     setMaxTokensField(fromStore(profile?.max_tokens_field));
     setSessionHeaderKey(profile?.session_header_key ?? "");
+    setMaxConcurrent(String(profile?.max_concurrent ?? 0));
     setRetry(profile?.retry ?? ZERO_OVERRIDE);
     setApiKey("");
     setKeyHint(profile?.api_key_hint ?? "");
@@ -458,6 +460,7 @@ function ProfileSheet({
         // The backend normalizes again; this also prevents contradictory UI submissions.
         max_tokens_field: format === "openai" ? toStore(maxTokensField) : "",
         session_header_key: sessionHeaderKey.trim(),
+        max_concurrent: Math.max(0, Number(maxConcurrent) || 0),
         retry,
       });
       if (isNew) toast.success(swt("interface.m1380", { p0: name.trim() }));
@@ -737,6 +740,26 @@ function ProfileSheet({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          <div className="grid gap-3 rounded-lg border p-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="grid gap-0.5">
+                <Label htmlFor="p-max-concurrent" className="text-sm">
+                  {swt("interface.m2874")}</Label>
+                <p className="text-muted-foreground text-xs">
+                  {swt("interface.m2875")}</p>
+              </div>
+              <Input
+                id="p-max-concurrent"
+                type="number"
+                min={0}
+                className="w-28 shrink-0"
+                value={maxConcurrent}
+                onChange={(e) => setMaxConcurrent(e.target.value)}
+                placeholder="0"
+              />
             </div>
           </div>
 

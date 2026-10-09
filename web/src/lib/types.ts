@@ -1054,6 +1054,9 @@ export interface LLMProfile {
   // Custom HTTP header name; nonempty sends the current conversation/intent session ID on every request.
   // Empty omits it. Used by gateways with session-based prompt caching or sticky routing.
   session_header_key?: string;
+  // Max in-flight requests to this profile; 0/unset = unlimited. Excess calls queue for a free
+  // slot — set it to the endpoint's own concurrency budget (e.g. 4 for a shared vLLM serve).
+  max_concurrent?: number;
   // Profile overrides for connection/empty-response/safe-window retries; blank/all zeros inherit global policy.
   retry?: LLMRetryOverride;
 }

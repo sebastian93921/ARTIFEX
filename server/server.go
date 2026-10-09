@@ -361,6 +361,7 @@ func (s *Server) saveLLMConfig(cfg agent.Config) error {
 	var maxTokens int
 	var maxTokensField string
 	var sessionHeaderKey string
+	var maxConcurrent int
 	var retry db.RetryOverride
 	if profs, _ := s.m.pg.ListProfiles(); profs != nil {
 		for _, p := range profs {
@@ -368,6 +369,7 @@ func (s *Server) saveLLMConfig(cfg agent.Config) error {
 				id, priority, poolExclude, streaming = p.ID, p.Priority, p.PoolExclude, p.Streaming
 				maxTokens, maxTokensField = p.MaxTokens, p.MaxTokensField
 				sessionHeaderKey = p.SessionHeaderKey
+				maxConcurrent = p.MaxConcurrent
 				retry = p.Retry
 				break
 			}
@@ -379,7 +381,8 @@ func (s *Server) saveLLMConfig(cfg agent.Config) error {
 		ContextWindowK: cfg.ContextWindowK, ThinkingType: cfg.ThinkingType, ReasoningEffort: cfg.ReasoningEffort, IsDefault: true,
 		Priority: priority, PoolExclude: poolExclude, Streaming: streaming,
 		MaxTokens: maxTokens, MaxTokensField: maxTokensField, SessionHeaderKey: sessionHeaderKey,
-		Retry: retry,
+		MaxConcurrent: maxConcurrent,
+		Retry:         retry,
 	})
 	if err != nil {
 		return err
@@ -449,6 +452,8 @@ func (s *Server) applyLLM(cfg agent.Config) error {
 		s.cfgMu.Unlock()
 		prov = llmrec.Wrap(prov, s.m.PG(), cfg.Model, profName, cfg.ThinkingType, cfg.ReasoningEffort, s.m.LLMRecordEnabled)
 		prov = bindSideProvider(prov, cfg, 0, profName)
+		// Env-configured concurrency cap (ARTEX_LLM_MAX_CONCURRENT); no-op when unset.
+		prov = llmpool.NewLimiter(prov, profName, cfg.MaxConcurrent)
 	}
 	s.cfgMu.Lock()
 	s.llmDirect = prov
@@ -584,6 +589,10 @@ func (s *Server) providerForProfile(id int64) (llm.Provider, agent.Config, bool)
 	if p, _ := s.m.pg.ProfileByID(id); p != nil {
 		prov = llmrec.Wrap(prov, s.m.PG(), cfg.Model, p.Name, cfg.ThinkingType, cfg.ReasoningEffort, s.m.LLMRecordEnabled)
 		prov = bindSideProvider(prov, cfg, id, p.Name)
+		// Concurrency cap per profile: every consumer sharing this cached
+		// provider shares one slot pool. Outermost so only admitted requests
+		// reach the recorder (queued calls never touch the endpoint).
+		prov = llmpool.NewLimiter(prov, p.Name, p.MaxConcurrent)
 	}
 	s.provCacheMu.Lock()
 	if generation != s.provCacheGen {

@@ -1832,6 +1832,15 @@ func (s *Server) pgSaveProfile(w http.ResponseWriter, r *http.Request) {
 	if p.MaxTokens < 0 {
 		p.MaxTokens = 0
 	}
+	// Same for the concurrency cap: negative is meaningless (schema CHECK rejects
+	// it, which would surface as a raw 500), and 1024 is already absurd for a
+	// real endpoint budget — clamp instead of erroring.
+	if p.MaxConcurrent < 0 {
+		p.MaxConcurrent = 0
+	}
+	if p.MaxConcurrent > 1024 {
+		p.MaxConcurrent = 1024
+	}
 	if p.Format != "openai" || p.MaxTokensField != llm.MaxTokensFieldCompletion {
 		p.MaxTokensField = ""
 	}

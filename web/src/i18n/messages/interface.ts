@@ -2872,5 +2872,7 @@ export const en = {
   "m2870": "Features",
   "m2871": "Dashboard",
   "m2872": "Chat",
-  "m2873": "Logs"
+  "m2873": "Logs",
+  "m2874": "Max concurrent requests",
+  "m2875": "Cap in-flight requests to this endpoint; excess calls queue for a free slot. 0 = unlimited. Set it to the endpoint's own budget (e.g. 4 for a shared vLLM serve)."
 };
