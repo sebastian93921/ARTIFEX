@@ -18,3 +18,23 @@ export const en = {
   updateLauncher: "One-click updates rely on the supervisor script to restart the application. Start with <code>start.sh</code> (Windows: <code>start.bat</code>). Running the binary directly does not restart it automatically after exit.",
   pagination: "{from}–{to} / {total} records",
 };
+
+export const zh: Record<keyof typeof en, string> = {
+  captureDisabled: "停用時（預設值），不會記錄任何流量。Agent <b>既不會取得 proxy 設定，也不會取得流量工具</b>，其提示詞中<b>不含任何 proxy 指示</b>。切換後會立即重建 Agent 以套用變更。",
+  binding: "預設為關閉。啟用後，在建立漏洞時觸發的報告 Agent 會檢視既有的 HTTP 請求與回應、關聯相關流量，然後撰寫報告。<b>檢視封包與進行額外的工具呼叫會增加 token 用量。</b>",
+  proxy: "所有 Agent 的<b>目標流量</b>都會使用此對外 proxy，以隱藏來源 IP 或使用跳板機。支援 <b>HTTP、HTTPS 與 SOCKS5</b>，並可選擇是否以 <code>user:pass</code> 進行驗證。留空則直接連線。",
+  proxyCapture: "在<b>啟用流量擷取</b>時，此 proxy 是記錄 proxy 的<b>上游</b>：流量會先記錄再轉發。停用擷取時，proxy 會直接注入 Agent 的 Bash/WebFetch。此設定與網頁搜尋及 LLM proxy 互相獨立。",
+  proxySocks: "<b>SOCKS5 注意事項：</b>停用擷取時，每個命令列工具都必須支援 <code>ALL_PROXY</code>。curl 支援；部分工具可能會忽略。就 SOCKS5 而言，建議啟用擷取：MITM proxy 會直接建立連線，無需工具支援。",
+  constraints: "啟用時，每個任務的<b>操作約束</b>（任務概覽中的允許／拒絕項目）會納入 Agent 的系統提示詞，以界定探索邊界，例如僅測試目前連接埠，或禁止暴力破解。",
+  constraintTargets: "為 <b>planner</b> 與 <b>worker</b> 分別控制注入；兩者預設皆啟用。變更會在下一次讀取時生效，無需重建 Agent。停用注入時，該 Agent 將不再看到這些約束。",
+  compression: "<b>noa 上下文壓縮</b>使用模型來壓縮冗長的對話歷史（norma v0.4.0）。啟用時，<b>planner、worker、main-Agent 與 chat</b> 的上下文會改用 noa，而非內建壓縮。原始內容會封存在任務工作目錄中供檢視。變更會影響後續執行，無需重建 Agent；停用時會立即恢復內建壓縮。",
+  webSearch: "此為網頁搜尋的<b>總開關與來源設定</b>。請先啟用此處，再於<b>每個 Agent 的設定中啟用 web_search</b>。搜尋會回傳標題、連結與摘要；WebFetch 則取得完整內容。網頁搜尋<b>不使用記錄 proxy</b>，且與流量擷取互相獨立。",
+  searchSources: "可用的來源包括：無需 API key 的 <b>DuckDuckGo (ddgs)</b>、需 Brave API key 的 <b>Brave 免費方案</b>、需 Tavily API key 的 <b>Tavily</b>，以及使用目前 LLM 設定檔的 <b>DeepSeek</b>。必須先開啟總開關，Agent 才能啟用網頁搜尋。",
+  deepseekRequirements: "此來源會重複使用<b>目前作用中的 LLM 設定檔</b>。它<b>僅支援官方 DeepSeek 模型</b>，且設定檔<b>必須使用 Anthropic 通訊協定</b>。DeepSeek 的 OpenAI 端點不支援伺服器端搜尋。切換 LLM 設定檔可能會使此來源無法使用。",
+  deepseekBehavior: "與其他來源不同，搜尋是在 <b>DeepSeek 的伺服器上</b>執行。每次搜尋都會增加一次模型呼叫與 token 成本。搜尋請求<b>會略過上方的對外 proxy</b>，且<b>不會記錄為流量</b>。結果<b>僅包含標題與連結</b>，不含摘要；請使用 WebFetch 取得完整內容。",
+  python: "自訂<b>腳本</b>工具會使用此 Python 直譯器。系統會在啟動時偵測，優先使用 python3。請輸入虛擬環境或特定版本的絕對路徑，或留空以自動偵測執行環境。",
+  workers: "每個任務同時執行的 Worker Agent 數量（預設：3）。更多 Worker 會增加平行探索的規模與成本。變更<b>僅適用於之後啟動的任務</b>；執行中的任務不受影響。",
+  sendPreference: "此偏好設定<b>僅儲存在此瀏覽器</b>中，不會與您的帳戶同步。更換瀏覽器或清除網站資料後，請重新設定。",
+  updateLauncher: "一鍵更新需依賴 supervisor 腳本來重新啟動應用程式。請以 <code>start.sh</code>（Windows：<code>start.bat</code>）啟動。若直接執行二進位檔，結束後不會自動重新啟動。",
+  pagination: "{from}–{to} / {total} 筆記錄",
+};

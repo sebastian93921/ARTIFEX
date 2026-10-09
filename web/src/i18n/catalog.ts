@@ -32,11 +32,17 @@ export type Catalog = Record<MessageKey, string>;
 function flatten(locale: Locale): Catalog {
   const out: Record<string, string> = {};
   for (const [ns, mod] of Object.entries(namespaces)) {
-    for (const [key, value] of Object.entries(mod[locale] as Record<string, string>)) out[`${ns}.${key}`] = value;
+    const tables = mod as unknown as Record<string, Record<string, string> | undefined>;
+    const base = mod.en as Record<string, string>;
+    const table = tables[locale];
+    for (const [key, value] of Object.entries(base)) {
+      // zh falls back to the English value per key until its table provides one.
+      out[`${ns}.${key}`] = (table && table[key]) || value;
+    }
   }
   return out as Catalog;
 }
 
-export const catalogs = { en: flatten("en") } as const;
+export const catalogs = { en: flatten("en"), zh: flatten("zh") } as const;
 
 export const namespaceNames = Object.keys(namespaces);

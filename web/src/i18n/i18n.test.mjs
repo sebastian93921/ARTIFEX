@@ -22,7 +22,7 @@ function reset() { delete globalThis.window; delete globalThis.document; __reset
 test("English is the default; unsupported and malformed preferences safely fall back", () => {
   reset(); assert.equal(getLocale(), "en");
   assert.equal(normalizeLocale("ko-KR"), null);
-  assert.equal(normalizeLocale("zh-CN"), null);
+  assert.equal(normalizeLocale("zh-CN"), "zh"); // zh maps onto the Traditional Chinese catalog
   assert.equal(readCookieLocale("artifex_locale=%E0%A4%A"), null);
   browser("unsupported", "artifex_locale=ko"); initializeLocale(); assert.equal(getLocale(), "en");
   reset(); browser("unsupported", "artifex_locale=%bad"); initializeLocale(); assert.equal(getLocale(), "en"); reset();
@@ -90,6 +90,7 @@ test("authored UI contains no untranslated Han literals; legacy parsers are expl
   for(const file of sourceFiles()) {
     const rel=path.relative(SRC_ROOT,file);
     if(rel.endsWith(".test.mjs"))continue; // Tests intentionally preserve multilingual user input.
+    if(rel.startsWith("i18n/"))continue;   // The i18n catalogs are the one place authored Han belongs (zh tables, native names).
     for(const hit of scanFile(file)) {
       if(rel==="lib/chat-mentions.ts" && legacyWire.has(hit.text))continue;
       if(rel==="components/approval-records.tsx" && hit.text==="/^\\[(?:模型|Model|모델)\\]\\s*/")continue;

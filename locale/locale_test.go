@@ -21,7 +21,10 @@ func TestNormalize(t *testing.T) {
 		"KO":    {Default, false},
 		"fr":    {Default, false},
 		"":      {Default, false},
-		"zh-CN": {Default, false},
+		"zh":    {Zh, true},
+		"zh-CN": {Zh, true},
+		"zh_TW": {Zh, true},
+		"ZH-HK": {Zh, true},
 	}
 	for in, want := range cases {
 		got, ok := Normalize(in)
@@ -38,9 +41,10 @@ func TestFromRequestPrecedence(t *testing.T) {
 	if got := FromRequest(r); got != En {
 		t.Errorf("unsupported query should fall through: got %q", got)
 	}
-	// Accept-Language wins over cookie when no query.
+	// Accept-Language wins over cookie when no query: the zh header beats the
+	// en cookie now that zh is a supported language.
 	r = newReq("/x", "zh-KR,zh;q=0.9,en;q=0.5", "en")
-	if got := FromRequest(r); got != En {
+	if got := FromRequest(r); got != Zh {
 		t.Errorf("accept-language should win over cookie: got %q", got)
 	}
 	// Unsupported cookie and header leave the server default.

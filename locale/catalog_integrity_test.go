@@ -70,3 +70,30 @@ func TestFormatArgumentsRecognizesReorderingAndWidth(t *testing.T) {
 		}
 	}
 }
+
+func TestZhCatalogKeysExistAndFormatCompatible(t *testing.T) {
+	if len(zhCatalog) == 0 {
+		t.Skip("no zh translations registered yet")
+	}
+	trunc := func(s string) string {
+		if len(s) > 60 {
+			return s[:60]
+		}
+		return s
+	}
+	t.Logf("checking %d registered zh keys", len(zhCatalog))
+	for key, value := range zhCatalog {
+		en, ok := catalog[key]
+		if !ok {
+			t.Errorf("zh translation for unknown key %q", trunc(key))
+			continue
+		}
+		if value == "" {
+			t.Errorf("empty zh translation for %q", trunc(key))
+			continue
+		}
+		if got, want := formatArguments(value), formatArguments(en); len(got) != len(want) {
+			t.Errorf("zh translation for %q: %d format args, en has %d", trunc(key), len(got), len(want))
+		}
+	}
+}

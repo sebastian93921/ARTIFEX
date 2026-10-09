@@ -63,3 +63,4 @@ Thumbs.db
 /artifex.old
 /artifex.failed
 /artifex.upgrade.json
+docker-compose.override.yml

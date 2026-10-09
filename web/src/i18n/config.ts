@@ -2,7 +2,7 @@
 // and the node tests. Keep this module free of DOM access and path aliases so
 // `node --test` can import it directly.
 
-export const LOCALES = ["en"] as const;
+export const LOCALES = ["en", "zh"] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = "en";
@@ -19,10 +19,12 @@ export const LOCALE_QUERY_PARAM = "lang";
 // Native names are shown in the language selector regardless of UI locale.
 export const LOCALE_NATIVE_NAMES: Record<Locale, string> = {
   en: "English",
+  zh: "繁體中文",
 };
 
 const INTL_LOCALES: Record<Locale, string> = {
   en: "en-US",
+  zh: "zh-HK",
 };
 
 export function isLocale(value: unknown): value is Locale {

@@ -17,10 +17,16 @@ func Register(key, en string) {
 	catalog[key] = en
 }
 
-// Lookup returns the raw (un-interpolated) template for key, falling back to the
-// key itself. ok reports whether a catalog entry was found. The lang argument is
-// retained for API compatibility; the catalog is English-only.
+// Lookup returns the raw (un-interpolated) template for key. The zh catalog is
+// consulted first when lang is Zh; keys without a zh translation fall back to
+// English. ok reports whether any catalog entry was found; a total miss returns
+// the key itself so a missing translation is visible but never fatal.
 func Lookup(l Lang, key string) (string, bool) {
+	if l == Zh {
+		if zh, ok := zhCatalog[key]; ok && zh != "" {
+			return zh, true
+		}
+	}
 	s, exists := catalog[key]
 	if !exists {
 		return key, false

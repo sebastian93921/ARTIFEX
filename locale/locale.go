@@ -21,8 +21,10 @@ import (
 type Lang string
 
 const (
-	// En is English, the product's only interface language.
+	// En is English, the product's default interface language.
 	En Lang = "en"
+	// Zh is Traditional Chinese (繁體中文).
+	Zh Lang = "zh"
 )
 
 // Default is the fallback language when nothing else is negotiated.
@@ -36,7 +38,7 @@ const CookieName = "artifex_locale"
 const QueryParam = "lang"
 
 // Supported reports whether l is a language ARTIFEX ships translations for.
-func Supported(l Lang) bool { return l == En }
+func Supported(l Lang) bool { return l == En || l == Zh }
 
 // Normalize parses a raw locale token (e.g. "en", "EN", "en-US") into a
 // supported Lang. ok is false when the token does not map to a supported
@@ -53,6 +55,8 @@ func Normalize(s string) (Lang, bool) {
 	switch Lang(s) {
 	case En:
 		return En, true
+	case Zh:
+		return Zh, true
 	default:
 		return Default, false
 	}
