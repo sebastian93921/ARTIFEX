@@ -12,8 +12,8 @@ An LLM multi-agent autonomous penetration-testing system (Go backend + Next.js f
 
 > **About this project.** ARTIFEX — an LLM multi-agent autonomous penetration-testing system by
 > [Autumn-27](https://github.com/Autumn-27/ARTEX) (Baidu "Agent+" attack-defense challenge champion
-> project). Built from upstream commit `160fe13`; this tree rebrands the product as **ARTIFEX**
-> with attribution retained.
+> project). This tree is a fork of ARTEX rebranded as **ARTIFEX** with attribution retained; it has
+> since diverged substantially from upstream.
 
 [Verification status and known limitations](docs/VERIFICATION.md).
 
@@ -587,8 +587,8 @@ own.
 
 ## Provenance
 
-ARTIFEX is [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) at upstream commit `160fe13`, rebranded as ARTIFEX in this tree (an intermediate ScopeWeaver rebrand was reverted
-before this rename). The Go module
+ARTIFEX is [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX), rebranded as ARTIFEX in this tree (an intermediate ScopeWeaver rebrand was reverted
+before this rename); the tree has since diverged substantially from upstream. The Go module
 (`github.com/sebastian93921/artifex`), the build source path (`./cmd/artifex`), the `ARTIFEX_*` config/env
 keys, and the `artifex` database defaults are original. The executable is `artifex`; release archives
 follow `artifex-<version>-<os>-<arch>.zip`. An intermediate Korean localization was removed; English
