@@ -56,7 +56,7 @@ func NewCompactor(prov llm.Provider, model string) *Compactor {
 		n:        20,
 		m:        8,
 		cooldown: 60 * time.Second,
-		maxDur:   5 * time.Minute,
+		maxDur:  15 * time.Minute,
 		running:  map[int64]bool{},
 		lastRun:  map[int64]time.Time{},
 	}
