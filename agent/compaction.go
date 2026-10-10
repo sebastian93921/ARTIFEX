@@ -85,7 +85,24 @@ func (c *Compactor) OnPlannerRound(ctx context.Context, ts *db.ExplorationStore)
 	}
 	go func() {
 		defer c.finish(ts.ID())
-		bg, cancel := context.WithTimeout(context.WithoutCancel(ctx), c.maxDur)
+		// Slot-lease compatibility: if the provider exposes hold-based slot
+		// reservation (llmpool), wait for a slot OUTSIDE the hard budget — two
+		// leased worker slots would otherwise starve every compression attempt.
+		// The maxDur below then bounds only the actual compression work.
+		base := context.WithoutCancel(ctx)
+		if hc, ok := c.prov.(interface {
+			AcquireHold(context.Context) (context.Context, func(), time.Duration, error)
+		}); ok {
+			queueCtx, cancelQueue := context.WithTimeout(base, 30*time.Minute)
+			defer cancelQueue()
+			if hctx, releaseHold, _, err := hc.AcquireHold(queueCtx); err == nil {
+				defer releaseHold()
+				base = hctx
+			}
+			// hold unavailable (pool failover chain etc.): keep the legacy
+			// behavior — the wait counts against maxDur.
+		}
+		bg, cancel := context.WithTimeout(base, c.maxDur)
 		defer cancel()
 		// Compaction calls prov.Complete directly, outside the agentcore session loop,
 		// so ctx lacks a session ID. Gateways using session headers for prompt caching
