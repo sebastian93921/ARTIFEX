@@ -398,6 +398,9 @@ CREATE TABLE IF NOT EXISTS llm_profiles (
     -- Max in-flight requests to this profile; 0=unlimited. Excess calls queue for a free slot
     -- (llmpool.Limiter) so a busy task cannot monopolize an endpoint with a small concurrency budget.
     max_concurrent    INTEGER NOT NULL DEFAULT 0 CHECK (max_concurrent >= 0),
+    -- Max timeout for a single LLM call through this profile, in seconds.
+    -- Covers slow endpoints under heavy contention; 0 disables the deadline.
+    max_timeout_seconds INTEGER NOT NULL DEFAULT 900 CHECK (max_timeout_seconds >= 0),
     -- Retry overrides: attempts 0=global default/-1=disabled/>0=explicit; interval 0=default backoff/>0=fixed milliseconds.
     -- The groups cover connection, empty-response, and same-provider safety-window retries; see ALTER comments below.
     retry_connect_attempts    INTEGER NOT NULL DEFAULT 0,
@@ -442,6 +445,10 @@ ALTER TABLE llm_profiles ADD COLUMN IF NOT EXISTS max_concurrent INTEGER NOT NUL
 ALTER TABLE llm_profiles DROP CONSTRAINT IF EXISTS llm_profiles_max_concurrent_check;
 ALTER TABLE llm_profiles ADD  CONSTRAINT llm_profiles_max_concurrent_check
     CHECK (max_concurrent >= 0);
+ALTER TABLE llm_profiles ADD COLUMN IF NOT EXISTS max_timeout_seconds INTEGER NOT NULL DEFAULT 900;
+ALTER TABLE llm_profiles DROP CONSTRAINT IF EXISTS llm_profiles_max_timeout_seconds_check;
+ALTER TABLE llm_profiles ADD CONSTRAINT llm_profiles_max_timeout_seconds_check
+    CHECK (max_timeout_seconds >= 0);
 
 -- Per-profile retry overrides (see LLM retry design): three attempt/fixed-interval pairs.
 -- Attempts: 0=global default, -1=disable this layer, >0=explicit count. Interval: 0=the layer's

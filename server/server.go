@@ -616,6 +616,9 @@ func (s *Server) providerForProfile(id int64) (llm.Provider, agent.Config, bool)
 		// reach the recorder (queued calls never touch the endpoint).
 		prov = llmpool.NewLimiter(prov, p.Name, p.MaxConcurrent)
 		if lim, ok := prov.(*llmpool.Limiter); ok {
+			if mt := time.Duration(p.MaxTimeoutSeconds) * time.Second; mt > 0 {
+				lim.SetMaxTimeout(mt)
+			}
 			s.profileLimiters.Store(id, lim)
 		}
 	}

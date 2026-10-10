@@ -102,7 +102,15 @@ func (c *Compactor) OnPlannerRound(ctx context.Context, ts *db.ExplorationStore)
 			// hold unavailable (pool failover chain etc.): keep the legacy
 			// behavior — the wait counts against maxDur.
 		}
-		bg, cancel := context.WithTimeout(base, c.maxDur)
+		// Prefer the profile's own Max timeout (LLM settings) over the
+		// built-in default: slow endpoints under contention need more room.
+		dur := c.maxDur
+		if mp, ok := c.prov.(interface{ MaxTimeout() time.Duration }); ok {
+			if mt := mp.MaxTimeout(); mt > 0 {
+				dur = mt
+			}
+		}
+		bg, cancel := context.WithTimeout(base, dur)
 		defer cancel()
 		// Compaction calls prov.Complete directly, outside the agentcore session loop,
 		// so ctx lacks a session ID. Gateways using session headers for prompt caching

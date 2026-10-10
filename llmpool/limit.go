@@ -30,6 +30,8 @@ type Limiter struct {
 	next  llm.Provider
 	name  string        // profile name for logs
 	slots chan struct{} // capacity = max concurrent requests
+	// maxTimeout caps a single admitted call; see SetMaxTimeout.
+	maxTimeout time.Duration
 
 	logMu    sync.Mutex
 	loggedWa bool // log the first wait per Limiter, not one line per request
@@ -46,6 +48,16 @@ func NewLimiter(next llm.Provider, name string, max int) llm.Provider {
 
 // Max returns the configured concurrency cap (for status endpoints).
 func (l *Limiter) Max() int { return cap(l.slots) }
+
+// SetMaxTimeout caps every call admitted through this limiter at d (whole
+// lifecycle: queue wait for non-hold callers, work for hold callers whose
+// AcquireHold already waited outside any budget). 0 = no per-call deadline.
+// Set once right after construction, before the limiter is published.
+func (l *Limiter) SetMaxTimeout(d time.Duration) { l.maxTimeout = d }
+
+// MaxTimeout reports the per-call cap; used by the compactor to size its own
+// budget from the profile instead of a hardcoded default.
+func (l *Limiter) MaxTimeout() time.Duration { return l.maxTimeout }
 
 // Name returns the profile name this limiter was built for (for logs).
 func (l *Limiter) Name() string { return l.name }
@@ -120,6 +132,18 @@ func (l *Limiter) holdActive(ctx context.Context) bool {
 
 // Stream implements llm.Provider with the concurrency cap applied.
 func (l *Limiter) Stream(ctx context.Context, req llm.CompletionRequest) iter.Seq2[llm.StreamEvent, error] {
+	if l.maxTimeout > 0 {
+		tctx, cancel := context.WithTimeout(ctx, l.maxTimeout)
+		inner := l.stream(tctx, req)
+		return func(yield func(llm.StreamEvent, error) bool) {
+			defer cancel() // the deadline lives exactly as long as the iteration
+			inner(yield)
+		}
+	}
+	return l.stream(ctx, req)
+}
+
+func (l *Limiter) stream(ctx context.Context, req llm.CompletionRequest) iter.Seq2[llm.StreamEvent, error] {
 	return func(yield func(llm.StreamEvent, error) bool) {
 		if !l.acquire(ctx) {
 			yield(llm.StreamEvent{}, context.Cause(ctx))
@@ -136,6 +160,11 @@ func (l *Limiter) Stream(ctx context.Context, req llm.CompletionRequest) iter.Se
 
 // Complete implements llm.Provider with the concurrency cap applied.
 func (l *Limiter) Complete(ctx context.Context, req llm.CompletionRequest) (llm.Message, string, llm.Usage, error) {
+	if l.maxTimeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, l.maxTimeout)
+		defer cancel()
+	}
 	if !l.acquire(ctx) {
 		return llm.Message{}, "", llm.Usage{}, context.Cause(ctx)
 	}

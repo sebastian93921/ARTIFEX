@@ -622,6 +622,8 @@ type LLMProfileDTO struct {
 	// slot so a busy task cannot monopolize an endpoint with a small concurrency budget
 	// (e.g. a shared vLLM serve with 4 concurrent session slots).
 	MaxConcurrent int `json:"max_concurrent"`
+	// Max timeout for a single LLM call through this profile, in seconds; 0 disables it.
+	MaxTimeoutSeconds int `json:"max_timeout_seconds"`
 	// Per-profile retry overrides for connection, empty response, and same-provider safe-window retries.
 	// attempts: 0=inherit, -1=disable this layer, positive=attempt count. interval_ms: 0=default exponential backoff;
 	// positive=fixed interval in milliseconds. All zeros fully inherit the historical global behavior.
@@ -650,6 +652,7 @@ func llmProfileDTO(p *db.LLMProfile) LLMProfileDTO {
 		MaxTokensField:   p.MaxTokensField,
 		SessionHeaderKey: p.SessionHeaderKey,
 		MaxConcurrent:    p.MaxConcurrent,
+		MaxTimeoutSeconds: p.MaxTimeoutSeconds,
 		Retry:            p.Retry,
 	}
 }

@@ -1841,6 +1841,17 @@ func (s *Server) pgSaveProfile(w http.ResponseWriter, r *http.Request) {
 	if p.MaxConcurrent > 1024 {
 		p.MaxConcurrent = 1024
 	}
+	// Max timeout: negative is meaningless; below a minute is indistinguishable
+	// from noise; a day is already absurd. 0 (disabled) passes through.
+	if p.MaxTimeoutSeconds < 0 {
+		p.MaxTimeoutSeconds = 0
+	}
+	if p.MaxTimeoutSeconds > 0 && p.MaxTimeoutSeconds < 60 {
+		p.MaxTimeoutSeconds = 60
+	}
+	if p.MaxTimeoutSeconds > 86400 {
+		p.MaxTimeoutSeconds = 86400
+	}
 	if p.Format != "openai" || p.MaxTokensField != llm.MaxTokensFieldCompletion {
 		p.MaxTokensField = ""
 	}

@@ -1057,6 +1057,7 @@ export interface LLMProfile {
   // Max in-flight requests to this profile; 0/unset = unlimited. Excess calls queue for a free
   // slot — set it to the endpoint's own concurrency budget (e.g. 4 for a shared vLLM serve).
   max_concurrent?: number;
+  max_timeout_seconds?: number;
   // Profile overrides for connection/empty-response/safe-window retries; blank/all zeros inherit global policy.
   retry?: LLMRetryOverride;
 }

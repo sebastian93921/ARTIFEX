@@ -326,6 +326,7 @@ function ProfileSheet({
   const [maxTokensField, setMaxTokensField] = React.useState(NONE); // Output-limit field name; NONE means max_tokens.
   const [sessionHeaderKey, setSessionHeaderKey] = React.useState(""); // Custom session header name; blank omits it.
   const [maxConcurrent, setMaxConcurrent] = React.useState("0"); // In-flight request cap; 0 = unlimited.
+  const [maxTimeout, setMaxTimeout] = React.useState("900"); // Per-call deadline in seconds; 0 = none.
   const [retry, setRetry] = React.useState<LLMRetryOverride>(ZERO_OVERRIDE); // Profile retry overrides; all zeros follow global settings.
   const [testing, setTesting] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
@@ -355,6 +356,7 @@ function ProfileSheet({
     setMaxTokensField(fromStore(profile?.max_tokens_field));
     setSessionHeaderKey(profile?.session_header_key ?? "");
     setMaxConcurrent(String(profile?.max_concurrent ?? 0));
+    setMaxTimeout(String(profile?.max_timeout_seconds ?? 900));
     setRetry(profile?.retry ?? ZERO_OVERRIDE);
     setApiKey("");
     setKeyHint(profile?.api_key_hint ?? "");
@@ -461,6 +463,7 @@ function ProfileSheet({
         max_tokens_field: format === "openai" ? toStore(maxTokensField) : "",
         session_header_key: sessionHeaderKey.trim(),
         max_concurrent: Math.max(0, Number(maxConcurrent) || 0),
+        max_timeout_seconds: Math.max(0, Number(maxTimeout) || 0),
         retry,
       });
       if (isNew) toast.success(swt("interface.m1380", { p0: name.trim() }));
@@ -759,6 +762,26 @@ function ProfileSheet({
                 value={maxConcurrent}
                 onChange={(e) => setMaxConcurrent(e.target.value)}
                 placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-3 rounded-lg border p-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="grid gap-0.5">
+                <Label htmlFor="p-max-timeout" className="text-sm">
+                  {swt("interface.m2876")}</Label>
+                <p className="text-muted-foreground text-xs">
+                  {swt("interface.m2877")}</p>
+              </div>
+              <Input
+                id="p-max-timeout"
+                type="number"
+                min={0}
+                className="w-28 shrink-0"
+                value={maxTimeout}
+                onChange={(e) => setMaxTimeout(e.target.value)}
+                placeholder="900"
               />
             </div>
           </div>
