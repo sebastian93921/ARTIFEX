@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"log"
 	"encoding/json"
 	"fmt"
 	"github.com/sebastian93921/artifex/locale"
@@ -68,6 +69,10 @@ type Worker struct {
 	// (0 = unlimited). When it fires, the run is cut and a settlement round is
 	// forced so already-identified facts get written back instead of being lost.
 	runTimeout time.Duration
+	// slotLease optionally reserves an LLM slot for the whole run before the
+	// wall clock starts (see taskLLMRuntime.SlotLeaseHook). The returned context
+	// makes per-call limiter acquires no-ops for the leased slot.
+	slotLease func(ctx context.Context) (context.Context, func(), time.Duration)
 	// extraTools are host-provided tools (e.g. traffic query, oast) appended to
 	// the worker's graph write-back tools.
 	extraTools []actool.CoreTool
@@ -145,6 +150,12 @@ func (w *Worker) wantConstraints() bool { return w.injectConstraints == nil || w
 // SetRunTimeout configures the per-intent wall-clock budget for the main
 // exploration (0 = unlimited). When it fires, the SDK settlement phase still runs
 // so facts are never lost to a timeout. Safe to call before Execute.
+// SetSlotLease installs the slot-lease callback. Called once per run before
+// the wall clock starts; nil disables leasing.
+func (w *Worker) SetSlotLease(hook func(ctx context.Context) (context.Context, func(), time.Duration)) {
+	w.slotLease = hook
+}
+
 func (w *Worker) SetRunTimeout(run time.Duration) {
 	w.runTimeout = run
 }
@@ -347,6 +358,18 @@ func (w *Worker) ExecuteWithMessage(ctx context.Context, name string, taskID int
 }
 
 func (w *Worker) execute(ctx context.Context, name string, taskID int64, as *db.AssetStore, ts *db.ExplorationStore, intent *db.Node, hooks harness.HookRunner, emit func(db.Activity), enr EnrichTrigger, notifyFinding func(int64, string), requestID, message string) (harness.TerminalReason, WriteCounts, error) {
+	// Slot lease: reserve the LLM slot BEFORE the wall clock starts so queue
+	// time never burns the intent budget. The returned context carries the hold,
+	// making this run's per-call limiter acquires no-ops.
+	if w.slotLease != nil {
+		if lctx, release, waited := w.slotLease(ctx); release != nil {
+			defer release()
+			if waited > time.Second {
+				log.Printf("[worker %s] intent %d slot lease held after %v wait (outside the intent clock)", name, intent.ID, waited.Round(time.Millisecond))
+			}
+			ctx = lctx
+		}
+	}
 	tsx := NewToolSet(ts, name, locale.FromContext(ctx))
 	tsx.SetFindingRecorder(w.findingRecorder)
 	tsx.SetTaskID(taskID)

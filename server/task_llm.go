@@ -184,6 +184,36 @@ func (r *taskLLMRuntime) nonStreaming() bool {
 
 // maxTokens returns the currently-active source's per-reply output cap.
 // Unresolvable → 0, i.e. send no cap, matching the pre-setting behaviour.
+// SlotLeaseHook returns the worker's slot-lease callback: when the slot_lease
+// setting is on it reserves a slot on the task's currently active profile and
+// returns a context whose LLM calls skip that limiter (the hold IS the slot).
+// The reservation happens BEFORE the worker's wall clock starts, so queue time
+// never burns the intent budget. Returns a no-op when disabled or the profile
+// has no cached limiter.
+func (r *taskLLMRuntime) SlotLeaseHook() func(ctx context.Context) (context.Context, func(), time.Duration) {
+	return func(ctx context.Context) (context.Context, func(), time.Duration) {
+		if !r.s.m.SlotLeaseEnabled() {
+			return ctx, func() {}, 0
+		}
+		sel, err := r.current()
+		if err != nil || sel.profileID == 0 {
+			return ctx, func() {}, 0
+		}
+		lim, ok := r.s.limiterForProfile(sel.profileID)
+		if !ok {
+			return ctx, func() {}, 0
+		}
+		lctx, release, waited, err := lim.AcquireHold(ctx)
+		if err != nil {
+			return ctx, func() {}, 0
+		}
+		if waited > time.Second {
+			log.Printf("[slot-lease] task %s waited %v for a %s slot (outside the intent clock)", r.taskID, waited.Round(time.Millisecond), lim.Name())
+		}
+		return lctx, release, waited
+	}
+}
+
 func (r *taskLLMRuntime) maxTokens() int {
 	cfg, _ := r.activeCfg() // Zero when no profile was resolved.
 	return cfg.MaxTokens
@@ -569,6 +599,7 @@ func (s *Server) agentsForTask(t *Task) *taskAgentBundle {
 	wk.SetMaxTokens(workerRuntime.maxTokens)       // The output limit likewise follows the currently active profile.
 	wk.SetNoaEnabled(s.m.NoaCompactionEnabled)     // Experimental noa compaction: platform-level flag read once per run.
 	wk.SetRunTimeout(time.Duration(s.agentRunSeconds("worker")) * time.Second)
+	wk.SetSlotLease(workerRuntime.SlotLeaseHook())
 	wk.SetProxy(s.m.ProxyAddr(), s.m.ProxyCACert())
 	wk.SetWebSearch(s.webSearchFor("worker"))
 	wk.SetConstraintInject(s.constraintInjectWorker) // Inject operation constraints into workers; configurable and enabled by default.

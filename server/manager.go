@@ -262,6 +262,7 @@ const (
 	// only routes the search backend) and the per-profile LLM proxy.
 	settingGlobalProxy = "global_proxy"
 	settingWorkers     = "workers"
+	settingSlotLease   = "slot_lease"
 	settingLLMRecord   = "llm_record"
 	// LLM failover is disabled by default. When enabled, agents using the globally active profile
 	// switch to the next profile on insufficient balance, invalid keys, rate limits, or service failures.
@@ -335,6 +336,17 @@ func (m *Manager) SetWorkers(n int) error {
 		return locale.Errorf("workers must be greater than zero")
 	}
 	return m.pg.SetSetting(settingWorkers, strconv.Itoa(n))
+}
+
+// SlotLeaseEnabled reports whether intents lease an LLM slot for their whole
+// run (waits happen before the intent clock starts; default false).
+func (m *Manager) SlotLeaseEnabled() bool {
+	return m.pg.GetBool(settingSlotLease, false)
+}
+
+// SetSlotLeaseEnabled persists the slot-lease switch.
+func (m *Manager) SetSlotLeaseEnabled(on bool) error {
+	return m.pg.SetBool(settingSlotLease, on)
 }
 
 // Enrich returns the asset auto-completion engine (may be nil if init failed).

@@ -5,6 +5,7 @@ import (
 	"iter"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/sebastian93921/artifex/locale"
 	"github.com/Autumn-27/norma/llm"
@@ -46,9 +47,15 @@ func NewLimiter(next llm.Provider, name string, max int) llm.Provider {
 // Max returns the configured concurrency cap (for status endpoints).
 func (l *Limiter) Max() int { return cap(l.slots) }
 
+// Name returns the profile name this limiter was built for (for logs).
+func (l *Limiter) Name() string { return l.name }
+
 // acquire takes a slot, waiting for one to free up. Returns false when ctx is
 // done first (caller stopped, task stopped, timeout) — no slot is taken.
 func (l *Limiter) acquire(ctx context.Context) bool {
+	if l.holdActive(ctx) {
+		return true // the context already holds a reserved slot on this limiter
+	}
 	select {
 	case l.slots <- struct{}{}:
 		return true
@@ -71,6 +78,45 @@ func (l *Limiter) acquire(ctx context.Context) bool {
 }
 
 func (l *Limiter) release() { <-l.slots }
+
+// holdCtxKey carries an active slot hold through the call context.
+type holdCtxKey struct{}
+
+type holdInfo struct{ lim *Limiter }
+
+// AcquireHold reserves a slot for the lifetime of the returned release func.
+// The returned context carries the hold: provider calls made under it skip this
+// limiter's acquire (the hold IS the reserved slot), so per-call queueing never
+// happens — e.g. a worker run leasing a slot for a whole intent. waited reports
+// how long the reservation itself blocked, so callers can keep that time OUT of
+// their own wall-clock budgets. Returns an error when ctx ends first.
+func (l *Limiter) AcquireHold(ctx context.Context) (context.Context, func(), time.Duration, error) {
+	start := time.Now()
+	select {
+	case l.slots <- struct{}{}:
+	case <-ctx.Done():
+		return ctx, func() {}, 0, ctx.Err()
+	}
+	waited := time.Since(start)
+	cctx := context.WithValue(ctx, holdCtxKey{}, holdInfo{lim: l})
+	var mu sync.Mutex
+	released := false
+	return cctx, func() {
+		mu.Lock()
+		defer mu.Unlock()
+		if released {
+			return
+		}
+		released = true
+		<-l.slots
+	}, waited, nil
+}
+
+// holdActive reports whether ctx carries an active hold on THIS limiter.
+func (l *Limiter) holdActive(ctx context.Context) bool {
+	h, ok := ctx.Value(holdCtxKey{}).(holdInfo)
+	return ok && h.lim == l
+}
 
 // Stream implements llm.Provider with the concurrency cap applied.
 func (l *Limiter) Stream(ctx context.Context, req llm.CompletionRequest) iter.Seq2[llm.StreamEvent, error] {

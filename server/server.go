@@ -100,6 +100,9 @@ type Server struct {
 	// cache, so global fallback and task chains do not accidentally double the
 	// configured request rate. Cleared on profile edits, then repopulated by active reapply.
 	provCacheMu   sync.Mutex
+	// profileLimiters caches each profile's llmpool.Limiter so callers can lease a
+	// slot for a whole run (see taskLLMRuntime.SlotLeaseHook) instead of per call.
+	profileLimiters sync.Map // profileID (int64) -> *llmpool.Limiter
 	provByProfile map[int64]*provEntry
 	provCacheGen  uint64
 
@@ -520,6 +523,25 @@ func (s *Server) loadProfileConfig(id int64) (agent.Config, bool) {
 	return cfg, true
 }
 
+// rememberProfileLimiter records the limiter built for a profile (called from
+// the two provider build paths). Missing entries make slot leases no-ops.
+func (s *Server) rememberProfileLimiter(id int64, lim *llmpool.Limiter) {
+	if lim == nil {
+		return
+	}
+	s.profileLimiters.Store(id, lim)
+}
+
+// limiterForProfile returns the cached limiter for a profile, if built.
+func (s *Server) limiterForProfile(id int64) (*llmpool.Limiter, bool) {
+	v, ok := s.profileLimiters.Load(id)
+	if !ok {
+		return nil, false
+	}
+	lim, ok := v.(*llmpool.Limiter)
+	return lim, ok
+}
+
 // effectiveProfileForAgent resolves the LLM profile id an agent should run on, by
 // precedence: agent binding (agents.llm_profile_id) → pin (task/conversation) → nil
 // (caller falls back to the global active profile). A binding to a deleted profile
@@ -593,6 +615,9 @@ func (s *Server) providerForProfile(id int64) (llm.Provider, agent.Config, bool)
 		// provider shares one slot pool. Outermost so only admitted requests
 		// reach the recorder (queued calls never touch the endpoint).
 		prov = llmpool.NewLimiter(prov, p.Name, p.MaxConcurrent)
+		if lim, ok := prov.(*llmpool.Limiter); ok {
+			s.profileLimiters.Store(id, lim)
+		}
 	}
 	s.provCacheMu.Lock()
 	if generation != s.provCacheGen {
@@ -3308,6 +3333,7 @@ func (s *Server) settingsPayload() map[string]any {
 		"traffic_capture":          s.m.TrafficEnabled(),
 		"agent_traffic_binding":    s.m.pg.GetBool(settingAgentTrafficBinding, false),
 		"llm_record":               s.m.LLMRecordEnabled(),
+		"slot_lease":               s.m.SlotLeaseEnabled(),
 		"web_search_enabled":       on,
 		"web_search_backend":       backend,
 		"brave_key_set":            strings.TrimSpace(braveKey) != "",
@@ -3379,6 +3405,7 @@ func (s *Server) putSettings(w http.ResponseWriter, r *http.Request) {
 		TrafficCapture      *bool   `json:"traffic_capture"`
 		AgentTrafficBinding *bool   `json:"agent_traffic_binding"`
 		LLMRecord           *bool   `json:"llm_record"` // LLM recording defaults off and changes immediately without rebuilding agents.
+		SlotLease           *bool   `json:"slot_lease"` // Slot leases reserve a profile slot per intent run; waits happen before the intent clock starts.
 		// Web search. WebSearchEnabled/Backend toggle the tool + backend; BraveKey/TavilyKey
 		// are optional — omit (null) to leave a stored key untouched, send "" to clear.
 		WebSearchEnabled *bool   `json:"web_search_enabled"`
@@ -3501,6 +3528,12 @@ func (s *Server) putSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.PythonInterp != nil {
 		if err := s.m.pg.SetSetting(settingPythonInterp, strings.TrimSpace(*req.PythonInterp)); err != nil {
+			writeError(w, 500, err)
+			return
+		}
+	}
+	if req.SlotLease != nil {
+		if err := s.m.SetSlotLeaseEnabled(*req.SlotLease); err != nil {
 			writeError(w, 500, err)
 			return
 		}
