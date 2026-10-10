@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # Build the frontend and binary from this checkout; no published image is required.
 FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS frontend
 WORKDIR /src/web
