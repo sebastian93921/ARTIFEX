@@ -4,7 +4,7 @@
 
 An LLM multi-agent autonomous penetration-testing system (Go backend + Next.js frontend)
 
-[English](README.md) | [简体中文](README_zh.md)
+[English](README.md) | [繁體中文](README_zh.md)
 
 </div>
 
