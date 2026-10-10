@@ -668,3 +668,18 @@ contributors are not liable for any direct or indirect loss, data loss, system d
 dispute arising from use of this tool, whether or not the use was appropriate. **By downloading,
 installing, or using this project, you confirm that you have read, understood, and agreed to all of
 the terms above.**
+
+---
+
+## 🙏 Thank you, ARTEX
+
+This project exists because **[Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX)** is a genuinely
+excellent piece of work — an autonomous penetration-testing platform that won the Baidu "Agent+"
+attack-defense challenge and kept evolving well past it. We forked it because we loved using it,
+not because we thought we could do better.
+
+Everything good in ARTIFEX — the exploration-graph engine, the worker/planner split, the intercept
+pipeline, the taste of the whole thing — is theirs. Our changes (the rebrand, the deployment work,
+the upstream ports, i18n) are just maintenance on a house they built. If this tool saved you time,
+go give [ARTEX](https://github.com/Autumn-27/ARTEX) a star and read the original README — the
+upstream project deserves that attention far more than this fork does.
