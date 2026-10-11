@@ -541,7 +541,11 @@ func (c *Compactor) compress(ctx context.Context, g *coldGraph, b block, nodeByI
 	req := llm.CompletionRequest{
 		System:    []string{locale.Text(locale.FromContext(ctx), compressionSystemPrompt)},
 		Messages:  []llm.Message{llm.UserText(buildCompressionInput(g, b, nodeByID))},
-		MaxTokens: 1500,
+		// Generous cap: reasoning models (GLM-5.3 on a local vLLM endpoint
+		// ignores the thinking-disabled switch) spend a large share of the
+		// budget on reasoning before any content lands; 1500 regularly
+		// returned an empty body. 6000 keeps the summary well within reach.
+		MaxTokens: 6000,
 		Thinking:  "disabled",
 	}
 	msg, _, _, err := c.prov.Complete(ctx, req)
