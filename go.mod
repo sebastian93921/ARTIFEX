@@ -2,6 +2,8 @@ module github.com/sebastian93921/artifex
 
 go 1.27.3
 
+godebug multipathtcp=0
+
 require (
 	github.com/Autumn-27/norma v0.4.3
 	github.com/golang-jwt/jwt/v5 v5.3.1
