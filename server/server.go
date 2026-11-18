@@ -991,7 +991,14 @@ func (s *Server) Handler() http.Handler {
 	api := withLocale(cors(s.requireAuth(mux)))
 	root := http.NewServeMux()
 	root.Handle("/api/", api)
-	root.Handle("/", s.webuiHandler())
+	webui := s.webuiHandler()
+	root.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Keep the operator console out of cross-origin frames and referrers.
+		w.Header().Set("Content-Security-Policy", "frame-ancestors 'self'")
+		w.Header().Set("X-Frame-Options", "SAMEORIGIN")
+		w.Header().Set("Referrer-Policy", "same-origin")
+		webui.ServeHTTP(w, r)
+	})
 	return limitRequestBody(root)
 }
 
