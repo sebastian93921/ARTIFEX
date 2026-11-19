@@ -52,6 +52,8 @@ type Server struct {
 	// free slots off the same snapshot and over-promote past the limit.
 	concMu sync.Mutex
 
+	readyPG readyCache
+
 	cfgMu     sync.Mutex
 	chatAgent *agent.ChatAgent // conversational runner for the chat page; nil w/o LLM
 	// llmProv is the fully-decorated global provider (recorder + failover chain)
@@ -704,6 +706,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /api/auth/change-password", s.authChangePassword)
 
 	mux.HandleFunc("GET /api/health", s.health)
+	mux.HandleFunc("GET /api/ready", s.ready)
 	mux.HandleFunc("GET /api/stats", s.stats)
 	mux.HandleFunc("GET /api/logs", s.getLogs)
 	mux.HandleFunc("GET /api/logs/history", s.getLogsHistory)
