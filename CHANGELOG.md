@@ -43,8 +43,20 @@ This is the translated upstream ARTEX history from baseline `160fe13`, preservin
 
 ### Upstream ports
 
+#### Added
+
+- Ported the PostgreSQL readiness probe from BaaRai/ARTEX: `GET /api/ready`
+  is unauthenticated like `/api/health`, pings PostgreSQL with a one-second
+  timeout, caches the verdict for one second and collapses concurrent
+  probes onto a single ping. It answers `{"ready":true}` with 200 or
+  `{"ready":false}` with 503, never echoing connection details.
+
 #### Fixed
 
+- Ported the capture-blob permission fix from BaaRai/ARTEX: spilled HTTP and
+  raw-stream bodies are written `0600` inside a `0700` bucket directory, and
+  an existing blob is tightened to `0600` when it is seen again, so other
+  local users can no longer read captured traffic.
 - Ported three upstream changes from the final ARTEX tree (v0.3.15, via
   kutukam/autonomous-pentest-agent): the auth init/status fail-open fix
   (a DB read error no longer lets an unauthenticated request reach

@@ -544,16 +544,21 @@ func (t *Traffic) spill(body []byte, contentType string) storedBody {
 	// One bucket level (256 buckets) is enough to keep any single directory small;
 	// the store only ever holds bodies above maxInlineBody, deduplicated by hash.
 	blobDir := filepath.Join(t.dir, "_blobs", "sha256", h[:2])
-	if err := os.MkdirAll(blobDir, 0o755); err != nil {
+	if err := os.MkdirAll(blobDir, 0o700); err != nil {
 		log.Printf(locale.Text(locale.ServerDefault(), "[traffic] Could not create blob directory: %v"), err)
 		return storedBody{inline: clipBytes(body, blobPreview), index: indexText()}
 	}
+	if err := os.Chmod(blobDir, 0o700); err != nil {
+		log.Printf(locale.Text(locale.ServerDefault(), "[traffic] failed to restrict blob directory: %v"), err)
+	}
 	blobPath := filepath.Join(blobDir, h+".bin")
 	if _, err := os.Stat(blobPath); os.IsNotExist(err) {
-		if err := os.WriteFile(blobPath, body, 0o644); err != nil {
+		if err := os.WriteFile(blobPath, body, 0o600); err != nil {
 			log.Printf(locale.Text(locale.ServerDefault(), "[traffic] Could not write blob %s: %v"), h, err)
 			return storedBody{inline: clipBytes(body, blobPreview), index: indexText()}
 		}
+	} else if err := os.Chmod(blobPath, 0o600); err != nil {
+		log.Printf(locale.Text(locale.ServerDefault(), "[traffic] failed to restrict blob %s: %v"), h, err)
 	}
 	sb := storedBody{hash: h, index: indexText()}
 	if text {
