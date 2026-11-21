@@ -164,8 +164,9 @@ func calcCSegment(ipStr string) string {
 func normalizeURL(raw string) string {
 	u, err := url.Parse(raw)
 	if err != nil {
-		return raw
+		return stripURLUserinfo(raw)
 	}
+	u.User = nil // userinfo is never part of an asset URL
 	u.Scheme = strings.ToLower(u.Scheme)
 	u.Host = strings.ToLower(u.Host)
 	s := u.String()
@@ -173,6 +174,25 @@ func normalizeURL(raw string) string {
 		s = strings.TrimSuffix(s, "/")
 	}
 	return s
+}
+
+// stripURLUserinfo removes scheme://userinfo@ when url.Parse cannot. The
+// userinfo is the span before the last @ that still sits in the authority.
+func stripURLUserinfo(raw string) string {
+	i := strings.Index(raw, "://")
+	if i < 0 {
+		return raw
+	}
+	rest := raw[i+3:]
+	authEnd := len(rest)
+	if j := strings.IndexAny(rest, "/?#"); j >= 0 {
+		authEnd = j
+	}
+	at := strings.LastIndex(rest[:authEnd], "@")
+	if at < 0 {
+		return raw
+	}
+	return raw[:i+3] + rest[at+1:]
 }
 
 // parseURL extracts domain, port, service_name from a URL.
