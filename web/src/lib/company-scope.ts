@@ -84,12 +84,16 @@ function domainHostname(value: string): string | null {
     if (value.startsWith("//")) candidate = `http:${value}`;
     else if (!value.includes("://")) candidate = `http://${value}`;
     const url = new URL(candidate);
-    return (
-      url.hostname
-        .replace(/^\[|\]$/g, "")
-        .replace(/\.$/, "")
-        .toLowerCase() || null
-    );
+    const hostname = url.hostname
+      .replace(/^\[|\]$/g, "")
+      .replace(/\.$/, "")
+      .toLowerCase();
+    // "*.example.com" scopes a domain and its subdomains; the server accepts it on a registrable domain.
+    if (hostname.startsWith("*.")) {
+      const domain = hostname.slice(2);
+      return ipVersion(domain) === null ? domain : null;
+    }
+    return hostname || null;
   } catch {
     return null;
   }

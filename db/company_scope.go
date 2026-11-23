@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"github.com/sebastian93921/artifex/locale"
 	"net"
 	"net/url"
@@ -163,10 +164,10 @@ func ParseAutoScopeLine(line string) (ParsedScope, error) {
 	return ParseScopeInput(ScopeInput{Kind: "keyword", Value: raw})
 }
 
-func scopeHostname(raw string) (string, error) {
+func scopeHostname(raw string) (host string, wildcard bool, err error) {
 	candidate := strings.TrimSpace(raw)
 	if candidate == "" {
-		return "", locale.Errorf("Hostname is empty")
+		return "", false, fmt.Errorf("hostname is empty")
 	}
 	if strings.HasPrefix(candidate, "//") {
 		candidate = "http:" + candidate
@@ -178,38 +179,42 @@ func scopeHostname(raw string) (string, error) {
 		if err == nil {
 			err = locale.Errorf("Missing hostname")
 		}
-		return "", err
+		return "", false, err
 	}
-	host := strings.TrimSuffix(strings.TrimSpace(parsed.Hostname()), ".")
+	host = strings.TrimSuffix(strings.TrimSpace(parsed.Hostname()), ".")
+	host, wildcard = strings.CutPrefix(host, "*.")
 	if host == "" {
-		return "", locale.Errorf("Hostname is empty")
+		return "", false, fmt.Errorf("hostname is empty")
 	}
 	if ip := net.ParseIP(host); ip != nil {
-		return ip.String(), nil
+		if wildcard {
+			return "", false, fmt.Errorf("a wildcard needs a domain, not an IP")
+		}
+		return ip.String(), false, nil
 	}
 	host, err = idna.Lookup.ToASCII(host)
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 	host = strings.ToLower(host)
 	if len(host) > 253 {
-		return "", locale.Errorf("Domain exceeds 253 characters")
+		return "", false, fmt.Errorf("domain exceeds 253 characters")
 	}
 	labels := strings.Split(host, ".")
 	if len(labels) < 2 {
-		return "", locale.Errorf("Domain must contain at least two labels")
+		return "", false, fmt.Errorf("domain needs at least two labels")
 	}
 	for _, label := range labels {
 		if label == "" || len(label) > 63 || label[0] == '-' || label[len(label)-1] == '-' {
-			return "", locale.Errorf("Invalid domain label")
+			return "", false, fmt.Errorf("invalid domain label")
 		}
 		for _, r := range label {
 			if !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-') {
-				return "", locale.Errorf("Domain contains invalid characters")
+				return "", false, fmt.Errorf("domain contains invalid characters")
 			}
 		}
 	}
-	return host, nil
+	return host, wildcard, nil
 }
 
 // ParseScopeLine classifies and validates one scope line (root domain / IP /
@@ -243,9 +248,17 @@ func ParseScopeLine(line string) (ParsedScope, error) {
 		}
 		return r, nil
 	}
-	host, err := scopeHostname(raw)
+	host, wildcard, err := scopeHostname(raw)
 	if err != nil {
 		return r, locale.Errorf("Not a valid domain/IP/CIDR: %s", raw)
+	}
+	// "*.example.com" is how bug bounty programs write a domain and its
+	// subdomains, which is what a domain rule on example.com covers (assets match
+	// on their registrable domain). A deeper wildcard has no such rule yet.
+	if wildcard {
+		if root, err := publicsuffix.EffectiveTLDPlusOne(host); err != nil || root != host {
+			return r, fmt.Errorf("a wildcard is only supported on a registrable domain such as *.example.com: %s", raw)
+		}
 	}
 	if ip := net.ParseIP(host); ip != nil {
 		r.Kind = "ip"
