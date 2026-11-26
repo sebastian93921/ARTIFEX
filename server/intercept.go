@@ -117,7 +117,7 @@ func (s *Server) interceptCreateRule(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req interceptRuleReq
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -145,7 +145,7 @@ func (s *Server) interceptUpdateRule(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req interceptRuleReq
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -193,7 +193,7 @@ func (s *Server) interceptToggleRule(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Enabled bool `json:"enabled"`
 	}
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -359,7 +359,7 @@ func (s *Server) interceptDecide(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Decision string `json:"decision"` // "allowed" | "denied"
 	}
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -397,7 +397,7 @@ func (s *Server) interceptSetToolConfig(w http.ResponseWriter, r *http.Request) 
 	var req struct {
 		EnabledTools []string `json:"enabled_tools"`
 	}
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -426,7 +426,7 @@ func (s *Server) interceptGetJudgeConfig(w http.ResponseWriter, r *http.Request)
 // interceptSetJudgeConfig persists the judge configuration.
 func (s *Server) interceptSetJudgeConfig(w http.ResponseWriter, r *http.Request) {
 	var req intercept.JudgeConfig
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}

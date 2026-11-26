@@ -189,7 +189,7 @@ func (s *Server) authInit(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Password string `json:"password"`
 	}
-	if err := decode(r, &req); err != nil || req.Password == "" {
+	if err := decode(w, r, &req); err != nil || req.Password == "" {
 		writeErr(w, 400, locale.Text(responseLanguage(w), "Password cannot be empty"))
 		return
 	}
@@ -239,7 +239,7 @@ func (s *Server) authChangePassword(w http.ResponseWriter, r *http.Request) {
 		OldPassword string `json:"old_password"`
 		NewPassword string `json:"new_password"`
 	}
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeErr(w, 400, locale.Text(responseLanguage(w), "Invalid request format"))
 		return
 	}
@@ -286,7 +286,7 @@ func (s *Server) authLogin(w http.ResponseWriter, r *http.Request) {
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeErr(w, 400, locale.Text(responseLanguage(w), "Invalid request format"))
 		return
 	}

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime"
 	"net/http"
 	"net/url"
 	"os"
@@ -79,7 +80,102 @@ func pathInt(r *http.Request, name string) (int64, bool) {
 	return n, err == nil
 }
 
-func decode(r *http.Request, v any) error { return json.NewDecoder(r.Body).Decode(v) }
+// decodeMaxBytes is the default JSON body cap. Multipart uploads get the larger
+// maxMultipartBodyBytes here instead; the upload handlers set their own,
+// tighter limit. A smaller MaxBytesReader installed by a handler still wins,
+// because it sits inside this one.
+const decodeMaxBytes = 32 << 20
+
+// maxMultipartBodyBytes caps any request that declares a multipart Content-Type.
+// It is the largest limit an upload handler sets (workspace uploads; chat
+// attachments and skill zips are smaller), so no real upload is refused, while
+// a handler that decodes JSON straight from r.Body can no longer be handed an
+// unbounded body just by labelling the request multipart.
+const maxMultipartBodyBytes = maxWorkspaceUpload + chatUploadMultipartOverhead
+
+// limitedBody records a MaxBytesError so a later 400 can be answered as 413.
+type limitedBody struct {
+	io.ReadCloser
+	tooLarge bool
+}
+
+func (b *limitedBody) Read(p []byte) (int, error) {
+	n, err := b.ReadCloser.Read(p)
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		b.tooLarge = true
+	}
+	return n, err
+}
+
+type bodyLimitWriter struct {
+	http.ResponseWriter
+	tooLarge func() bool
+}
+
+func (b *bodyLimitWriter) WriteHeader(code int) {
+	if code == http.StatusBadRequest && b.tooLarge != nil && b.tooLarge() {
+		code = http.StatusRequestEntityTooLarge
+	}
+	b.ResponseWriter.WriteHeader(code)
+}
+
+func (b *bodyLimitWriter) Flush() {
+	if f, ok := b.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
+func (b *bodyLimitWriter) Unwrap() http.ResponseWriter { return b.ResponseWriter }
+
+// limitRequestBody caps a non-multipart body at decodeMaxBytes and passes the
+// real ResponseWriter into MaxBytesReader. A handler that then answers 400 for
+// that read is rewritten to 413. A multipart body gets the plain upload-sized
+// cap instead: it is not a limitedBody, so decode still applies the JSON cap
+// if a JSON handler receives it, and upload handlers keep their own messages.
+func limitRequestBody(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Body == nil || r.Body == http.NoBody {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if isMultipart(r) {
+			r.Body = http.MaxBytesReader(w, r.Body, maxMultipartBodyBytes)
+			next.ServeHTTP(w, r)
+			return
+		}
+		body := &limitedBody{ReadCloser: http.MaxBytesReader(w, r.Body, decodeMaxBytes)}
+		r.Body = body
+		next.ServeHTTP(&bodyLimitWriter{ResponseWriter: w, tooLarge: func() bool { return body.tooLarge }}, r)
+	})
+}
+
+func isMultipart(r *http.Request) bool {
+	media, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	if err != nil {
+		return false
+	}
+	return strings.HasPrefix(media, "multipart/")
+}
+
+func decode(w http.ResponseWriter, r *http.Request, v any) error {
+	if r.Body != nil {
+		if _, already := r.Body.(*limitedBody); !already {
+			r.Body = &limitedBody{ReadCloser: http.MaxBytesReader(w, r.Body, decodeMaxBytes)}
+		}
+	}
+	err := json.NewDecoder(r.Body).Decode(v)
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		if lb, ok := r.Body.(*limitedBody); ok {
+			lb.tooLarge = true
+		}
+		// Return the original error: a caller that maps 413 itself keeps working,
+		// and the middleware still rewrites a 400 for callers that do not.
+		return tooLarge
+	}
+	return err
+}
 
 // ---------- tasks (delete) ----------
 
@@ -138,7 +234,7 @@ func (s *Server) pgDeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var opts DeleteTaskOptions
-	if err := decode(r, &opts); err != nil && err != io.EOF {
+	if err := decode(w, r, &opts); err != nil && err != io.EOF {
 		writeErr(w, 400, locale.Text(responseLanguage(w), "invalid JSON: ")+err.Error())
 		return
 	}
@@ -250,7 +346,7 @@ func (s *Server) pgCreateAgent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct{ Key, Name, Description string }
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -290,7 +386,7 @@ func (s *Server) pgUpdateAgent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct{ Name, Description string }
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -518,7 +614,7 @@ func (s *Server) pgSavePrompt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct{ Template, Note string }
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -567,7 +663,7 @@ func (s *Server) pgSaveWrapup(w http.ResponseWriter, r *http.Request) {
 		Prompt   string `json:"prompt"`
 		MaxTurns *int   `json:"max_turns"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -621,7 +717,7 @@ func (s *Server) pgSaveTaskTimeoutWrapup(w http.ResponseWriter, r *http.Request)
 		Prompt   string `json:"prompt"`
 		MaxTurns *int   `json:"max_turns"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -692,7 +788,7 @@ func (s *Server) pgPreviewPrompt(w http.ResponseWriter, r *http.Request) {
 		Template string            `json:"template"`
 		Sample   map[string]string `json:"sample"`
 	}
-	_ = decode(r, &body)
+	_ = decode(w, r, &body)
 	vars, _ := pg.PromptVars(a.ID)
 	if body.Template == "" {
 		body.Template, _ = pg.CurrentPrompt(a.ID)
@@ -728,7 +824,7 @@ func (s *Server) pgSetAgentVisibility(w http.ResponseWriter, r *http.Request) {
 		MCP   []int64  `json:"mcp"`
 		Skill []string `json:"skill"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -800,7 +896,7 @@ func (s *Server) pgUpdateTool(w http.ResponseWriter, r *http.Request) {
 		Agents      []string        `json:"agents"`
 		Enabled     bool            `json:"enabled"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -883,7 +979,7 @@ func (s *Server) pgSaveMCP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var m db.MCPServer
-	if err := decode(r, &m); err != nil {
+	if err := decode(w, r, &m); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -1098,7 +1194,7 @@ func (s *Server) fsCreateSkill(w http.ResponseWriter, r *http.Request) {
 		MCPs          []string `json:"mcps"`          // optional; MCP servers this skill unlocks
 		Instructions  string   `json:"instructions"`  // optional; scaffolded if empty
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -1171,7 +1267,7 @@ func (s *Server) fsUpdateSkillMeta(w http.ResponseWriter, r *http.Request) {
 		License       *string   `json:"license"`
 		Compatibility *string   `json:"compatibility"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -1640,7 +1736,7 @@ func (s *Server) fsWriteFile(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Content string `json:"content"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -1671,7 +1767,7 @@ func (s *Server) fsCreateDir(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Path string `json:"path"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -1740,7 +1836,7 @@ func (s *Server) pgToggleSkillVisibility(w http.ResponseWriter, r *http.Request)
 		SkillName string `json:"skill_name"`
 		Visible   bool   `json:"visible"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -1778,7 +1874,7 @@ func (s *Server) pgToggleVisibility(w http.ResponseWriter, r *http.Request) {
 		ResourceID int64  `json:"resource_id"`
 		Visible    bool   `json:"visible"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -1819,7 +1915,7 @@ func (s *Server) pgSaveProfile(w http.ResponseWriter, r *http.Request) {
 		APIKey    string `json:"api_key"`
 		Streaming *bool  `json:"streaming"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -1890,7 +1986,7 @@ func (s *Server) pgSaveLLMRetryPolicy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var pol db.LLMRetryPolicy
-	if err := decode(r, &pol); err != nil {
+	if err := decode(w, r, &pol); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -1962,7 +2058,7 @@ func (s *Server) pgActivateProfile(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		ID int64 `json:"id"`
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -1995,7 +2091,7 @@ func (s *Server) pgLLMPoolReset(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		ID int64 `json:"id"` // 0 / omitted = all
 	}
-	if err := decode(r, &body); err != nil {
+	if err := decode(w, r, &body); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -2021,7 +2117,7 @@ func (s *Server) pgListModels(w http.ResponseWriter, r *http.Request) {
 		Proxy     string `json:"proxy"`
 		ProfileID *int64 `json:"profile_id"` // fallback: use stored key from this profile
 	}
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}

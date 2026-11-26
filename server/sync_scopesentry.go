@@ -124,7 +124,7 @@ func (s *Server) syncSSDatasource(w http.ResponseWriter, r *http.Request) {
 		URL    string `json:"url"`
 		APIKey string `json:"api_key"`
 	}
-	_ = decode(r, &body) // empty body = just create the placeholder
+	_ = decode(w, r, &body) // empty body = just create the placeholder
 	body.URL = strings.TrimSpace(body.URL)
 	body.APIKey = strings.TrimSpace(body.APIKey)
 
@@ -266,7 +266,7 @@ func (s *Server) syncSSRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req ssSyncReq
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, locale.Errorf("Invalid JSON: %w", err))
 		return
 	}

@@ -88,7 +88,7 @@ func (s *Server) taskInterceptCreateRule(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	var req taskInterceptRuleReq
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -120,7 +120,7 @@ func (s *Server) taskInterceptUpdateRule(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	var req taskInterceptRuleReq
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}
@@ -177,7 +177,7 @@ func (s *Server) taskInterceptToggleRule(w http.ResponseWriter, r *http.Request)
 	var req struct {
 		Enabled bool `json:"enabled"`
 	}
-	if err := decode(r, &req); err != nil {
+	if err := decode(w, r, &req); err != nil {
 		writeError(w, 400, err)
 		return
 	}

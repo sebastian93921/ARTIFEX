@@ -992,7 +992,7 @@ func (s *Server) Handler() http.Handler {
 	root := http.NewServeMux()
 	root.Handle("/api/", api)
 	root.Handle("/", s.webuiHandler())
-	return root
+	return limitRequestBody(root)
 }
 
 // --- handlers ---

@@ -21,7 +21,7 @@ type taskCategoryRequest struct {
 func decodeTaskCategoryRequest(w http.ResponseWriter, r *http.Request) (*taskCategoryRequest, bool) {
 	r.Body = http.MaxBytesReader(w, r.Body, maxTaskCategoryRequestBytes)
 	var request taskCategoryRequest
-	if err := decode(r, &request); err != nil {
+	if err := decode(w, r, &request); err != nil {
 		var tooLarge *http.MaxBytesError
 		if errors.As(err, &tooLarge) {
 			writeErr(w, http.StatusRequestEntityTooLarge, "Request body is too large")
@@ -150,7 +150,7 @@ func (s *Server) updateTaskCategory(w http.ResponseWriter, r *http.Request) {
 	var request struct {
 		CategoryID json.RawMessage `json:"category_id"`
 	}
-	if err := decode(r, &request); err != nil {
+	if err := decode(w, r, &request); err != nil {
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
@@ -184,7 +184,7 @@ func (s *Server) updateTasksCategoryBatch(w http.ResponseWriter, r *http.Request
 		TaskIDs    []string        `json:"task_ids"`
 		CategoryID json.RawMessage `json:"category_id"`
 	}
-	if err := decode(r, &request); err != nil {
+	if err := decode(w, r, &request); err != nil {
 		var tooLarge *http.MaxBytesError
 		if errors.As(err, &tooLarge) {
 			writeErr(w, http.StatusRequestEntityTooLarge, "Request body is too large")

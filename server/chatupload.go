@@ -16,6 +16,9 @@ import (
 // maxChatUpload caps a single chat-attachment upload request (memory + spill).
 const maxChatUpload = 128 << 20 // 128 MiB
 
+// chatUploadMultipartOverhead covers multipart framing around the file data.
+const chatUploadMultipartOverhead = 1 << 20 // 1 MiB
+
 // safeChatID guards the {id} path segment against traversal — task ids are numeric,
 // session ids are alnum/_/- ; anything with "/" or ".." is rejected.
 var safeChatID = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)

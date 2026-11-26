@@ -28,7 +28,7 @@ func (s *Server) updateTaskMetadata(w http.ResponseWriter, r *http.Request) {
 		Name   *string `json:"name"`
 		Pinned *bool   `json:"pinned"`
 	}
-	if err := decode(r, &request); err != nil {
+	if err := decode(w, r, &request); err != nil {
 		var tooLarge *http.MaxBytesError
 		if errors.As(err, &tooLarge) {
 			writeErr(w, http.StatusRequestEntityTooLarge, "Request body is too large")
