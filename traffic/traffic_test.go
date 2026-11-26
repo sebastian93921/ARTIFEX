@@ -180,6 +180,65 @@ VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
 	}
 }
 
+func TestHostDirSkipsStorePaths(t *testing.T) {
+	root := t.TempDir()
+	for _, name := range []string{"_index", "_blobs", "_ca", "_delete_staging", ".", ".."} {
+		if _, ok := hostDir(root, name); ok {
+			t.Fatalf("hostDir(%q) was accepted", name)
+		}
+	}
+	dir, ok := hostDir(root, "api.example.com")
+	if !ok || dir != filepath.Join(root, "api.example.com") {
+		t.Fatalf("hostDir(api.example.com)=%q ok=%v", dir, ok)
+	}
+}
+
+func TestDeleteHostsExactSkipsStoreDirs(t *testing.T) {
+	dir := t.TempDir()
+	tr, err := Open(dir, "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tr.Close()
+	host := "api.example.com"
+	exDir := filepath.Join(dir, host, "GET", "1")
+	if err := os.MkdirAll(exDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := tr.DB().Exec(`INSERT INTO exchanges(id,ts,host,method,url_template,url,status,content_type,req_len,resp_len,path)
+VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
+		"1", 1, host, "GET", "/", "http://"+host+"/", 200, "text/html", 0, 0, host+"/GET/1"); err != nil {
+		t.Fatal(err)
+	}
+	keep := filepath.Join(dir, "_delete_staging", "keep.txt")
+	if err := os.MkdirAll(filepath.Dir(keep), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(keep, []byte("keep"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	n, err := tr.DeleteHostsExact([]string{host, "_index", "_blobs", "_ca", "_delete_staging", ".", ".."})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != 1 {
+		t.Fatalf("deleted=%d, want 1", n)
+	}
+	for _, path := range []string{
+		filepath.Join(dir, "_index", "index.sqlite"),
+		filepath.Join(dir, "_blobs"),
+		filepath.Join(dir, "_ca"),
+		keep,
+	} {
+		if _, err := os.Stat(path); err != nil {
+			t.Fatalf("store path %s gone: %v", path, err)
+		}
+	}
+	if _, err := os.Stat(exDir); !os.IsNotExist(err) {
+		t.Fatalf("host tree still exists: %v", err)
+	}
+}
+
 func TestDeleteHostsExactReportsTreeRemovalFailure(t *testing.T) {
 	dir := t.TempDir()
 	tr, err := Open(dir, "127.0.0.1:0")
