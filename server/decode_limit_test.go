@@ -89,6 +89,27 @@ func (zeroReader) Read(p []byte) (int, error) {
 	return len(p), nil
 }
 
+func TestInsertAssetsCapsMultipartBody(t *testing.T) {
+	s := &Server{m: &Manager{}}
+	h := limitRequestBody(http.HandlerFunc(s.insertAssets))
+
+	large := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/assets", strings.NewReader(`{"assets":[{"type":"`+strings.Repeat("a", decodeMaxBytes)+`"}]}`))
+	req.Header.Set("Content-Type", "multipart/form-data; boundary=abc")
+	h.ServeHTTP(large, req)
+	if large.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("status=%d body=%s, want 413", large.Code, large.Body.String())
+	}
+
+	small := httptest.NewRecorder()
+	ok := httptest.NewRequest(http.MethodPost, "/api/assets", strings.NewReader(`{"assets":[]}`))
+	ok.Header.Set("Content-Type", "multipart/form-data; boundary=abc")
+	h.ServeHTTP(small, ok)
+	if small.Code != http.StatusServiceUnavailable {
+		t.Fatalf("status=%d body=%s, want 503 without a store", small.Code, small.Body.String())
+	}
+}
+
 func TestMultipartBodyIsNotGivenTheJSONCap(t *testing.T) {
 	h := limitRequestBody(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := r.Body.(*limitedBody); ok {

@@ -41,6 +41,7 @@ This is the translated upstream ARTEX history from baseline `160fe13`, preservin
 
 ## [Unreleased]
 
+<<<<<<< HEAD
 ### Upstream ports
 
 #### Fixed
@@ -72,6 +73,355 @@ This is the translated upstream ARTEX history from baseline `160fe13`, preservin
   `docs/task-integration.md` (was the client-specific contract doc) and its
   cross-repo transport test/env var, and neutralised the retention confirmation
   strings in English and Chinese. The HTTP contract and behaviour are unchanged.
+=======
+### Added
+
+- **Wildcard domains in asset scope**: a scope line such as `*.example.com`, the way bug bounty programs write a domain and its subdomains, is accepted in company and task asset scope and stored as the `example.com` domain rule, which already covers its subdomains. A URL form (`https://*.example.com/`) works too. The wildcard is accepted only on a registrable domain: `*.api.example.com`, `*.co.uk` and `*.<IP>` are still rejected, because no rule covers only a subdomain's subdomains (#519).
+- **Stream viewer direction filter** (follow-up to #380): the Traffic detail's Stream tab can show all messages, client-to-server messages or server-to-client messages. Pagination and refresh keep the selected direction, changing the filter resets the list, and opening another exchange resets the direction to all. Recording-limit warnings remain visible but are excluded from the displayed message counts.
+- **Security response headers on every response**: `X-Content-Type-Options: nosniff`, a same-origin referrer policy, `X-Frame-Options: SAMEORIGIN` and a `frame-ancestors 'self'` CSP are now set by one wrapper around the whole handler tree, so the JSON API carries them too; previously only the console route did. Console documents additionally get `Permissions-Policy` and COOP/CORP. `Strict-Transport-Security` is sent only when the request is known to be HTTPS: directly over TLS, or via `X-Forwarded-Proto: https` from a peer in `ARTEX_TRUSTED_PROXIES`, so a direct client cannot claim HTTPS on its own. The README reverse-proxy recipe now starts with an 80 to 443 redirect.
+- **Global company switcher**: the sidebar header carries a company picker (search, an explicit "all companies", the asset count). It persists per browser and narrows these views on the server: the findings list, grouped view, asset tree and stat cards (`GET /api/exploration/findings`, `/groups`, `/asset-tree`, `/stats` take `company`), the dashboard findings panels (same list endpoint), the task list (`GET /api/tasks?company=`), the traffic list (`GET /api/traffic?company=`, the hosts the company owns) and the asset tabs (`GET /api/assets?company_id=`, plain and DSL path; the company clause is ANDed outside the compiled DSL). A finding belongs to a company through its live assets. A finding with no live asset belongs to a company only when its task is scoped to that company (`task_scope` kind `company`); otherwise it shows under "all companies" only. An unknown or non-numeric company id returns nothing (#425).
+- **Go vulnerability scanning in CI**: every push and pull request runs the official `govulncheck` action against packages reachable from `./...`, using the Go version declared by `go.mod`. Run the same check locally with `./scripts/verify.sh --security`.
+
+### Fixed
+
+- **Asset insert applies the JSON body cap**: `POST /api/assets` decodes through the shared JSON limit, including a `multipart/` request that the upload middleware leaves uncapped. A body over the cap is rejected before the database is touched.
+- **Missing Docker buildx is reported before the build**: without the buildx plugin, Compose only warns and falls back to the legacy builder, which fails on the Dockerfile's first `FROM --platform=$BUILDPLATFORM` with `failed to parse platform`. `install.sh` (all-Docker) and `update.sh` (Docker update) now check `docker buildx version` first and stop with an install hint, and the automatic Docker install on apt-based distros not covered by get.docker.com installs the buildx package as well. The README Docker section names buildx as a requirement.
+- **A goal URL followed by punctuation is still seeded**: a goal such as `Assess http://juiceshop:3000.` no longer logs `could not parse a target host/IP` and skips the site. Trailing punctuation, including full-width `。` and a closing bracket that has no matching opener, is trimmed from the URL before it is parsed, so `http://[::1]` is left alone. The scheme the goal names is kept and a final period does not end up in the host.
+- **Task timeout triggers fire for every task**: `on_task_timeout` used the task id as a watermark, but tasks time out in deadline order. Once a newer task timed out first, an older task that timed out later was never fired for. Fired timeouts are now kept in a persisted set, like met goals; on first start the set is seeded with the tasks already timed out, so nothing replays.
+- **A named pipe in the task workspace no longer hangs the archive worker**: packing opened every non-directory entry, and opening a FIFO blocks until a writer appears, so the single archive worker stopped there and every later archive, restore and delete job waited behind it. A socket failed the archive instead, and a device was packed but refused on restore. The packer now skips every entry that is neither a directory nor a regular file, as it already did for symlinks.
+- **Task form does not keep test-account secrets on screen**: after a task is created the credential rows are cleared, and the password field is masked.
+- **LLM connection-test logs stay one line**: the response body written by a connection test has CR and LF replaced with spaces before it is logged, so the body cannot start a second log record.
+- **Benchmark judge validation**: grading and the judge's falsification battery require one verdict per ground-truth ID, actual boolean decisions and gates, and matches to the supplied scanner findings. Invalid grading responses use the existing three-attempt budget and abort without writing scores, rather than counting duplicate IDs or truthy strings such as `"false"`.
+- **Live log subscribers can no longer crash the process**: a client disconnect closes its log channel. The sink now delivers a line while it still holds the subscriber lock, so that close cannot land in the middle of the send.
+- **Notification delivery ignores HTTP_PROXY**: the dial guard checks the address it connects to. An environment proxy made that address the proxy, so a link-local target could still be reached. Notification HTTP now connects directly.
+- **Captured traffic blobs are owner-only**: HTTP and raw-stream bodies spilled out of the database are written `0600`, and their bucket directory is `0700`. An existing blob is tightened when it is seen again.
+- **Asset URLs drop userinfo when parsing fails**: a URL `url.Parse` rejects is no longer stored unchanged. The `scheme://userinfo@` prefix is removed first, so a password in that prefix does not land in the asset row.
+- **Hook `==` keeps the fraction of a float**: comparing a float with an integer truncated the float first, so `1.5 == 1` and `-0.5 == 0` were true. A number decoded by `json.Decode` is a float, so a hook testing `m["amount"] == 0` matched `{"amount":0.5}`. A float on either side is now compared as a float.
+- **Hook `range` counts against the memory budget**: ranging over a body, slice, string, or map charges the iteration before the loop. A body larger than the hook budget now stops with the memory limit instead of allocating one element at a time with no check.
+- **Chat upload name search stops**: choosing `name`, `name-1`, `name-2`, … now returns an error when the filesystem rejects the path or after 10000 collisions, instead of looping while `Stat` keeps failing.
+- **Uploads do not follow a symlink**: chat and workspace uploads `Lstat` the destination and refuse to write when it is already a symlink. A dangling link is no longer treated as a free name.
+- **Hardening follow-up for the upload and capture fixes**: existing spill blob directories and files are tightened on startup, hook `range` charges 32 bytes per pair, and uploads open with `O_NOFOLLOW` on Unix. The Windows upload path keeps the `Lstat` check.
+- **Docker Compose database passwords with URL-special characters**: `docker-compose.yml` no longer pastes `POSTGRES_PASSWORD` into `ARTEX_PG_DSN`. The server builds the URL from `ARTEX_PG_HOST`, `ARTEX_PG_PORT`, `ARTEX_PG_USER`, `ARTEX_PG_PASSWORD`, `ARTEX_PG_DBNAME` and `ARTEX_PG_SSLMODE`, percent-encoding the user and password, so `/`, `?`, `%`, `@`, `:` and spaces connect. An explicit `ARTEX_PG_DSN` still wins and is not rewritten. `ARTEX_PG_PASSWORD` is removed from the environment with the other startup secrets (#450).
+
+## [0.7.0] - 2026-11-21
+
+Agent-driven traffic capture (SOCKS5, transparent TCP and raw UDP), operator tampering hooks with their admin panel, the agentic injection and proof hardening from the #124 audit, LLM context telemetry and the worker cache-prefix split, capture-proxy rewrite rules, HAR import and export, and a large security batch across the interception gate, sessions, logs, the workspace file API and the model endpoint probe.
+
+### Added
+
+- **Traffic > Hooks admin panel (P4.2 PR2)**: the Traffic page gains an operator-only Hooks tab for the constrained Go tampering hooks: list, create (always created disabled), edit, delete, toggle, version history with rollback, and a dry-run against a captured exchange or a synthetic input. A dry-run shows the mutated request or response, the fields the hook changed, and the per-line trace, with masked fields shown as their keyed HMAC. Binary and compressed bodies are flagged and skipped, bodies over 1 MiB are flagged, and the UI never renders hook or exchange text as HTML (#435).
+- **Concurrent multi-LLM worker rotation** (#270): a task can rotate several bound LLM profiles across its workers, with per-lane exhaustion tracked and shown on the task controls.
+- **Encrypted S3 archive storage** (#285, #318): an optional S3 backend stores task archives encrypted, connects with the existing archive lifecycle, and lets an interrupted archive job be recovered on the next start.
+- **Turkish and Simplified Chinese UI, optional Neon theme** (#346, #413, #401): the web console gains a translation layer with a Turkish and a Simplified Chinese locale, and an opt-in Neon theme preset in Settings.
+- **Readiness probe** (#363): `GET /api/ready` checks PostgreSQL and reports readiness separately from the health route.
+- **Operator console browser protections** (#349): the embedded console restricts framing to the same origin and keeps referrer information on the same origin.
+- **Target noise governor**: one shared egress governor paces ARTEX's own HTTP requests (WebFetch, the http custom tools and the enrich probe) against a noise profile (`off` by default, `quiet`, `balanced`, `aggressive`): a per-host token bucket with jitter, per-host and global in-flight caps, 429/503 backoff, GET deduplication with a short cache, and a configurable target User-Agent (`ARTEX_TARGET_USER_AGENT`). Off is a strict passthrough (#205).
+- **Low-and-slow prompt block**: when a noise profile is set, the planner, worker, main agent and chat prompts carry the per-host limits of the profile and the exact rate or delay flags for nmap, nuclei, httpx, katana, ffuf, dalfox and sqlmap; with the profile off the prompts are unchanged (#212).
+- **Noise profile at runtime**: System settings has a **Target noise** card. It sets the profile (`off`, `quiet`, `balanced`, `aggressive`) through the `noise_profile` setting, which takes precedence over `ARTEX_NOISE_PROFILE`. The change applies to the next WebFetch, http custom tool and enrich request, and to the next agent prompt, without a restart. The card also shows the per-host counters, which `GET /api/settings/noise` returns (#233).
+- **Bash requests paced through the capture proxy**: with traffic capture on, the Bash proxy URL carries a marker userinfo. The recording proxy paces each request of a marked connection by the noise profile's per-host rate and jitter, and counts it, before it goes upstream. This applies inside CONNECT tunnels too. WebFetch, the http custom tools and enrich keep the unmarked URL and are not paced twice. The proxy now drops `Proxy-Authorization` from every request it forwards or records. This is best effort: only clients that honour the proxy are covered, with capture on (#234).
+- **Hierarchical budgets**, off by default: a task budget and a per-intent budget take the minimum of their own budget and the parent's remaining budget above the wrap-up reserve, planner calls count inside the task, and reaching the reserve forces a wrap-up (#206).
+- **Coverage ledger**: the worker records what it examined, ruled out or left open for each surface and risk class with `record_coverage`; gaps, unexamined classes and completeness appear in the planner context, `GET /api/tasks/{id}/coverage`, the coverage card and the Markdown report (#207).
+- **Closed-question judge**: the LLM fallback judge answers eight fixed questions that the code owns and the code takes the decision; every failure now leads to ask instead of allow, and the previous behaviour stays available as `llm_judge_mode = freeform` (#208).
+- **argv interception rules**: a new `match_type = argv` matches the parsed prefix of a Bash command exactly, and a pending Bash approval can create such a rule in one click; a code-owned denylist refuses programs where a prefix would allow arbitrary code (#210, #211).
+- **Scanner output ingestion**: `ingest_scan_output` parses nmap XML, nuclei JSONL, httpx JSONL and ffuf JSON, and writes assets and facts deterministically, so the model never reads the raw output (#214, #215).
+- **bbot ingestion**: a typed parser splits bbot JSONL events by `scope_distance`, only in-scope events go through `insert_assets`, and `ingest_bbot` reads the file line by line with a 64 KiB cap (#199, #200).
+- **Tool RAG**, off by default: when the bound tool list of an agent is large, only the subset relevant to the current intent is injected, as a projection that never adds or edits a tool (`ARTEX_TOOL_RAG`) (#204).
+- **Fact provenance**: `record_fact` takes a closed `source` enum (default `inference`) and every fact carries the server-set `origin`, both shown in `recent_facts`, `list_facts` and `expand_digest` (#194).
+- **Per-message nonce envelope**: agent- and target-derived fields reach the planner and worker user messages inside a code-owned data envelope with a random nonce per message; operator input stays outside it (#195).
+- **Intercept risk score and batch approval**: a deterministic risk score (low, medium, high) is shown on each pending approval, and up to 100 pending decisions can be settled in one call, each through the existing single-decision path (#232).
+- **`ask_operator` target warning**: a request whose question names a host or URL outside the goal targets is tagged as containing target-derived text (#197).
+- **Opt-in update banner**: `ARTEX_UPDATE_CHECK` makes the backend check the latest GitHub release at most once per 24 hours and the UI show a banner; off by default (#202).
+- **Release provenance**: release archives carry GitHub build provenance attestations and a CycloneDX SBOM (`gh attestation verify <zip> --repo BaaRai/ARTEX`); release notes are the matching `CHANGELOG.md` section (#219, #201).
+- **Opt-in constrained Go tampering hooks — backend, API & trace (P4.2 PR1)**: opt-in behind `ARTEX_TAMPER_HOOKS_ENABLED=1` (off by default; flag off loads zero hooks and keeps the no-hook baseline unchanged). Adds a small, deterministic, zero-dependency Go-subset evaluator (`traffic/hookvm`, parsed via `go/parser` with sorted map iteration, hard 100k step / 25 ms per-hook / 100 ms per-phase / 4 MiB memory bounds, and AST rejection of FS/network/exec/env/time/rand/goroutine/channel/defer/goto/global-var/pointer/switch constructs). Operator-only hooks (never an agent tool) are stored sealed at rest in `traffic_tamper_hooks` and `traffic_tamper_hook_versions` (migration `0011_traffic_tamper_hooks.sql`), managed via `/api/traffic/hooks*` (CRUD, toggle, version history, rollback, dry-run), prefiltered with `traffic/rewrite` matchers, executed after declarative rewrite rules per phase (fail-open only in 0.7; binary/compressed/>1 MiB bodies skipped; tainted sensitive fields stay HMAC-masked), and traced in SQLite `exchange_rewrites` (`source_kind`, `hook_id`, `hook_version`). See `docs/traffic-tamper-hooks.md`.
+- **Opt-in SOCKS5 UDP ASSOCIATE & raw UDP recording (P4.1c)**: when traffic capture is enabled, setting `ARTEX_SOCKS5_UDP_ENABLED=1` enables RFC 1928 `UDP ASSOCIATE` (`0x03`, IPv4 first) on the SOCKS5 listener (off by default: with flags off no listener starts; with SOCKS5 TCP on and UDP off, `UDP ASSOCIATE` returns `0x07` and no UDP socket is opened). Enforces per-datagram destination policy before forwarding using the existing target gate (`intercept.Interceptor.ResolveUDP4` / `intercept.PinnedUDP4Resolver`) and egress governor (`egress.Do`), dropping denied datagrams without passthrough; bounds associations (`UDPMaxDatagrams`, `UDPMaxBytes`, `UDPIdleTimeout`) and tears them down with the TCP control connection; drops `FRAG != 0` with no fragmentation reassembly; and records each forwarded datagram individually in SQLite `raw_udp_datagrams` with capped previews and atomic `_blobs` refs without writing HTTP `exchanges` rows or PG migrations. Transparent UDP (`IP_RECVORIGDSTADDR`) is deferred to C2. See `docs/traffic-socks5-udp.md`.
+- **Opt-in Linux transparent TCP inbound & raw TCP recording (P4.1b)**: on Linux when traffic capture is enabled, setting `ARTEX_TRANSPARENT_TCP_ENABLED=1` (loopback `127.0.0.1:1081` by default) or `ARTEX_TRANSPARENT_TCP_ADDR=<ipv4:port>` starts an IPv4 transparent TCP listener fed by operator-managed `iptables`/`nftables` `REDIRECT` rules (off by default; ARTEX never touches the host firewall; root/`CAP_NET_ADMIN` is required only for the operator's redirect rules; IPv6 is not covered). Recovers original IPv4 destinations via `SO_ORIGINAL_DST` with self-redirect loop protection, reuses the P4.1a target gate (`intercept.Interceptor.DialSOCKS5`), egress governor (`egress.Do`), half-close relay bounds, and SQLite `raw_tcp_streams` store (atomic `_blobs` spill, no HTTP `exchanges` row, no PostgreSQL migration). See `docs/traffic-transparent.md`.
+- **Opt-in SOCKS5 inbound proxy & raw TCP recording (P4.1a)**: when traffic capture is enabled, setting `ARTEX_SOCKS5_ENABLED=1` (loopback `127.0.0.1:1080` by default) or `ARTEX_SOCKS5_ADDR=<addr>` starts an RFC 1928 SOCKS5 `CONNECT` listener alongside the HTTP recording proxy (off by default; HTTP proxy and agent proxy env vars are unchanged; listener does not start if traffic recording is disabled). Accepts loopback no-auth and RFC 1929 username/password without verifying credentials (carrying `artex-pace` in the username; binding to a non-loopback address therefore exposes an unauthenticated proxy, though the target gate and governor still apply), rejects `BIND`/`UDP ASSOCIATE` with `0x07`, enforces the existing target gate (`intercept.Interceptor.DialSOCKS5` / `intercept.PinnedDialer`) and egress governor (`egress.Do`) before dialing, relays half-close-aware TCP with concurrency/byte/idle/handshake bounds, and records one row per connection in SQLite `raw_tcp_streams` with capped directional previews and atomic (temp+rename) `_blobs` refs without writing HTTP `exchanges` rows. See `docs/traffic-socks5.md`.
+- **Opt-in worker cache-prefix split (P3.5 Phase C)**: setting `ARTEX_CACHE_PREFIX=1` (off by default) splits the `worker` system prompt at `DynamicBoundary = 1` into a sibling-shareable static prefix (`body + untrustedContentTail + workerTrafficBlock`) and a per-intent dynamic suffix (`workerArtifactSpec(runDir)` through `<available-deferred-tools>`) without reordering sections or altering the visible joined prompt text. Planner, mainagent, chat, and goals are unchanged; custom worker prompts referencing `{{.Now}}` remain volatile in the static segment. See `docs/context-telemetry.md`.
+- **Opt-in LLM context size telemetry (P3.5 Phase A)**: setting `ARTEX_CONTEXT_TELEMETRY=1` (off by default) records per-call request section byte sizes (`system_static`/`system_dynamic` split at `DynamicBoundary`, serialized `tools`, `messages` by role, `tool_result` subset, and `last_message_bytes`), tool/message counts, and token/cache usage in the new `llm_context` table (migration `0009_llm_context.sql`), with zero prompt/behavior change and zero content stored, independent of `llm_record`. `GET /api/llm/context/summary` aggregates input percentiles (`p50`/`p90`/`p99`), pro-rata section shares over real `input_tokens`, `cache_read/input` ratios by `(worker, model)`, and top tasks. See `docs/context-telemetry.md`.
+- **HAR 1.2 traffic import and export**: `POST /api/traffic/import/har` imports raw HAR 1.2 JSON captures (up to 32 MiB / 2,000 entries / 32 MiB decoded bodies) with deterministic `har-<sha256>` IDs (and `_artexExchangeId` preservation for ARTEX exports so distinct same-second exchanges round-trip without collapsing), base64 decoding, `postData.params` and `cookies` array fallbacks, URL userinfo stripping, blob spilling above 256 KiB, and full-text indexing, without applying capture rewrite rules (`exchange_rewrites` stays empty); per-entry errors are reported alongside `imported`/`skipped`/`failed` counts. `GET /api/traffic/export/har` exports filtered traffic (reusing the `GET /api/traffic` filters) as a compliant HAR 1.2 document (with explicit unknown placeholders for unrecorded timings and header sizes) in stable `(ts, id)` order, encoding UTF-8 bodies as text and binary bodies as base64, capped at 1,000 entries / 20 MiB raw headers+bodies (31 MiB JSON backstop, guaranteed under the 32 MiB import limit) with explicit truncation reporting via `X-ARTEX-HAR-*` headers and `_truncated`/`_truncatedReason`/`_totalMatched` fields. The Traffic page adds **Import HAR** and **Export HAR** controls. See `docs/traffic-har.md`.
+- **Capture-proxy rewrite rules, storage and API**: `GET`, `POST`, `PUT` and `DELETE /api/traffic/rewrite-rules` and `POST /api/traffic/rewrite-rules/{id}/toggle` manage rules that match a request or a response (method, host, URL, headers, body, status) and describe a rewrite (method, path and query, headers, body, status). Rules are validated on save, limited to 100 of which 50 enabled, created disabled, and stored in the new table `traffic_rewrite_rules` (migration `0005_traffic_rewrite_rules.sql`) with `matchers` and `actions` encrypted at rest. The value of an action marked `sensitive` is never returned, and an update sent without it keeps the stored one. The server compiles the enabled rules at startup and after every change and hands the snapshot to the proxy. The proxy applies them from the next entry. See `docs/traffic-rewrite-rules.md`.
+- **Capture-proxy rewrite rules applied**: the capture proxy applies enabled rules to each HTTP request before it is sent to the target and to each response before it reaches the client. Each action that ran is recorded in the new table `exchange_rewrites` in the same transaction as the exchange, `traffic_get` shows a `REWRITTEN` line, and `traffic_search` never finds a value a rule wrote. SSE status and headers are rewritten at the start of the stream. **WebSocket handshakes are not rewritten**: the capture library runs its hook after the upgrade, so the status and headers cannot be changed, and frames pass unchanged. **Responses of 5 MiB or more** are forwarded unchanged and not recorded in full, because the library does not call the response hook for them. Snapshots of original requests are capped at 1024 entries and 64 MiB. Replays (`POST /api/traffic/replay`) bypass capture rewrite rules by default via an internal `X-ARTEX-Replay-Nonce` header stripped unconditionally by the proxy, and apply the rules when opted in with `apply_rules: true` (the **Apply capture rewrite rules** checkbox in the Replay panel). `GET /api/traffic` exposes the proxy's `rewrite` counters (`large_responses`, `capacity_refusals`, `tombstone_drops`, `conversions`, `sweeps`), flags each exchange row with `rewritten`, and filters with `rewritten=all|rewritten|original` (also accepting `true`/`false`), surfaced with a filter control and row badge on the Traffic page. Traffic archives export version 2 with per-exchange `rewritten` and sorted distinct applied `rewrite_rule_ids` while remaining deterministic and backward-compatible with version 1 archives. The rule-management web UI comes later.
+- **Bulk finding status** (#298): select findings in the findings table and apply one disposition to all of them, up to 500 per call, in one transaction; each row still goes through the single-decision notification semantics and the change is mirrored onto its exploration node (#289).
+- **Stream message direction filter** (#379): `GET /api/traffic/stream` and the `traffic_messages` agent tool take an optional `direction` (`c2s` or `s2c`) that lists only one side of a WebSocket or SSE conversation. `total` and `offset` apply to the filtered list, each row keeps its `seq` in the whole stream, and the `meta` row (messages dropped past the recorder limits) stays in a filtered page. Any other value is a 400 (API) or a tool error.
+- **Traffic replay** (#266): replay a recorded request from the traffic detail with its method, URL, headers and stored body; replay is disabled when only the body preview is loaded.
+- **Finding proof strength in reports** (#268): the Markdown report and the export show each finding's proof strength next to its verification status.
+- **Opt-in Keenable web search backend** (#295): the search tool gains Keenable alongside Brave and Tavily; the key is stored encrypted and can be cleared independently.
+- **Durable activity outbox** (#300): activity rows that cannot be stored are written to the new `activity_outbox` table (migration `0006_activity_outbox.sql`) and replayed once on the next start. The server stops admitting new work before the drain, and a shutdown cancel leaves an in-flight intent claim running so the next start can reset it to open instead of recording it as done or blocked.
+- **LLM model search** (#284): the System → LLM model picker can search the model list, and the API-key field opts out of password-manager autofill.
+- **Finding report state** (#308): findings carry a `report_state` (`none`, `submitted`, `accepted`, `rejected`, `duplicate`) for what was sent to a bug bounty program, separate from the triage status; the bulk update accepts both fields, and restoring an older archive fills `none` (migration `0007_finding_report_state.sql`).
+
+### Changed
+
+- **`record_fact` is facts-only** (#410, #282): the tool publishes and accepts facts only; asset writes go through `insert_assets`.
+- **Web dependency lockfile** (#438): `source-map-js` 1.2.4 and `baseline-browser-mapping` 2.11.39, past their denial-of-service advisories; `npm audit --omit=dev` is clean.
+- **Build and supply-chain hardening** (#408, #416, #419, #420): tool and Node digests are pinned instead of fetching their checksums, `npm ci` runs with `--ignore-scripts` in the build, install and update stages, the web build disables Next.js telemetry, and the api-recon skill lockfile points at the public npm registry.
+- **Password changes revoke sessions**: a password change stores a monotonic `auth.password_version` in the same transaction as the hash. Tokens carry that version, so a token from an older version is rejected, including when two changes land in the same second. `reset-password.sh` writes the same counter and requires an ARTEX restart, because the process reads the version at startup. A failed write leaves the previous session valid. Log, activity, and side-question streams re-check the token and close after the version moves. If the version cannot be read at startup, sessions are rejected until the next login reads it.
+- **Task budgets survive a restart**: planner, worker, judge, and compactor rows in `llm_usage` are counted back into `ARTEX_TASK_BUDGET_*`. A restored task already inside the wrap-up reserve only has that reserve left, so the run wraps up instead of starting another worker. The per-worker estimate is not restored and starts from the defaults (50,000 tokens and 10 turns) until a worker finishes in this process. Chat, goal decomposition, and side questions stay outside the cap.
+- **Untrusted-output boundary is now on by default**: Norma frames tool results for the worker, planner, chat and main agent unless `ARTEX_UNTRUSTED_BOUNDARY` is set to `0`, `false`, `off` or `no`. It was opt-in via `ARTEX_UNTRUSTED_BOUNDARY=1` in 0.6.0 (#166); the default flips here (#203).
+- **Versioned migrations**: the `db` package applies numbered `db/migrations/NNNN_slug.sql` files once, in order, under the schema advisory lock, and records a SHA-256 checksum in `schema_migrations`; missing, renamed, changed or out-of-order migrations fail closed (#226).
+- **Coverage graph performance**: the coverage graph batches its connector lookups (three queries instead of one per root and per company) and adds the partial index `idx_ts_icp`; on a task of about 3,000 assets the p50 dropped from 126 ms to 27 ms and the queries per call from 221 to 3 (#230).
+- **Request body bounds** (#305): JSON request bodies decode at most 32 MiB, every non-multipart body is capped, and an oversized body answers 413 instead of a generic bad request. `ReadTimeout` bounds how long headers and the body may take to arrive without cutting a handler that is already running.
+- **Chat attachments up to 512 MiB** (#252): the client, server, compose file and reverse-proxy sample agree on a 512 MiB combined multipart limit.
+- **MITM passthrough TTL** (#306): a host that cannot be intercepted is tunnelled for one minute, then interception is tried again; an expired mark counts as intercepted.
+- **Norma v0.4.11** (#294).
+- **CI**: the suite also runs on the latest Go release as an advisory job, the rewrite-rule engine runs under the race detector, and the gzip/compression fixtures no longer depend on the local Go version (#279, #278).
+- **Repository hygiene** (#275): `docs/` is no longer ignored, and contributing documents the 7-open-pull-request cap (#307).
+
+### Fixed
+
+- **Compose private model endpoints** (#406): `ARTEX_LLM_PRIVATE_ENDPOINTS` is passed to the artex container, so the private endpoint allow-list works in the Compose deployment.
+- **Bash exit 127 in transcripts** (#398): the session transcript explains a 127 exit as a missing command and shows the matching hint.
+- **LLM usage status on early stream exit**: when a consumer stops reading a stream before `message_stop`, the recorder now stores the `llm_usage` row as `error` at that point, whether or not the context was cancelled, instead of inferring the status from `ctx.Err()` in a deferred call. `TestSideUsageRecordedOnceOnConsumerCancellation` runs again (follow-up to #9).
+- **RSI lesson trust**: the planner overview carries each finding's triage status, and `prove_goal` refuses a `false_positive`, `duplicate`, or `ignored` finding. A lesson with no company is visible only to tasks that also have no company. Retracted evidence stays on the row with `withdrawn_at` set, extraction runs when a disposition changes or a retest completes, and it still withdraws evidence after a task gains a second company. The rendered lesson block is capped in characters, not bytes.
+- **Workspace and skill symlink confinement**: workspace file operations, the skill file APIs and the skill loader resolve symlinks in every path component and refuse a target outside their root, so a link planted in the workspace or a skill directory cannot expose another file.
+- **Target gate behind proxies**: a target approval is name-only whenever a proxy is in the path, including the recording proxy, the global egress proxy and a custom tool's own proxy, so the gate never claims an IP binding the proxy does not enforce.
+- **Remote MCP response bound**: Streamable HTTP JSON-RPC bodies and SSE data payloads are refused above 8 MiB, so a remote MCP server cannot force an unbounded decode.
+- **LLM response capture bound**: each recorded provider attempt keeps at most 1 MiB, and a call keeps at most 8 attempts, so a large or retrying stream cannot grow the recorder without bound. The live stream is unchanged.
+- **Intercept audit ring**: `preToolUse` records allow only after intercept and the target gate decide, so a blocked call no longer leaves a leftover allow row in `Guard.Audit()`.
+- **DSN password redaction**: `config.Redact` now masks libpq `password=` keywords and `?password=` query values as well as URL userinfo, so a ping-failure log cannot print the database password.
+- **Asset DSL nesting**: `ParseDSL` refuses queries longer than 4 KiB or nested more than 32 parentheses deep, so a crafted `dsl` cannot grow the goroutine stack without bound.
+- **Retry-After overflow**: a 429/503 `Retry-After` of huge seconds no longer wraps `time.Duration` into a tiny delay. Values above `MaxDelay` are not retried.
+- **Conversation message pages**: `GET /api/conversations/{id}/messages` clamps `limit` (200 for history, 1000 for `?since=`), so a huge query cannot load the whole transcript in one response.
+- **Findings CSV formula cells**: `FindingsCSV` prefixes name, class, summary, task, and other text fields that start with `=`, `+`, `-`, `@`, tab, or CR so Excel/LibreOffice do not evaluate them as formulas when the export is opened.
+- **Asset service links**: the Services tab only uses an asset URL as `href` when it is `http:` or `https:`. `javascript:`, `data:`, and other schemes render as text.
+- **Chat session directories**: `ChatAgent.Chat` accepts only `[A-Za-z0-9_-]` session ids (at most 64 bytes) before joining them under `<workDir>/sessions`, so `..` and path separators cannot escape that directory.
+- **Change-password rate limit**: `POST /api/auth/change-password` uses the same limiter as login, keyed by client IP and by the session token, so a stolen session cannot guess the current password without backoff.
+- **Ingested traffic headers**: `RecordExternal` rejects a method that is not an HTTP token and header names or values that contain CR, LF, or NUL, matching Replay, so ingested exchanges cannot inject extra header lines into stored evidence.
+- **Browser MCP starts offline** (#329): the seeded `browser` MCP ran `npx @playwright/mcp`, which contacts the npm registry on every start even with the package installed globally, and Playwright MCP defaulted to a Chrome channel the image does not ship. It now runs the image's `playwright-mcp` binary with `--headless --browser chromium`. Existing databases that still have a stock `npx @playwright/mcp` row (including the common `-y` form) or a `playwright-mcp` row with no `--browser` are rewritten once; any other command or package is left alone. The image also installs the Chromium build `@playwright/mcp` and `@playwright/cli` expect, which is not the same build `playwright install` puts in the cache.
+- **CREATE DATABASE identifiers**: `ensureDatabase` now builds the statement with `pgx.Identifier`, which quotes the DSN database name and doubles any embedded quote, so the name cannot close the identifier. No database name PostgreSQL accepts is refused, so existing installs with a hyphen, a dot or non-ASCII characters keep starting.
+- **ask_operator image_path**: the screenshot path must resolve inside the run directory of the agent that asks (`<data>/tasks/<id>/i<N>` for a worker, `<data>/tasks/<id>/main` for the main agent). A relative path resolves from that directory and an absolute path must be inside it; `..` segments and symlinks that leave it are refused, so the tool cannot copy an arbitrary server image into the operator transcript. The copy is staged in `<data>/tasks/<id>/uploads`.
+- **ask_operator image_path, behavior change**: a worker that passed `i<N>/shot.png` relative to the task directory must now pass `shot.png` from its working directory, or an absolute path inside its run directory.
+- **insert_assets fail-closed**: when intercept or task allow/block rules cannot be loaded, `insert_assets` refuses the whole call instead of evaluating an empty rule set (which allowed every asset). The tool result does not include the underlying database error.
+- **BlobRange length no longer wraps int64**: `offset+length > size` overflowed when length was near MaxInt64, so the cap was skipped and `make([]byte, length)` could exhaust memory. The bound is now `length > size-offset`.
+- **PostgreSQL text[] literals escape backslashes**: `marshalStringArray` quoted double quotes but not backslashes, so a value ending in `\"` could close the current array element and inject another. It now doubles backslashes before quotes, matching `marshalJSONBArray`.
+- **Browser MCP env null no longer crashes startup**: a stored MCP `env` of JSON `null` unmarshaled into a nil map, and `syncBrowserMCPProxy` then assigned `NODE_EXTRA_CA_CERTS` when traffic capture was on, panicking the process on every start. `decodeStrMap` now always returns a writable map.
+- **Provider refusals reported as refusals**: a turn the provider's safety system declined (Anthropic `stop_reason: "refusal"`, OpenAI-compatible `finish_reason: "content_filter"`) has no text and no tool calls, so it ended as `completed` with "the model ended this turn normally", and the idle-turn rerun resent the same conversation up to the empty-response retry count, where it is expected to be refused again. The LLM recorder now hands each call's stop reason to the run (`llmrec.WithStopSink`, `agent.WithStopTracker`). After a refusal the idle-turn rerun is skipped, and the run summary says the provider refused the turn and the intent was not completed.
+- **LLM health badge on every task path**: `/system/llm/` read a breaker state that only the failover Pool wrote, so a profile used by an explicit task chain, by a bound agent with failover off, or as the global provider stayed "Healthy" through a real outage. Every task LLM attempt now records its outcome through the same policy the Pool uses, keyed by the profile that served it. The LLM recording page also explains an empty list when the `llm_record` toggle is off instead of looking broken.
+- **LLM health persistence** (#304): persisted breaker rows are applied in sequence at startup and written before the database closes, and a slow write no longer holds the registry lock while it runs.
+- **Skill visibility survives restarts**: turning a skill off now writes an explicit disabled row instead of deleting it, so the startup seed, which only inserts missing rows, can no longer bring the skill back. Skills that were turned off before this version have no row to keep, so they come back once after the upgrade and must be turned off again.
+- **Browser extension traffic capture**: CDP delivers `Network.responseReceived` response headers as an object, not an array of `{name, value}` records, so the extension threw on every response and never queued an exchange. It now accepts both shapes and lower-cases names before the body-capture gate, so captures work again and `content-type` correctly controls body capture.
+- **bbot on arm64**: the image now builds on arm64 hosts such as Apple Silicon. bbot's `gowitness` downloaded an x86-64 Chrome and `retirejs` an x86-64 Node, which can't run there, so the build failed. On arm64 the image uses Debian's `chromium` for gowitness and an arm64 Node for retirejs, and the build check now covers `retirejs` too. amd64 builds are unchanged.
+- **Auto-scope hygiene**: auto `task_scope` rows count for coverage and untested assets only under a declared root, and direct coverage counts anchored assets through fact anchors only; the scope is described as "coverage scope, not enforced" (#196).
+- **Enrich HTTP probe**: it now dials through `intercept.PinnedDialer`, so the target gate applies and a probe without a target scope is refused (#198).
+- **Agent hook data races**: the eight package-level hooks are synchronised, so a second wire-up no longer races tasks that already read them (#227).
+- **Coverage flag read failure** (#303): asset-coverage tools stay available when the coverage flag cannot be read, and a failed read no longer disables coverage for the task.
+- **RSI lesson correctness** (#287, #290): lessons are scoped from `task_scope`, UTF-8 is no longer split mid-character, caution lessons are looked up by cue, lesson evidence and every retest are retracted when a finding's disposition reverses, and extraction is skipped on a task with more than one company.
+- **Finding disposition mirror** (#289): finding triage is mirrored onto its exploration node, so the graph and the findings table agree.
+- **RSI lessons in the data envelope** (#288): lesson text reaches the planner and worker inside the same nonce-framed envelope as other target-derived content.
+- **Intent summaries framed** (#311): the intent summary on the worker-finished and finding lines, and the summaries in `graph_overview`, now reach the planner inside the nonce frame; the structured intent fields stay in the plain JSON, and the operator-typed deletion reason stays outside.
+- **LLM pool context window** (#286): the pool and side-question paths use the model's real context window instead of a default when computing compression thresholds.
+- **Sensitive rewrite values** (#273 follow-ups): a kept sensitive value is matched on action type, header name and regex, and a host change is refused while a stored sensitive value is kept.
+- **Triage bot context** (#274): the PR triage bot receives a directory map instead of a truncated file list.
+
+### Security
+
+- **Secrets at rest**: the credential-bearing columns and settings (LLM API keys and proxy, task credentials, MCP server env, notification channel config, search and proxy settings), the exec spec of custom tools and the evidence snapshot heads are encrypted in PostgreSQL with AES-256-GCM (`enc:v1:`) using `ARTEX_SECRET_KEY`, else `keys/secret.key`; existing plaintext rows are backfilled once at startup, and a missing or wrong key while encrypted data exists refuses to start. This protects database dumps and backups, not a running instance (#213, #216, #217, #218).
+- **URL credentials are dropped before storage**: scan and bbot ingestion, the asset store and archive restore strip URL userinfo, so `https://user:pass@host/app` is stored and matched as `https://host/app` (#222, #223, #224).
+- **Agentic injection and proof hardening** (#437): the four surfaces that still carried target or agent text outside the per-message data envelope now go through it: the worker intent assets move out of the system prompt into the framed user message, and the planner stagnation warning, agent-written task credentials and planner todos are framed. Scanner output is opened with `os.Root` and every symlink and hard-linked file is refused. `prove_goal` closes a goal with a finding only when a bound `traffic_ref` still exists in the live capture and its host matches the finding's linked asset, and refuses fail-closed when that check is unavailable, so a planted or unbound finding stays recorded but cannot close a goal. An agent scope addition outside the declared scope, or one whose classification read fails, is recorded as `expanded` with its source and reason. A deterministic adversarial bench runs in CI against a hostile local target.
+- **Interception, session, log and endpoint hardening** (#436): when the interception rules cannot be read, tool calls are blocked instead of allowed, and a rule whose pattern does not compile blocks the calls it would target. A cookie-authenticated POST, PUT, PATCH or DELETE must carry a same-origin `Origin` or `Sec-Fetch-Site`, otherwise it answers 403; bearer tokens, GET and HEAD are unaffected. The one-time setup token is no longer written to the log the API exposes, and proxy credentials are masked at write time, on stderr and on read-back. The workspace refuses the capture CA, index and blob store for read and write, and refuses a delete that would remove them. `POST /api/llm/models` refuses carrier-grade NAT, benchmark, IETF protocol and reserved ranges for literal hosts, resolved names, redirects and at dial time, judges NAT64 and 6to4 addresses by the IPv4 they embed, and no longer echoes an upstream error body.
+
+### Thanks
+
+Thanks to the contributors whose work is in this release:
+
+- Security and core reliability: @Coff0xc, @Protonmatter, @liuxiaobo0920, @cyberd4ch, @Dev-next-gen, @Michael-JRead, @anqorithm, @renaesop, @tglemser, @adam-33-pixel
+- Features, UI and locales: @Toys0125, @cocodedk, @BlackGownQ, @Amineharrabi, @chetanvhsk-wq, @YunzhouLi-hub, @mervedalgin
+- Build, packaging and tests: @ldevbr, @Lusitaniae, @mp-web3, @Alexandre200-lab, @maheshBawa
+- Documentation: @err0rgod, @yeting1107, @henefesto, @mathkartel
+
+## [0.6.0] - 2026-11-12
+
+Machine-checked finding verification (S1), intercept decisions traced to their actor, configurable notification limits, prompt hardening and goal guards from the #124 agentic audit, the target gate (S3b phase 1 and step 2.1, off by default and API-only), intent claim leases, and checksum-verified tool downloads in the Docker image.
+
+### Verified findings (S1)
+
+- **POE level and verification status**: findings carry `poe_level` (0-4), `verification_status` and `verification_note`; a finding is `verified` only with a bound proof or verification response, a declared POE level of 3 or more, and every evidence quote of 8 runes or more found verbatim in a bound body. Existing rows stay `unverified` (#162).
+- **Verification in the findings UI**: a badge (`Verified L3`/`L4`, `Unverified`, `Blocked`, `Not assessed`, `False positive`) beside the triage status, a filter, and the note on the detail page; the list, groups, asset tree and export accept `verification_status` (#163).
+- **Retest linkage**: a completed retest with verdict `reproduced` or `fixed` upgrades an `unverified`, `not_assessed` or `blocked` finding to `verified`, with a note naming the retest; other verdicts never change the state (#164).
+- **Evidence gzip decoding**: gzip and deflate bodies are decoded (one layer, 4 MiB cap, fail-closed) before the quote check, so compressed HTML can verify; brotli and zstd stay `not_assessed` (#169).
+- **Counterevidence and confidence rationale**: findings take two optional free-text fields, `counterevidence` (what was tried and did not work) and `confidence_rationale` (why the conclusion holds), through `report_finding`, the findings API and the finding detail page; a missing field never refuses a finding. An idempotent upgrade adds both properties to the stored `report_finding` schema on existing databases and keeps user edits (#193).
+
+### Intercept decision tracing
+
+- **`decided_by` on approvals**: each settled approval records its actor (`human`, `rule`, `model`, `system`), shown in a "Decided by" column with a filter; legacy rows show "Legacy" and are not rewritten (#165).
+- **Judge decisions no longer stored as `unknown`**: the `[model]`/`[Model]` prefix case mismatch is fixed, and an idempotent backfill relabels the affected rows `decision_source=model` (#159, fixes #156).
+
+### Notifications (closes #168)
+
+- **"and N more" counts the hidden items**: the notification asset list reported the total instead of the assets left out (#170); the malformed-IP asset warning had the same bug (#171).
+- **Configurable limits**: `notify_summary_max_runes` (default 120, 0-4000) and `notify_assets_max_shown` (default 3, 0-50) in `/api/settings`, `0` meaning no truncation; the Feishu card guard drops from 24000 to 16000 bytes to stay under the 20 KB request limit (#172).
+- **Limits on the settings page**: both fields under System > Notifications > Global settings, validated before anything is saved (#173).
+- **Feishu digest overflow**: digests are packed against the serialized request body, so a digest of many short items is split instead of exceeding 20 KB and being rejected (#174).
+
+### Agentic prompt hardening (#124 phase B)
+
+- **Untrusted-content tails owned by code**: the planner and the compactor get an untrusted-data rule appended after their prompt body, and the #49 block moves out of the editable bodies into a tail appended for every chat agent (worker, main agent, auto, pentest, reporter), so a prompt override cannot remove it (#189).
+- **Planner goal anchor**: the planner user message ends with a block that restates the task goal and constraints and asks each new intent to name the goal it serves (#189).
+- **bbot skill rules**: every bbot event field is untrusted, only `scope_distance == 0` reaches `insert_assets`, and other events stay intel facts that are never auto-scoped or probed (#189).
+
+### Agentic guards (#124 phase B)
+
+- **`goal_met` refuses while a goal is open**: it names the open count and points to `prove_goal`; a task with no goal node keeps the old behaviour (#190).
+- **`prove_goal` requires an observed fact**: a fact is accepted only with `confidence` `observed`; findings are accepted as before (#190).
+- **Hint origin**: `add_hint` stores who wrote the hint (`human`, `orchestrator` or the agent name) and the planner trigger names it, instead of always "The human (main agent)" (#190).
+- **Built-in rules for the planner and the main agent**: the `[built-in]` deny rules now apply to their Bash and other intercept-enabled tools; user rules and the judge still do not (#190).
+- **Deny reasons to the model are capped**: the reason in a block message (deny rule, judge or target gate) is cut to 4000 runes, with a truncation marker, before it reaches the model; the reason stored in the interception log is unchanged (#192).
+
+### Target gate (S3b phase 1 and 2.1): OFF by default, API-only
+
+- **Opt-in only**: `target_gate` on tasks and conversations defaults to `false` and is set through the API (`POST`/`PATCH`); there is no UI. With it off, nothing below runs. Decision D2 (gate on by default) is NOT in 0.6.0 (#178).
+- **Hooks and scope**: the planner and the main agent run with tool hooks, and every session carries a target-gate scope (#177).
+- **Schema, flag and approval requests**: `target_pins`, one open request per scope and `host:port`, and a human approval that pins the displayed addresses; pin list and revoke routes (#178).
+- **Extraction, resolver, exemptions, decision in the hook**: declared targets are extracted, block rules and exemptions applied, names resolved, and uncovered targets wait for a human approval (#179).
+- **Rendered custom-tool targets**: the URL or command that a custom `http` or `command` tool renders goes through the gate (#180).
+- **Inheritance**: a task spawned by a gated caller and a conversation triggered by a gated task start gated; pins are never copied (#182).
+- **Declared form first**: block and URL rules match the declared targets before any DNS lookup (#183).
+- **Redirect hops**: every redirect hop of WebFetch and of the custom `http` tool is checked; an uncovered hop fails with `TARGET_APPROVAL_PENDING` (#185).
+- **Pinned dialer**: in a gated scope, WebFetch and a direct custom `http` call connect only to pinned or exempt addresses, on every hop, with no direct retry (#186).
+
+### Other changes
+
+- **Custom User-Agent for LLM requests**: an optional per-profile `User-Agent` (trimmed, no control characters, 256 bytes max); empty keeps the default. Part of #154, without the fixed-full-URL mode (#155).
+- **Untrusted-output boundary toggle**: `ARTEX_UNTRUSTED_BOUNDARY=1` enables Norma's framing of tool results for worker, planner, chat and main agent; off by default (#166).
+- **Intent claim lease and fencing (S3c)**: a claim has a 15 s heartbeat, a 90 s TTL and an owner token, so a stale worker can no longer overwrite a result; in-flight intents reopen when their claim expires, not at startup (#176).
+
+### Fixed
+
+- **Custom-tool proxy scheme**: `use_recording_proxy` produced `http://http://...`; a value with a scheme is now used as is and a bare `host:port` gets `http://` (#187).
+- **`list_task_credentials` schema**: it emitted `"required": [""]`, which strict providers reject, failing every worker; fixed, with a one-time heal of existing databases at startup. Reported and first fixed by @kiserufetch (#130).
+- **MCP protocol version**: the Streamable HTTP client negotiates the version (offers 2025-11-25, then 2025-06-18) and sends the negotiated one after `initialize` (#132, fixes #131).
+
+### Build, Docker and tests
+
+- **Docker tool verification**: the recon tools are checked against their release checksums, sqlmap is pinned to tag 1.9.9 at a fixed commit, Node 22.23.4 comes from nodejs.org verified against `SHASUMS256.txt`, and the Playwright packages are pinned. Carries over the Dockerfile part of #127 (#188).
+- **Secrets out of the build context**: `.dockerignore` excludes `.env`, `config.json`, `jwt.key` and `backups` (#153).
+- **Server tests skip without a DSN**: the Postgres-backed `./server` tests skip when no database is configured instead of failing (#175).
+- **Norma v0.4.4 to v0.4.8**: v0.4.5 (#160), v0.4.6 (#161), v0.4.7 (#184), v0.4.8 (#186).
+
+### Docs
+
+- **LLM base URL note in the README**: the Anthropic base has no `/v1` suffix; OpenAI-format bases end in `/v1` (`/chat/completions` or `/responses` is appended). Follow-up to #154 (#157, #158).
+
+### Known limits
+
+- **Target gate**: OFF by default and API-only; turning it on by default (D2) is not part of this release.
+- **Declared-input detection, not enforcement, for subprocesses**: the gate reads the targets a call declares; a subprocess that builds its target at run time, or a custom script tool's stored code, is not seen. Only WebFetch and direct custom `http` calls are bound at connect time; calls through a proxy are not (recording-proxy binding is step 2.2).
+- **URL rules match the URL as written**, with no normalisation; use a domain, IP or CIDR rule to keep an agent away from a host (#183).
+- **Fact provenance**: `prove_goal` trusts the `confidence` the model declared in `record_fact`; F4 fact provenance and the source check come in 0.7.0. There is no pending-proof UI.
+- **Prompt rules are advisory to the model**: the tails, the goal anchor and the skill rules are prompt text, and their effect on model behaviour was not measured. The enforced parts are the `goal_met`/`prove_goal` handlers, the built-in deny rules and the target gate.
+- **Stored tool descriptions**: the new `add_hint` and `prove_goal` descriptions reach fresh databases only (#190).
+- **Intent claim leases need one version per database**: an older binary does not heartbeat, so a 0.6.0 instance takes over its live claims (#176).
+- **Verification**: no path produces `blocked` or `false_positive` yet, and non-HTTP findings stay `unverified` until S1b.
+- **Finding reasoning fields are not enforced**: the prompts and the `report_finding` descriptions ask for `counterevidence` and `confidence_rationale` when confidence is not high, but findings have no confidence field, so nothing requires them; a confidence field and its enforcement are 0.7.0 items. The prompt sentence reaches fresh databases only; the schema descriptions reach existing ones through the upgrade (#193).
+
+## [0.5.1] - 2026-11-05
+
+Login rate limiting per client IP with trusted-proxy support, a 12-character minimum for new passwords, a loopback-only default for the binary, and the JWT signing key in its own Docker volume.
+
+### Changed
+
+- **The binary listens on `127.0.0.1:8787` by default**: the `-addr` default was `:8787`, every interface. Running `artex` or `./start.sh` without `-addr` now accepts connections from the local machine only; pass `-addr :8787` to listen on every interface. Docker is unchanged: the image starts the server with `-addr :8787` inside the container, and `docker-compose.yml` already publishes it on `127.0.0.1` by default (`ARTEX_BIND_ADDR`).
+- **New passwords need at least 12 characters** (was 8), at first-run setup (`POST /api/auth/init` and the `/setup` page) and in `POST /api/auth/change-password`. Login does not check length, so a password set under the old minimum keeps working until it is changed. `reset-password.sh` enforces the same minimum.
+
+### Fixed
+
+- **The JWT signing key survives container rebuilds**: the server wrote `jwt.key` to the executable's directory, `/app` in the image, so the key lived in the container's writable layer and recreating the container (for example `docker compose up -d --build`) generated a new key and signed every user out. The key directory is now set by `ARTEX_JWT_KEY_DIR` (default: the executable's directory, unchanged for non-Docker installs). `docker-compose.yml` sets it to `/app/keys` and bind-mounts `./keys` there, outside `./data`, which the file manager browses. On start, when `<key dir>/jwt.key` is missing, a key at `data/jwt.key`, then at the executable's directory, is copied there with mode 0600 and the old file is removed; otherwise a new key is generated. An existing key is never overwritten. Upgrading a Docker install signs every user out once, because the old key is in the container being replaced; to keep sessions, copy it out before recreating the container:
+
+  ```bash
+  mkdir -p keys
+  docker cp artex-artex-1:/app/jwt.key ./keys/jwt.key
+  ```
+
+### Security
+
+- **Login rate limit**: `POST /api/auth/login` allows 10 attempts per minute per client IP. The next attempt gets 429 with a `Retry-After` header (seconds) and a JSON error, and the IP is blocked for 1 minute. Each attempt while blocked, and each later block, doubles the wait, up to 15 minutes. A successful login clears the IP's count. There is no per-account lockout, so failing logins cannot lock the admin out from other addresses. The state is in memory: a restart clears it, an IP idle for 15 minutes is dropped, and at most 10,000 IPs are tracked (the least recently seen is dropped first). The IP is the TCP peer address, and `X-Forwarded-For` is ignored, unless the peer is listed in the new `ARTEX_TRUSTED_PROXIES` (comma-separated CIDRs, empty by default, passed through by `docker-compose.yml`). For a listed peer the header is read from the right and the first address that is not a trusted proxy is the client; entries the client added further left are never used. Behind a reverse proxy, set it: otherwise every client has the proxy's address and shares one budget, and an attacker failing logins through the proxy blocks the real users, admin included, for up to 15 minutes. The README nginx example now sends `X-Forwarded-For`.
+- **`GET /api/health` hides the version from anonymous callers**: without a valid token it answers `{"ok":true}` only. With a token (the web UI sends one for the version in its top bar) the answer is unchanged: `ok`, `service` and `version`.
+
+## [0.5.0] - 2026-11-04
+
+Ollama support, a setup token for the first-run claim, secret scrubbing for child processes, a Docker image that builds from a fresh clone, Go 1.26.10 and Node 22, and race and shellcheck runs in CI. Entries marked "direct commit" landed on `main` without a pull request.
+
+### Added
+
+- **Ollama support**: an `ollama` LLM profile format for a local or LAN Ollama server. Keyless by design: no API key is needed, `OPENAI_API_KEY` is never inherited, the base URL defaults to `http://127.0.0.1:11434/v1` and is normalized to the `/v1` root, and the profile works in the failover pool, task LLM chains, model listing and connection tests. Contributed by @glauberportella (#128).
+- **Setup token for first-run setup**: while no admin password is set, the server generates a random 128-bit one-time token at startup and prints it to its log (`docker compose logs artex | grep "Setup token"`). The `/setup` page has a field for it, `POST /api/auth/init` requires it (`setup_token`, compared in constant time, 403 when missing or wrong), and it is cleared once the password is stored (#137).
+- **`ARTEX_BIND_ADDR`**: the address `docker-compose.yml` publishes the web UI on, default `127.0.0.1` (#137).
+
+### Security
+
+- **First-run claim**: before, anyone who reached port 8787 on a fresh install before the operator could set the admin password. Init now needs the setup token above, and Docker installs publish 8787 on `127.0.0.1` by default; set `ARTEX_BIND_ADDR=0.0.0.0` in `.env`, or use a reverse proxy or SSH tunnel, for remote access (#137).
+- **Startup secrets removed from the environment**: `ARTEX_PG_DSN`, `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` are unset inside `server.New` after they are read and before the MCP discovery goroutine and the task resume loop start, so agent shells, MCP stdio servers and custom tools spawned afterwards no longer inherit them (#136). The binary passes the option that enables this, but `New` did not apply its options, so the scrub from #136 never ran until #146 fixed it (#146). See Known issues for what this does not cover.
+- **Saved API keys go only to their own endpoint**: `POST /api/llm/test` and `POST /api/llm/models` used a saved key (the profile's, or the global one) for any `base_url` in the request body, so a crafted request could send it to another host. A saved key is now sent only when the request's provider and normalized base URL match the ones it was saved for; otherwise the request must carry `api_key` (#142).
+- **`ARTEX_LLM_PROVIDER` is matched case-insensitively**: `Ollama` or a value with surrounding spaces fell through to the Anthropic default and sent `ANTHROPIC_API_KEY` to the configured base URL (#140).
+
+### Fixed
+
+- **Ollama base URL on the environment path**: `ARTEX_LLM_BASE_URL=http://host:11434` is normalized to the `/v1` root the same way the saved-profile path already was, so a LAN Ollama server configured through the environment no longer answers 404 on chat (direct commit 1c35c9c).
+- **Malformed `config.json` is an error**: `config.Load` used to ignore a parse error and treat the file as missing, which surfaced as a misleading "no database config found" or a silently ignored `skill_dir`. A read or parse error is now returned with the file path and startup exits (#141).
+- **`install.sh` escapes what it writes**: the local install writes `config.json` string values through a JSON escaper and requires a numeric port; the Docker install escapes `\`, `|` and `&` in the Postgres password and API key before the `.env` substitution (#141).
+- **`scripts/backup.sh --keep 0` is rejected**: it used to delete every dump, including the one just written, and still report success. Values with a leading zero are rejected too (#139).
+- **`backups/` is ignored again**: a missing newline had merged it into the previous `.gitignore` line, so database dumps showed up as untracked files (#138).
+
+### Build and CI
+
+- **The image is built from the checkout instead of pulled**: `docker-compose.yml` no longer references the `autumn27/artex` namespace, whose repository is gone and whose name its holder could republish at any time. `install.sh` and `update.sh` build the image locally (direct commit 1ed154e).
+- **A fresh clone builds the image**: the Dockerfile copied a prebuilt `dist/<arch>/artex` that a clean checkout does not have. It is now a multi-stage build: a Node 22 stage runs the frontend static export, a Go 1.26 stage runs `build.sh` with the release binaries job's flags (CGO-free cross-compile, `-trimpath`, version stamp), and the runtime stage copies the result (#147).
+- **`update.sh` refuses to rebuild stale code**: when `git pull --ff-only` fails on a diverged clone (including every clone made before the 2026-10-23 history rewrite), it now stops with recovery commands instead of warning, rebuilding the old tree and printing "Build complete" (direct commit 1ed154e).
+- **CI runs the race detector and shellcheck**: `go test -race -p 1` over every package with tests except `./server`, and `shellcheck -S warning` on `install.sh`, `update.sh`, `start.sh` and `scripts/backup.sh` (#144). The race run uses its own database (direct commit 0477751).
+
+### Upgrades
+
+- **Go 1.26.10** in `go.mod` (was 1.26.3), and **`golang.org/x/net` v0.62.0** (was v0.58.0), which raised x/crypto to 0.58.0, x/text to 0.43.0, x/sys to 0.49.0, x/sync to 0.24.0, x/mod to 0.41.0 and x/tools to 0.51.0 (#145).
+- **Node 22 in the runtime image**: NodeSource `setup_22.x` instead of the end-of-life `setup_20.x`, matching CI and the release workflow (#143).
+
+### Known issues
+
+- **The secret scrub has limits**: `os.Unsetenv` changes only the Go runtime's copy, so a process running as the same user can still read `/proc/<pid>/environ` of the server (and, in Docker, of PID 1, `start.sh`). Other variables that may carry credentials, such as `ARTEX_LLM_PROXY`, are not scrubbed.
+- **The LLM test and model-list endpoints still take `proxy` from the request**, so a saved key can travel through a request-supplied proxy when the base URL is plain HTTP.
+- **Postgres passwords with URL-special characters** (`@`, `/`, `#`, `?`) break the `ARTEX_PG_DSN` that `docker-compose.yml` builds by interpolation, and Compose interpolates `$` in `.env`.
+- **The build context includes local secrets**: `.dockerignore` does not exclude `.env`, `config.json` or `jwt.key`, so the build stage's `COPY . .` puts them in a build-stage layer of the local builder cache. They are not copied into the final image.
+- **Image supply chain**: the recon tools are downloaded at pinned versions but not checksum-verified, sqlmap tracks its default branch, and the Playwright packages are installed at `@latest`. Draft #127 proposes checksum verification.
+- **No Docker image is published for this release**: the release workflow's `docker` job only runs when `DOCKERHUB_ENABLED` is set, and it still downloads prebuilt binaries into `dist/` that the Dockerfile no longer uses. Build the image from the checkout with `docker compose up -d --build`.
+- **CI gaps**: there is no `docker build` job. Four tests skip themselves (fresh-database or timing failures, see #9).
+- **Reported and not fixed in this release**: `list_task_credentials` emits an invalid `"required": [""]` schema that strict LLM providers reject (#130), and the MCP Streamable HTTP client fails against servers that only support protocol version 2025-11-25 (#131; fix proposed in #132).
+
+## [0.4.0] - 2026-10-23
+
+First release of this fork. The engine underneath is still upstream's, but this tree carries a long stretch of operational work on top of it: a recon toolbox and skills, findings discipline, cost accounting, and container packaging.
+
+### Added
+
+- **Recon toolbox in the image**: nuclei, httpx, subfinder, katana, ffuf and dalfox installed at release-pinned versions, plus a sqlmap checkout that tracks the default branch, each smoke-tested at build time (run once, not checksum-verified), so hunt workers can call them directly (#112). Checksum verification arrives with #127.
+- **Recursive recon skill** (`bbot-recon`): bbot v3.0.2 in its own virtualenv with module dependencies preinstalled. Policy-gated modes (passive seeds-only when scanners are banned, active-safe, loud only on explicit permission) and JSONL ingestion into the facts graph (#118).
+- **php2shell skill**: turns a file-inclusion finding into verified RCE through the session.upload_progress chain, lab first and gated on program policy (#113).
+- **Code audit and reverse-engineering skills** (#55, #77).
+- **Goal ambiguity gate**: task creation rejects goals that name no target and goals under 80 characters; `[targetless]` opts out for tasks that legitimately have none (#111).
+- **LLM chain hardening**: consecutive-failure escalation across the ordered profile chain, plus per-intent profile rotation with a strict round-robin (`llm_rotate`) (#111, #114).
+- **Stagnation warning**: the graph overview tells a worker when it has repeated the same direction without producing findings (#111).
+- **Per-task credentials vault**: accounts stored per task, agent-generated passwords allowed, injected into the worker context and managed from the task page.
+- **Cost ledger**: token spend metered per call, with usage surfaced in the UI and judge/fallback calls counted separately (#71, #74).
+- **Backup script and MCP health reporting** (#43, #44).
+- **Ask-operator tool with environment handoff** (#45, #57).
+- **DrostBench corpus and benchmark harness** (#59, #95, #96, #97, #98).
+- **One database per test package**, removing cross-package test races (#82).
+
+### Changed
+
+- **Norma upgraded to v0.4.4**: per-task process-tree memory watchdog, UTF-8 aligned output truncation, non-interactive subprocess environments, message_delta usage recovery, and streaming fixes (#121).
+- **Planner quiet mode** for less narration during long runs (#81, #88).
+- **Findings discipline**: proof-basis gates, measured impact, adversarial verification and dedup rules decide what a finding must contain before it is reported (#51, #53, #63, #69).
+- **Prompt-injection hardening** on seed material and MCP tool descriptions (#49).
+- **Pause preserves the task timeout budget**, and paused time is frozen in the task clock (#2, #110).
+- **Deadline contract** in the executor seeds (#65).
+- **Task detail metrics and outcome cards** summarise a finished run (#92, #102).
+- **Skill-gap and loop-contract reporting** for the planner (#104, #106); the RSI notes land as documentation in #108.
+
+### Removed
+
+- **In-app self-update and the automatic version check**: the update source was hard-coded to a repository that no longer exists, and its checksums came from the same release. The `selfupdate` package, the `/api/update/*` endpoints, the top-bar update badge and the "Version & Updates" settings card are gone; `start.sh` / `start.bat` now only restart the process after a crash. Upgrade with `update.sh` or a release archive. (#125, contributed by @stevenAthompson)
+
+## [0.3.15] - 2026-10-07
+>>>>>>> be8a79dd (fix(server): cap insert_assets request bodies)
 
 ### Interception
 

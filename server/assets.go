@@ -447,11 +447,6 @@ func (s *Server) deleteAssets(w http.ResponseWriter, r *http.Request) {
 // =====================================================================
 
 func (s *Server) insertAssets(w http.ResponseWriter, r *http.Request) {
-	as := s.assetStore()
-	if as == nil {
-		writeErr(w, 503, locale.Text(responseLanguage(w), "database unavailable"))
-		return
-	}
 	var req struct {
 		TaskID int64 `json:"task_id"`
 		Assets []struct {
@@ -488,8 +483,18 @@ func (s *Server) insertAssets(w http.ResponseWriter, r *http.Request) {
 			Params []map[string]any `json:"params"`
 		} `json:"assets"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, 400, locale.Errorf("invalid JSON: %w", err))
+	if err := decode(w, r, &req); err != nil {
+		var tooLarge *http.MaxBytesError
+		if errors.As(err, &tooLarge) {
+			writeErr(w, http.StatusRequestEntityTooLarge, "Request body too large")
+			return
+		}
+		writeErr(w, 400, "invalid JSON: "+err.Error())
+		return
+	}
+	as := s.assetStore()
+	if as == nil {
+		writeErr(w, 503, "database unavailable")
 		return
 	}
 
