@@ -36,6 +36,7 @@ import {
   PinOffIcon,
   PlayIcon,
   PlusIcon,
+  RotateCcwIcon,
   SaveIcon,
   SearchIcon,
   SlidersHorizontalIcon,
@@ -252,6 +253,7 @@ const UNCATEGORIZED_VALUE = "uncategorized";
 // preventing disagreements between enabled states.
 const PAUSABLE_STATUSES = new Set<TaskStatus>(["created", "queued", "running"]);
 const ARCHIVABLE_STATUSES = new Set<TaskStatus>(["paused", "done", "failed", "timeout"]);
+const RESUMABLE_STATUSES = new Set<TaskStatus>(["timeout", "failed"]);
 
 function taskControlAction(status: TaskStatus): "pause" | "resume" | null {
   if (status === "paused") return "resume";
@@ -565,6 +567,21 @@ export default function TasksPage() {
         toast.error(swt("interface.m0116", { p0: action === "pause" ? swt("interface.m0151") : swt("interface.m0833"), p1: (e as Error).message }));
       } finally {
         // Refresh on success or failure; failures often mean state changed and controls need reconciliation.
+        lastRef.current = "";
+        load();
+      }
+    },
+    [swLocale, load],
+  );
+
+  const resumeTask = React.useCallback(
+    async (id: string) => {
+      try {
+        const result = await api.resumeTask(id);
+        toast.success(swt("interface.m2883", { p0: id, p1: result.queued ? swt("interface.m0832") : "" }));
+      } catch (e) {
+        toast.error(swt("interface.m2884", { p0: (e as Error).message }));
+      } finally {
         lastRef.current = "";
         load();
       }
@@ -990,6 +1007,7 @@ export default function TasksPage() {
                       nowSec={task.status === "running" ? nowSec : 0}
                       onDelete={deleteTask}
                       onControl={controlTask}
+                      onResume={resumeTask}
                       onRename={renameTask}
                       onTogglePinned={toggleTaskPinned}
                       onArchive={queueTaskArchive}
@@ -1158,6 +1176,7 @@ const TaskRow = React.memo(function TaskRow({
   nowSec,
   onDelete,
   onControl,
+  onResume,
   onRename,
   onTogglePinned,
   onArchive,
@@ -1168,6 +1187,7 @@ const TaskRow = React.memo(function TaskRow({
   nowSec: number;
   onDelete: (id: string, options: DeleteTaskOptions) => Promise<void>;
   onControl: (id: string, action: "pause" | "resume") => Promise<void>;
+  onResume: (id: string) => Promise<void>;
   onRename: (task: Task, name: string) => Promise<void>;
   onTogglePinned: (task: Task) => Promise<void>;
   onArchive: (task: Task) => Promise<void>;
@@ -1287,6 +1307,7 @@ const TaskRow = React.memo(function TaskRow({
               <EyeIcon />
             </Link>
           </Button>
+          <TaskResumeAction task={task} onResume={onResume} />
           <TaskControlButton task={task} onControl={onControl} />
           <TaskPinAction task={task} onTogglePinned={onTogglePinned} />
           <TaskArchiveAction task={task} onArchive={onArchive} />
@@ -1434,6 +1455,35 @@ function taskControlIcon(pending: boolean, action: "pause" | "resume" | null) {
   if (pending) return <Loader2Icon className="animate-spin" />;
   if (action === "resume") return <PlayIcon />;
   return <PauseIcon />;
+}
+
+// TaskResumeAction is hidden for non-terminal states: resume is only meaningful
+// for timeout/failed scans whose unfinished work can be re-opened.
+function TaskResumeAction({ task, onResume }: { task: Task; onResume: (id: string) => Promise<void> }) {
+  "use no memo";
+  const { t: swt } = useI18n();
+  const [pending, setPending] = React.useState(false);
+  if (!RESUMABLE_STATUSES.has(task.status)) return null;
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      disabled={pending}
+      aria-label={swt("interface.m2881")}
+      title={swt("interface.m2882")}
+      onClick={async () => {
+        setPending(true);
+        try {
+          await onResume(task.id);
+        } finally {
+          setPending(false);
+        }
+      }}
+    >
+      {pending ? <Loader2Icon className="animate-spin" /> : <RotateCcwIcon />}
+    </Button>
+  );
 }
 
 // TaskControlButton renders disabled for final tasks rather than hiding,

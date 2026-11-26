@@ -95,4 +95,8 @@ func init() {
 	Register("[task-archive] restored task %d with warning: %s", "[task-archive] restored task %d with warning: %s")
 	Register("[task-archive] persist restore warnings for task %d: %v", "[task-archive] persist restore warnings for task %d: %v")
 	Register("[task-archive] archived task %d metadata deleted; stale package cleanup failed: %v", "[task-archive] archived task %d metadata deleted; stale package cleanup failed: %v")
+	Register("Task is being deleted and cannot be resumed", "Task is being deleted and cannot be resumed")
+	Register("Cancelled tasks cannot be resumed", "Cancelled tasks cannot be resumed")
+	Register("Archived tasks cannot be resumed; restore the archive first", "Archived tasks cannot be resumed; restore the archive first")
+	Register("Only timeout or failed tasks can be resumed", "Only timeout or failed tasks can be resumed")
 }

@@ -2879,7 +2879,11 @@ export const en = {
   "m2877": "Hard deadline for a single LLM call through this profile. Default 900 (15 min); set higher for slow endpoints under heavy contention (e.g. 3600 = 1 hour). 0 = no deadline.",
   "m2878": "Pending",
   "m2879": "Max concurrent tasks",
-  "m2880": "How many tasks may run at once (default 0 = unlimited). Tasks are admitted oldest-first; the rest wait as Pending and claim nothing until a slot frees. 1 runs one task at a time."
+  "m2880": "How many tasks may run at once (default 0 = unlimited). Tasks are admitted oldest-first; the rest wait as Pending and claim nothing until a slot frees. 1 runs one task at a time.",
+  "m2881": "Resume scan",
+  "m2882": "Resume timed-out or failed scan and re-open unfinished work",
+  "m2883": "Scan #{p0} resumed{p1}",
+  "m2884": "Resume failed: {p0}"
 };
 
 // Traditional Chinese catalog. Same keys as en; missing keys fall back to en at flatten time.
@@ -5764,4 +5768,8 @@ export const zh: Record<keyof typeof en, string> = {
   "m2878": "等待中",
   "m2879": "同時運行任務上限",
   "m2880": "同一時間最多行幾多個 task（預設 0 = 不限）。按最舊優先排序；其餘顯示為等待中，唔會認領任何 intent，直至有位空出。設 1 即一個一個行。",
+  "m2881": "恢復掃描",
+  "m2882": "恢復逾時或失敗的掃描，重新開啟未完成的工作",
+  "m2883": "掃描 #{p0} 已恢復{p1}",
+  "m2884": "恢復失敗：{p0}"
 };

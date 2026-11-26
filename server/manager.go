@@ -1242,11 +1242,11 @@ func (m *Manager) ApplyTaskAdmission(id, expectedStatus, status string, queued b
 	        ELSE 'resume'
 	    END,
 	    first_run_at=CASE
-	        WHEN $6='timeout' AND $2 NOT IN ('done','failed','timeout') THEN NULL
+	        WHEN $6 IN ('timeout','failed') AND $2 NOT IN ('done','failed','timeout') THEN NULL
 	        ELSE first_run_at
 	    END,
 	    deadline_at=CASE
-	        WHEN $6='timeout' AND $2 NOT IN ('done','failed','timeout') THEN NULL
+	        WHEN $6 IN ('timeout','failed') AND $2 NOT IN ('done','failed','timeout') THEN NULL
 	        ELSE deadline_at
 	    END
 	WHERE id=$1 AND deleted_at IS NULL AND status=$6

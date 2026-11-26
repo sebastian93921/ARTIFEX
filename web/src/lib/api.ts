@@ -306,6 +306,8 @@ export const api = {
   deleteTask: (id: string, options: DeleteTaskOptions) => del<DeleteTaskResult>(`/tasks/${id}`, options),
   controlTask: (id: string, action: "pause" | "resume") =>
     post<{ id: string; paused: boolean; queued: boolean; status: string }>(`/tasks/${id}/control`, { action }),
+  resumeTask: (id: string) =>
+    post<{ id: string; queued: boolean; status: string; reopened: number }>(`/tasks/${id}/resume`),
   controlTasksBatch: (taskIds: string[], action: "pause" | "resume") =>
     post<{ items: BatchControlItem[] }>("/tasks/control/batch", { task_ids: taskIds, action }),
   taskArchives: (input?: { page?: number; size?: number; q?: string; state?: string }) => {
