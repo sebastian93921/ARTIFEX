@@ -44,6 +44,15 @@ func resumeCreateTaskWithIntents(t *testing.T, m *Manager, status string) (*Task
 	if err != nil {
 		t.Fatalf("create task: %v", err)
 	}
+	// Pin a nonexistent profile so resume queues instead of starting real workers:
+	// with a usable provider present (CI), an unguarded resume would otherwise claim
+	// intents and write transcripts after the test's TempDir cleanup has begun.
+	bogus := int64(999999999)
+	task.LLMProfileID = &bogus
+	task.ActiveLLMProfileID = &bogus
+	if _, err := m.pg.Exec(`UPDATE tasks SET llm_profile_id=$1, active_llm_profile_id=$1 WHERE id=$2`, bogus, task.ID); err != nil {
+		t.Fatalf("pin bogus profile: %v", err)
+	}
 	states := map[string]int64{}
 	for _, state := range []string{"open", "running", "done", "blocked"} {
 		id, err := task.Store.AddNode(db.KindIntent, map[string]any{"summary": state + " work"}, 0, "open", "system", nil)
