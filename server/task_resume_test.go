@@ -18,9 +18,30 @@ func resumeTestServer(t *testing.T) (*Server, *Manager, string) {
 	if err != nil {
 		t.Skipf("postgres unavailable (%v) - skipping", err)
 	}
-	t.Cleanup(func() { _ = m.Close() })
+	ctx, cancel := context.WithCancel(context.Background())
 	td := t.TempDir()
-	s := New(context.Background(), m, td, td, td)
+	s := New(ctx, m, td, td, td)
+	// With a usable provider present (CI), resume starts real workers. Stop them and
+	// drain in-flight work BEFORE TempDir cleanup, or transcript writes race RemoveAll.
+	t.Cleanup(func() {
+		cancel()
+		_ = m.Close()
+		deadline := time.Now().Add(5 * time.Second)
+		for time.Now().Before(deadline) {
+			busy := false
+			for _, task := range m.List() {
+				if s.engine.inflightCount(task.ID) > 0 {
+					busy = true
+					break
+				}
+			}
+			if !busy {
+				break
+			}
+			time.Sleep(50 * time.Millisecond)
+		}
+		time.Sleep(100 * time.Millisecond)
+	})
 	token, err := signJWT(s.jwtKey)
 	if err != nil {
 		t.Fatalf("sign jwt: %v", err)
@@ -43,15 +64,6 @@ func resumeCreateTaskWithIntents(t *testing.T, m *Manager, status string) (*Task
 	task, err := m.CreateTask("resume target", "unfinished scan", nil, 120, 0)
 	if err != nil {
 		t.Fatalf("create task: %v", err)
-	}
-	// Pin a nonexistent profile so resume queues instead of starting real workers:
-	// with a usable provider present (CI), an unguarded resume would otherwise claim
-	// intents and write transcripts after the test's TempDir cleanup has begun.
-	bogus := int64(999999999)
-	task.LLMProfileID = &bogus
-	task.ActiveLLMProfileID = &bogus
-	if _, err := m.pg.Exec(`UPDATE tasks SET llm_profile_id=$1, active_llm_profile_id=$1 WHERE id=$2`, bogus, task.ID); err != nil {
-		t.Fatalf("pin bogus profile: %v", err)
 	}
 	states := map[string]int64{}
 	for _, state := range []string{"open", "running", "done", "blocked"} {
