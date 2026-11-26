@@ -2,6 +2,37 @@
 
 This is the translated upstream ARTEX history from baseline `160fe13`, preserving its original dates, contributors and technical history. These entries are not ARTEX releases. ARTEX's 2026-10-02 modifications are recorded separately in [provenance](docs/PROVENANCE.md). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Latest changes
+
+### Task integration and API keys
+#### Added
+- Added scoped task API keys with Settings key management: per-key labels, optional expiry, tasks:read and tasks:write scopes, one-time secret display, and revocation without stopping running tasks.
+- Added idempotent task integration APIs: request-ID replay protection, canonical-host admission that deduplicates concurrent submissions of the same target, and tombstones retained after task deletion.
+
+### Task retention and housekeeping
+#### Added
+- Added retention settings (Tasks → Retention settings): archive completed tasks after a configurable age (default 7 days) and permanently delete archives after a separate residence period (default 30 days), with a daily scheduler disabled by default until enabled by an administrator.
+- Archive/export and restore are path-confined with pinned `os.Root`, preserving evidence, anti-replay tombstones and dependent-task barriers. Deletion is fail-closed on archive or blob-cleanup errors; running, queued, paused and unresolved tasks are excluded.
+- The report endpoint now hydrates task metrics so list summaries and the report dialog agree on finding counts.
+
+### Scan resume
+#### Added
+- Added resume for terminal timeout/failed tasks (`POST /api/tasks/{id}/resume` and a row action on the tasks page). Unfinished running intents return to open, completed facts/findings/evidence are preserved, and a fresh timeout budget is stamped for both timeout and failed runs. Cancelled, archived and non-terminal tasks are rejected; repeated resumes conflict cleanly.
+
+### Skills
+#### Added
+- Added the ct-subs skill: certificate-transparency subdomain enumeration using certspotter with crt.sh fallback and backoff.
+
+### Security and compatibility
+#### Changed
+- Disabled MPTCP by default via `godebug multipathtcp=0` in go.mod (CVE-2026-98432 mitigation; the actual fix is the host kernel patch).
+
+#### Fixed
+- Registered previously missing archive/deletion locale messages so the catalog-coverage test passes.
+
+#### Tests
+- Made resume tests hermetic across environments: resumed workers are drained before TempDir cleanup so CI (which has an LLM profile configured) no longer races transcript writes against directory removal.
+
 ## [Unreleased]
 
 ### Upstream ports

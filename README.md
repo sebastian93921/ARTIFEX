@@ -59,6 +59,18 @@ cards shown inside conversations all expand to show full detail. The presentatio
 [approval-detail component from AegisHook](https://github.com/RuoJi6/AegisHook/blob/main/web/src/components/CallDetail.vue),
 reusing the upstream component and theme.
 
+## What's new
+
+- **Task integration and API keys** — scoped, revocable API keys with optional expiry, and idempotent submission APIs with request-ID replay protection and canonical-host admission.
+- **Task retention and housekeeping** — configurable archival of completed tasks and permanent deletion of old archives, with durable jobs, path-confined archive/restore and an admin UI; disabled by default.
+- **Scan resume** — resume terminal timeout/failed tasks with preserved evidence and a fresh deadline.
+- **Retention settings UI** — admin-editable retention policy with optimistic-concurrency revisions, applied live without restart.
+- **Report metrics hydration** — consistent finding counts between task lists and report dialogs.
+- **New skills** — including ct-subs (certificate-transparency subdomain enumeration).
+- **Locale/catalog completeness** — archive and deletion messages fully registered in English and Chinese.
+
+Earlier additions include the delete-path deny rule, finding notifications (DingTalk, Feishu, WeCom, generic Webhook, Telegram and email, with filters, digests and delivery history), traffic Clear all with space reclamation, session-header support for one-shot LLM calls, and the upstream v0.3.15 fixes (auth init/status fail-open, SSE same-origin default, intercept-judge token metering).
+
 ## Asset sync (ScopeSentry)
 
 You can sync asset data directly from [ScopeSentry](https://github.com/Autumn-27/ScopeSentry),
