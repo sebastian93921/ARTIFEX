@@ -61,6 +61,8 @@ reusing the upstream component and theme.
 
 ## What's new
 
+- **Task concurrency control** — a single `max_active_tasks` admission setting: the engine admits tasks under the cap, paused tasks no longer consume a slot, and newly created tasks are admitted correctly.
+- **LLM pool concurrency** — per-profile request-concurrency caps and slot leases that reserve a profile slot for a whole intent run, plus a per-profile max timeout (`max_timeout_seconds`) and compaction slot-wait scaling with the profile budget.
 - **Task integration and API keys** — scoped, revocable API keys with optional expiry, and idempotent submission APIs with request-ID replay protection and canonical-host admission.
 - **Task retention and housekeeping** — configurable archival of completed tasks and permanent deletion of old archives, with durable jobs, path-confined archive/restore and an admin UI; disabled by default.
 - **Scan resume** — resume terminal timeout/failed tasks with preserved evidence and a fresh deadline.
@@ -324,7 +326,7 @@ internal agents and model configuration intact.
 configuration" page. Optional: `ARTIFEX_LLM_PROVIDER` / `ARTIFEX_LLM_MODEL` / `ARTIFEX_LLM_BASE_URL` /
 `ARTIFEX_LLM_PROXY`.
 
-**Concurrency**: the number of work agents per task is set in "System settings" (default 3).
+**Concurrency**: the number of work agents per task is set in "System settings" (default 3); task admission is capped by `max_active_tasks` (paused tasks do not consume a slot).
 
 **Common flags**: `./start.sh -addr :8787 -proxy :8788` (`-addr` is frontend + API, `-proxy` is the
 traffic-capture proxy). The start script passes flags straight through to `artifex`.

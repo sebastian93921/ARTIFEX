@@ -44,6 +44,8 @@ LLM 多 agent 自主滲透測試系統（Go 後端 + Next.js 前端）
 
 ## 最新消息
 
+- **任務併發控制** — 單一 `max_active_tasks` 准入設定：引擎按上限准入任務，暫停中的任務不再佔用名額，新建任務可正確准入。
+- **LLM 池併發** — 每個 LLM 設定檔的請求併發上限，以及為整個 intent 執行預留設定檔名額的 slot lease；另支援每個設定檔的最大逾時（`max_timeout_seconds`）與依設定檔預算縮放的壓縮等待視窗。
 - **任務整合與 API 金鑰** — 具範圍限制、可撤銷的 API 金鑰（可選到期日），以及具請求識別碼防重放與標準主機准入的冪等提交 API。
 - **任務保留與清理** — 可設定已結束任務的封存時間與舊封存的永久刪除，包含持久化作業、路徑限制的封存/還原與管理員介面；預設停用。
 - **掃描恢復** — 恢復逾時或失敗的終態掃描，保留既有證據並賦予新的期限。
@@ -251,7 +253,7 @@ Claude Code、Codex 與 Pi 可通過 [agent 適配器](adapters/agent/README.md)
 
 **LLM**：`export ANTHROPIC_API_KEY=sk-...`（或 `OPENAI_API_KEY`），也可在 UI 的「LLM 配置」頁填寫。可選：`ARTIFEX_LLM_PROVIDER` / `ARTIFEX_LLM_MODEL` / `ARTIFEX_LLM_BASE_URL` / `ARTIFEX_LLM_PROXY`。
 
-**併發**：每個任務的 work agent 數量在「系統設置」中配置（默認 3）。
+**併發**：每個任務的 work agent 數量在「系統設置」中配置（默認 3）；任務准入受 `max_active_tasks` 上限限制（暫停中的任務不佔用名額）。
 
 **常用參數**：`./start.sh -addr :8787 -proxy :8788`（`-addr` 為前端 + API，`-proxy` 為流量錄製代理）。啓動腳本會將參數原樣透傳給 `artifex`。
 

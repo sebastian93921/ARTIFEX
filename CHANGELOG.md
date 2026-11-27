@@ -4,6 +4,12 @@ This is the translated upstream ARTEX history from baseline `160fe13`, preservin
 
 ## Latest changes
 
+### Task concurrency and LLM pool
+#### Added
+- Added `max_active_tasks` (System settings): engine-level task admission under a configurable cap. Paused tasks no longer consume a slot and newly created tasks are admitted correctly. This replaces the `task_concurrency_enabled` / `task_concurrency_limit` pair with one knob.
+- Added per-profile LLM request-concurrency caps and slot leases that reserve a profile slot for a whole intent run, so concurrent intents cannot oversubscribe a profile.
+- Added a per-profile `max_timeout_seconds` setting; compaction slot-wait windows scale with the profile budget.
+
 ### Task integration and API keys
 #### Added
 - Added scoped task API keys with Settings key management: per-key labels, optional expiry, tasks:read and tasks:write scopes, one-time secret display, and revocation without stopping running tasks.
