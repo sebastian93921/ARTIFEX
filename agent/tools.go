@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sebastian93921/artifex/locale"
+	"log/slog"
 	"strconv"
 	"strings"
 
-	"github.com/sebastian93921/artifex/db"
 	acperm "github.com/Autumn-27/norma/permission"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/sebastian93921/artifex/db"
 )
 
 // compactIntents distills intents to {id, summary, state, asset_ids, parents,
@@ -1237,6 +1238,7 @@ func (t *ToolSet) addFinding() actool.CoreTool {
 			AssetIDs                                     []json.RawMessage `json:"asset_ids"`
 			TrafficRefs                                  []db.TrafficRef   `json:"traffic_refs"`
 			EvidenceHintID                               json.RawMessage   `json:"evidence_hint_id"`
+			ForceRegister                                bool              `json:"force_register"`
 		}
 		if err := json.Unmarshal(in, &a); err != nil {
 			return actool.Errorf(locale.ErrorMessage(locale.FromContext(ctx), err)), nil
@@ -1257,9 +1259,40 @@ func (t *ToolSet) addFinding() actool.CoreTool {
 		}
 		refs, err := t.findingRefsFromHint(pid(a.EvidenceHintID), a.TrafficRefs)
 		if err != nil {
-			return actool.Errorf(locale.ErrorMessage(locale.FromContext(ctx), err)), nil
+			if degraded, derr := db.NormalizeTrafficRefs(a.TrafficRefs); derr == nil && len(degraded) > 0 {
+				refs = degraded
+			} else {
+				return actool.Errorf(err.Error()), nil
+			}
 		}
 		input := db.RecordFindingInput{TaskID: t.taskID, ExplorationID: t.ts.ID(), IntentID: pid(a.IntentID), VulnClass: a.VulnClass, Name: a.Name, Severity: a.Severity, Summary: a.Summary, Evidence: a.Evidence, Worker: t.worker, AssetIDs: pidList(a.AssetIDs)}
+		// Advisory dedup (agent/triage.go): a decision model answers "same defect as
+		// an already registered finding?" in one small request instead of a
+		// main-model turn. A confident duplicate is not registered a second time —
+		// the caller is told which finding to extend. Every failure path (no client,
+		// no existing findings, transport error, low confidence) falls through to
+		// the normal registration below.
+		//
+		// force_register is the way back out of a wrong suppression: without it the
+		// advice "register it again if it is distinct" is unactionable, because the
+		// retry hits the same check and is suppressed again.
+		if a.ForceRegister {
+			slog.Info("[triage] override: force_register set, registering without duplicate check", "candidate", a.Name)
+		} else if dup, ok := t.fingerprintDuplicate(input); ok {
+			res := map[string]any{
+				"duplicate_of_finding_id":      dup.FindingID,
+				"duplicate_of_finding_node_id": dup.NodeID,
+				"dedup_source":                 "fingerprint",
+				"fingerprint":                  dup.Fingerprint,
+				"evidence_status":              "duplicate_not_registered",
+				"note": fmt.Sprintf("Deterministic fingerprint (%s) matched already registered finding_id %d (exploration node %d), so no new finding was created. "+
+					"To extend that finding with new evidence, call update_finding_report with finding_id=%d (it addresses the NODE id, not the findings-table id). "+
+					"If the new evidence is in fact a distinct defect (different endpoint, parameter or root cause), call report_finding again with force_register=true.",
+					dup.Fingerprint, dup.FindingID, dup.NodeID, dup.NodeID),
+			}
+			raw, _ := json.Marshal(res)
+			return actool.Text(fmt.Sprintf("finding matched existing finding_id %d (node %d, fingerprint %s) — not registered again\n%s", dup.FindingID, dup.NodeID, dup.Fingerprint, raw)), nil
+		}
 		var recorded *db.RecordedFinding
 		if t.findingRecorder != nil {
 			recorded, err = t.findingRecorder.Record(ctx, input, refs)
