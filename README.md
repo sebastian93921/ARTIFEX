@@ -26,6 +26,19 @@ An LLM multi-agent autonomous penetration-testing system (Go backend + Next.js f
 
 ---
 
+## Local LLM — first-class support
+
+ARTIFEX is built to run entirely on your own hardware. Any OpenAI- or Anthropic-compatible
+endpoint works through a model profile, including **local servers such as Ollama, vLLM and
+llama.cpp**: point the profile at `http://127.0.0.1:11434/v1` (Ollama), `http://127.0.0.1:8000/v1`
+(vLLM) or `http://127.0.0.1:8080/v1` (llama.cpp), or set `ARTIFEX_LLM_BASE_URL`, and keep the model
+and the scan data on the same machine — no provider account, no API key, no data leaving the host.
+
+Local profiles get the same planner/worker loop, per-profile request-concurrency caps, slot leases
+and `max_timeout_seconds` as remote ones, so a single GPU box can run the whole system offline.
+
+---
+
 ## Language
 
 English is the only interface language. The server's durable default is

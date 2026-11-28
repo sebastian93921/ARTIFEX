@@ -20,6 +20,14 @@ LLM 多 agent 自主滲透測試系統（Go 後端 + Next.js 前端）
 
 ---
 
+## 本地 LLM — 一等支援
+
+ARTIFEX 設計成可以完全喺你自己嘅硬件上運行。任何 OpenAI/Anthropic 兼容 endpoint 都可以經 model profile 接入，包括**本地服務如 Ollama、vLLM、llama.cpp**：將 profile 指向 `http://127.0.0.1:11434/v1`（Ollama）、`http://127.0.0.1:8000/v1`（vLLM）或 `http://127.0.0.1:8080/v1`（llama.cpp），或設定 `ARTIFEX_LLM_BASE_URL`，模型同掃描數據都留喺同一部機 — 唔需要 provider account、唔需要 API key、數據唔會離開主機。
+
+本地 profile 同遠端一樣有 planner/worker 迴圈、per-profile 請求併發上限、slot lease 同 `max_timeout_seconds`，所以一部 GPU 機就可以離線跑完成套系統。
+
+---
+
 ## 語言
 
 英文是唯一的界面語言。服務端的持久默認值是系統設置中的 `language`；`ARTIFEX_LANGUAGE` 提供環境變量層面的回退。操作系統的 `LANG` 不會決定應用語言。
